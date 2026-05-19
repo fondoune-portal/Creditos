@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FondoUne — Portal de Crédito Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --navy:   #0B2545;
+    --navy2:  #134074;
+    --blue:   #1A6BAD;
+    --sky:    #4DA8DA;
+    --gold:   #C9963B;
+    --gold2:  #F0C060;
+    --cream:  #F7F4EE;
+    --white:  #FFFFFF;
+    --muted:  #8A9BB5;
+    --border: rgba(11,37,69,0.12);
+    --success:#1A7A4A;
+    --sucbg:  #EAF5EE;
+    --danger: #C0392B;
+    --danbg:  #FDECEA;
+    --warn:   #A06000;
+    --warnbg: #FEF6E6;
+    --shadow: 0 4px 32px rgba(11,37,69,0.10);
+    --shadow-lg: 0 12px 60px rgba(11,37,69,0.16);
+    --r: 16px;
+    --r-sm: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND PATTERN ── */
+  body::before {
+    content:'';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 15%, rgba(26,107,173,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(201,150,59,0.06) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .portal { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-block {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--navy); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(11,37,69,0.25);
+    flex-shrink: 0;
+  }
+  .logo-block i { font-size: 24px; color: var(--gold2); }
+  .logo-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--navy); letter-spacing: -0.3px;
+  }
+  .logo-text p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .secure-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--sucbg); color: var(--success);
+    font-size: 11px; font-weight: 500;
+    padding: 5px 10px; border-radius: 20px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-track { display: flex; align-items: center; margin-bottom: 2rem; gap: 0; }
+  .p-step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex: 1; position: relative;
+  }
+  .p-step::after {
+    content: ''; position: absolute;
+    top: 16px; left: 50%; width: 100%;
+    height: 1px; background: var(--border);
+    transition: background 0.4s;
+  }
+  .p-step:last-child::after { display: none; }
+  .p-step.done::after { background: var(--blue); }
+  .p-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--muted);
+    position: relative; z-index: 1;
+    transition: all 0.3s;
+  }
+  .p-step.done .p-dot { background: var(--blue); border-color: var(--blue); color: var(--white); }
+  .p-step.active .p-dot { background: var(--navy); border-color: var(--navy); color: var(--white); box-shadow: 0 0 0 4px rgba(11,37,69,0.12); }
+  .p-label { font-size: 10px; color: var(--muted); text-align: center; white-space: nowrap; }
+  .p-step.active .p-label, .p-step.done .p-label { color: var(--navy); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.35s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--navy);
+    margin-bottom: 6px; line-height: 1.2;
+  }
+  .card-sub { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+  /* ── FORMS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--navy); }
+  .field input, .field select, .field textarea {
+    padding: 11px 14px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    background: var(--cream); color: var(--navy);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,107,173,0.10);
+    background: var(--white);
+  }
+  .field .hint { font-size: 11px; color: var(--muted); }
+
+  /* ── CONSENT ── */
+  .consent-box {
+    background: #EFF4FB; border: 1px solid rgba(26,107,173,0.2);
+    border-radius: var(--r-sm); padding: 14px 16px;
+    font-size: 12.5px; color: var(--navy2); line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+    margin: 1rem 0;
+  }
+  .consent-box input[type=checkbox] { flex-shrink: 0; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--blue); }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+  .btn {
+    padding: 11px 24px; border-radius: var(--r-sm); font-size: 14px;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--white); color: var(--navy);
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--cream); }
+  .btn.primary {
+    background: var(--navy); color: var(--white); border-color: var(--navy);
+  }
+  .btn.primary:hover { background: var(--navy2); }
+  .btn.success { background: var(--success); color: var(--white); border-color: var(--success); }
+  .btn.gold { background: var(--gold); color: var(--white); border-color: var(--gold); }
+
+  /* ── SECURITY LAYERS ── */
+  .sec-layers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.25rem 0; }
+  .sec-item {
+    border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .sec-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sec-icon i { font-size: 17px; }
+  .sec-title { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .sec-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* ── KYC UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed rgba(26,107,173,0.3); border-radius: var(--r-sm);
+    background: #F0F5FB; padding: 2rem; text-align: center;
+    cursor: pointer; transition: all 0.2s; margin: 14px 0;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--blue); background: #E8F2FA; }
+  .upload-zone.done { border-color: var(--success); border-style: solid; background: var(--sucbg); }
+  .upload-zone i { font-size: 32px; color: var(--blue); display: block; margin-bottom: 8px; }
+  .upload-zone.done i { color: var(--success); }
+  .upload-zone p { font-size: 13px; color: var(--muted); }
+  .upload-zone strong { display: block; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+
+  /* ── SELFIE ZONE ── */
+  .selfie-box {
+    background: var(--navy); border-radius: var(--r-sm);
+    padding: 2rem; text-align: center;
+    position: relative; overflow: hidden;
+    margin: 14px 0;
+  }
+  .selfie-box::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(26,107,173,0.3) 0%, transparent 70%);
+  }
+  .camera-view {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; position: relative; z-index: 1;
+  }
+  .camera-view i { font-size: 48px; color: rgba(255,255,255,0.5); }
+  .camera-view.capturing { border-color: var(--gold2); animation: pulse 1s ease infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,192,96,0.4); } 50% { box-shadow: 0 0 0 12px rgba(240,192,96,0); } }
+  .liveness-instruction {
+    font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 8px; position: relative; z-index:1;
+  }
+  .liveness-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--gold2);
+    position: relative; z-index: 1;
+  }
+
+  /* ── 2FA OTP ── */
+  .otp-row { display: flex; gap: 8px; justify-content: center; margin: 1.25rem 0; }
+  .otp-box {
+    width: 48px; height: 56px; text-align: center;
+    font-size: 22px; font-family: 'DM Mono', monospace; font-weight: 500;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    background: var(--cream); color: var(--navy); outline: none;
+  }
+  .otp-box:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,107,173,0.12); background: var(--white); }
+
+  /* ── VALIDATION STREAM ── */
+  .val-list { display: flex; flex-direction: column; gap: 8px; margin: 1.25rem 0; }
+  .val-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: var(--r-sm);
+    border: 1px solid var(--border); background: var(--white);
+    transition: all 0.3s;
+  }
+  .val-item.running { border-color: rgba(26,107,173,0.3); background: #F0F5FB; }
+  .val-item.ok { border-color: rgba(26,122,74,0.3); background: var(--sucbg); }
+  .val-item.err { border-color: rgba(192,57,43,0.3); background: var(--danbg); }
+  .val-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .val-icon.idle { background: var(--cream); color: var(--muted); }
+  .val-icon.running { background: #D9EBFA; color: var(--blue); }
+  .val-icon.ok { background: var(--sucbg); color: var(--success); }
+  .val-icon.err { background: var(--danbg); color: var(--danger); }
+  .val-name { font-size: 13px; font-weight: 500; color: var(--navy); flex: 1; }
+  .val-status { font-size: 11px; color: var(--muted); }
+  .val-status.running { color: var(--blue); }
+  .val-status.ok { color: var(--success); font-weight: 500; }
+  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .pb-fill { height: 100%; background: var(--blue); border-radius: 2px; width: 0%; transition: width 0.05s linear; }
+
+  /* ── SUMMARY CARD ── */
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .lbl { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .summary-row .val { font-weight: 500; color: var(--navy); }
+  .summary-row .val.good { color: var(--success); }
+
+  /* ── RESULT ── */
+  .result-hero {
+    text-align: center; padding: 1.5rem 0 1rem;
+  }
+  .result-ring {
+    width: 88px; height: 88px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .result-ring.approved { background: var(--sucbg); border: 2px solid rgba(26,122,74,0.3); }
+  .result-ring i { font-size: 40px; color: var(--success); }
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--navy); margin-bottom: 8px;
+  }
+  .result-sub { font-size: 14px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  .metrics-band {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 1.5rem 0;
+  }
+  .metric {
+    background: var(--cream); border-radius: var(--r-sm); padding: 16px;
+    text-align: center; border: 1px solid var(--border);
+  }
+  .metric .m-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--navy); margin-bottom: 4px;
+  }
+  .metric .m-label { font-size: 11px; color: var(--muted); }
+
+  /* ── SOURCE TAGS ── */
+  .sources-block { margin: 1.25rem 0; }
+  .src-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--r-sm);
+    font-size: 13px; margin-bottom: 6px;
+  }
+  .src-row i { font-size: 16px; }
+  .src-ok { background: var(--sucbg); color: var(--success); }
+  .src-pending { background: var(--warnbg); color: var(--warn); }
+
+  /* ── NOTE ── */
+  .note {
+    border-radius: var(--r-sm); padding: 12px 14px;
+    font-size: 12.5px; line-height: 1.6; display: flex; gap: 10px;
+    align-items: flex-start; margin: 12px 0;
+  }
+  .note i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .note.info { background: #EFF4FB; color: var(--navy2); border: 1px solid rgba(26,107,173,0.15); }
+  .note.warn { background: var(--warnbg); color: var(--warn); }
+  .note.ok { background: var(--sucbg); color: var(--success); }
+  .note.danger { background: var(--danbg); color: var(--danger); }
+
+  /* ── UTILS ── */
+  .hidden { display: none !important; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag-blue { background: #D9EBFA; color: var(--navy2); }
+  .tag-green { background: var(--sucbg); color: var(--success); }
+  .tag-gold { background: #FBF0DA; color: var(--gold); }
+  .tag-red { background: var(--danbg); color: var(--danger); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* ── FOOTER STATUS BAR ── */
+  .status-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--navy); color: rgba(255,255,255,0.7);
+    font-size: 11.5px; padding: 8px 20px;
+    display: flex; align-items: center; gap: 20px;
+    font-family: 'DM Mono', monospace; z-index: 100;
+  }
+  .status-bar .sb-item { display: flex; align-items: center; gap: 5px; }
+  .status-bar .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #4DA; flex-shrink: 0; }
+  .status-bar .sb-dot.warn { background: var(--gold2); }
+  .status-bar .sb-dot.idle { background: var(--muted); }
+
+  /* ── SELECTOR BANCO ── */
+  .bank-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 1rem 0; }
+  .bank-btn {
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    padding: 14px 10px; text-align: center; cursor: pointer;
+    background: var(--cream); transition: all 0.2s;
+  }
+  .bank-btn:hover { border-color: var(--blue); background: var(--white); }
+  .bank-btn.selected { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,37,69,0.08); }
+  .bank-btn .bk-logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .bank-btn .bk-name { font-size: 11px; color: var(--muted); }
+
+  /* Responsive */
+  @media (max-width: 540px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .metrics-band { grid-template-columns: 1fr 1fr; }
+    .sec-layers { grid-template-columns: 1fr; }
+    .bank-grid { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="portal">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-block"><i class="ti ti-building-bank"></i></div>
+    <div class="logo-text">
+      <h1>FondoUne</h1>
+      <p>Portal de Crédito Inteligente — Prototipo v1.0</p>
+    </div>
+    <div class="header-right">
+      <div class="secure-badge"><i class="ti ti-shield-check" style="font-size:13px;"></i> Sesión segura</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TRACK -->
+  <div class="progress-track" id="prog-track">
+    <div class="p-step active" id="pt1"><div class="p-dot" id="pd1">1</div><div class="p-label">Identificación</div></div>
+    <div class="p-step" id="pt2"><div class="p-dot" id="pd2">2</div><div class="p-label">Verificación KYC</div></div>
+    <div class="p-step" id="pt3"><div class="p-dot" id="pd3">3</div><div class="p-label">Solicitud</div></div>
+    <div class="p-step" id="pt4"><div class="p-dot" id="pd4">4</div><div class="p-label">Validación IA</div></div>
+    <div class="p-step" id="pt5"><div class="p-dot" id="pd5"><i class="ti ti-check" style="font-size:14px;"></i></div><div class="p-label">Resultado</div></div>
+  </div>
+
+  <!-- ═══ PASO 1: IDENTIFICACIÓN ═══ -->
+  <div id="s1">
+    <div class="card">
+      <div class="card-eyebrow">Paso 1 de 5</div>
+      <div class="card-title">Acceso al portal</div>
+      <div class="card-sub">Ingresa con tu número de cédula y correo corporativo para verificar que eres un asociado activo.</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Número de cédula <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="f-cedula" placeholder="Ej. 1045678901" value="1045678901">
+        </div>
+        <div class="field">
+          <label>Correo corporativo <span style="color:var(--danger)">*</span></label>
+          <input type="email" id="f-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Celular registrado</label>
+          <input type="tel" id="f-cel" placeholder="+57 300 000 0000" value="+57 314 802 4500">
+        </div>
+        <div class="field">
+          <label>Código de empleado</label>
+          <input type="text" placeholder="Ej. UNE-04321" value="UNE-04321">
+        </div>
+      </div>
+
+      <div class="sec-layers">
+        <div class="sec-item">
+          <div class="sec-icon" style="background:#EFF4FB;"><i class="ti ti-users" style="color:var(--blue);"></i></div>
+          <div><div class="sec-title">Base interna</div><div class="sec-sub">Validamos que la cédula pertenece a un asociado activo del fondo</div></div>
+        </div>
+        <div class="sec-item">
+          <div class="sec-icon" style="background:#EAF5EE;"><i class="ti ti-mail-check" style="color:var(--success);"></i></div>
+          <div><div class="sec-title">Correo corporativo</div><div class="sec-sub">Confirma que sigues siendo empleado activo en la empresa</div></div>
+        </div>
+      </div>
+
+      <div class="consent-box">
+        <input type="checkbox" id="c1" checked>
+        <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion), a consultar listas de cumplimiento SARLAFT/UIAF y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" onclick="goTo(2)">Continuar <i class="ti ti-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 2: KYC ═══ -->
+  <div id="s2" class="hidden">
+    <div class="card" id="kyc-doc-card">
+      <div class="card-eyebrow">Paso 2 de 5 — KYC · Verificación de Identidad</div>
+      <div class="card-title">Fotografía tu cédula de ciudadanía</div>
+      <div class="card-sub">Necesitamos el frente y el reverso para verificar tu identidad mediante OCR. La imagen nunca se almacena sin cifrar.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="upload-zone" id="uz-front" onclick="simulateUpload('uz-front','uz-front-status')">
+          <i class="ti ti-id" id="uz-front-icon"></i>
+          <strong id="uz-front-status">Frente de la cédula</strong>
+          <p>Toca para cargar o tomar foto</p>
+        </div>
+        <div class="upload-zone" id="uz-back" onclick="simulateUpload('uz-back','uz-back-status')">
+          <i class="ti ti-id-off" id="uz-back-icon"></i>
+          <strong id="uz-back-status">Reverso de la cédula</strong>
+          <p>Toca para cargar o tomar foto</p>
+        </div>
+      </div>
+
+      <div id="ocr-result" class="hidden">
+        <div class="note ok"><i class="ti ti-check"></i> <strong>OCR completado.</strong> Datos extraídos correctamente y verificados contra la base del fondo y la RNEC.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+          <div style="background:var(--cream);border-radius:8px;padding:10px;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
+            <div style="font-size:13px;font-weight:500;">Carlos A. Gil</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
+            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';">1.045.678.901</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
+            <div style="font-size:13px;font-weight:500;color:var(--success);">✓ Vigente</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="kyc-next-btn" class="hidden">
+        <div class="btn-row">
+          <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+          <button class="btn primary" onclick="showLiveness()">Verificar biometría <i class="ti ti-face-id"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVENESS -->
+    <div id="kyc-liveness-card" class="card hidden">
+      <div class="card-eyebrow">Paso 2 de 5 — KYC · Biometría facial</div>
+      <div class="card-title">Verificación de identidad en vivo</div>
+      <div class="card-sub">Sigue las instrucciones para confirmar que eres tú, no una foto ni un video.</div>
+
+      <div class="selfie-box">
+        <div class="camera-view" id="cam-view">
+          <i class="ti ti-user-circle" id="cam-icon"></i>
+        </div>
+        <div class="liveness-instruction" id="lv-instruction">Posiciona tu rostro en el óvalo</div>
+        <div class="liveness-big" id="lv-action">Esperando cámara...</div>
+      </div>
+
+      <div id="lv-steps" style="margin-top:1rem;">
+        <div class="val-item" id="lv1"><div class="val-icon idle"><i class="ti ti-eye"></i></div><div><div class="val-name">Detección facial</div></div><div class="val-status">En espera</div></div>
+        <div class="val-item" id="lv2"><div class="val-icon idle"><i class="ti ti-rotate-2"></i></div><div><div class="val-name">Liveness activo — giro de cabeza</div></div><div class="val-status">En espera</div></div>
+        <div class="val-item" id="lv3"><div class="val-icon idle"><i class="ti ti-scan-eye"></i></div><div><div class="val-name">Match facial vs cédula ≥ 98%</div></div><div class="val-status">En espera</div></div>
+        <div class="val-item" id="lv4"><div class="val-icon idle"><i class="ti ti-shield-check"></i></div><div><div class="val-name">Anti-deepfake & anti-foto</div></div><div class="val-status">En espera</div></div>
+      </div>
+      <div id="lv-done" class="hidden">
+        <div class="note ok"><i class="ti ti-check"></i> <strong>Identidad verificada.</strong> Coincidencia facial: 99.3%. Ninguna anomalía detectada.</div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="show2FA()">Continuar a 2FA <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA -->
+    <div id="kyc-2fa-card" class="card hidden">
+      <div class="card-eyebrow">Paso 2 de 5 — KYC · Doble factor de autenticación</div>
+      <div class="card-title">Confirma tu identidad</div>
+      <div class="card-sub">Enviamos un código de 6 dígitos a <strong>+57 314 *** 4500</strong> y un enlace a <strong>carlos.g***@une.net.co</strong>. Ingresa el código para continuar.</div>
+
+      <div class="otp-row">
+        <input class="otp-box" maxlength="1" value="7" id="otp1" oninput="otpMove(this,null,'otp2')">
+        <input class="otp-box" maxlength="1" value="4" id="otp2" oninput="otpMove(this,'otp1','otp3')">
+        <input class="otp-box" maxlength="1" value="8" id="otp3" oninput="otpMove(this,'otp2','otp4')">
+        <input class="otp-box" maxlength="1" value="2" id="otp4" oninput="otpMove(this,'otp3','otp5')">
+        <input class="otp-box" maxlength="1" value="0" id="otp5" oninput="otpMove(this,'otp4','otp6')">
+        <input class="otp-box" maxlength="1" value="3" id="otp6" oninput="otpMove(this,'otp5',null)">
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);">Código demo: <span style="font-family:'DM Mono';font-weight:500;color:var(--navy);">748203</span> · Expira en <span id="otp-timer">4:58</span></div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="btn primary" onclick="goTo(3)">Verificar y continuar <i class="ti ti-lock-check"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 3: SOLICITUD ═══ -->
+  <div id="s3" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 3 de 5 — Solicitud de Crédito</div>
+      <div class="card-title">Configura tu crédito</div>
+      <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
+          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
+        </div>
+        <div class="field">
+          <label>Plazo <span style="color:var(--danger)">*</span></label>
+          <select id="f-plazo" onchange="updateSummary()">
+            <option>12 meses</option>
+            <option>18 meses</option>
+            <option selected>24 meses</option>
+            <option>36 meses</option>
+            <option>48 meses</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Tipo de crédito</label>
+          <select>
+            <option selected>Crédito de consumo</option>
+            <option>Educativo</option>
+            <option>Vivienda</option>
+            <option>Emergencia médica</option>
+            <option>Libranza especial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Destino</label>
+          <select>
+            <option>Gastos personales</option>
+            <option>Educación</option>
+            <option>Salud</option>
+            <option>Remodelación hogar</option>
+            <option>Consolidación deudas</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Validación capacidad de pago -->
+      <hr class="divider">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">Fuentes de información para el análisis</div>
+
+      <div class="note info"><i class="ti ti-info-circle"></i> Dado que no tenemos acceso directo a la nómina, puedes adjuntar tu desprendible de pago. La IA lo leerá automáticamente — no necesitas llenar ningún formulario adicional.</div>
+
+      <div class="upload-zone" id="uz-nomina" onclick="simulateNomina()" style="margin:10px 0;">
+        <i class="ti ti-file-invoice" id="uz-nomina-icon"></i>
+        <strong id="uz-nomina-status">Adjuntar desprendible de nómina (PDF)</strong>
+        <p>Opcional pero acelera el proceso · La IA extrae los datos automáticamente</p>
+      </div>
+      <div id="nomina-result" class="hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">BÁSICO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$3.800K</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEVENGADO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$4.250K</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEDUCCIONES</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);">$1.100K</div>
+          </div>
+          <div style="background:#EAF5EE;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NETO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);">$3.150K</div>
+          </div>
+        </div>
+        <div class="note ok" style="margin-top:8px;"><i class="ti ti-check"></i> Nómina leída por IA · Empresa: Tigo-UNE S.A.S. · Periodo: Abril 2025 · Libranzas previas: $0</div>
+      </div>
+
+      <hr class="divider">
+      <div style="background:var(--cream);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Resumen preliminar <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span></div>
+        <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
+        <div class="summary-row"><span class="lbl">Plazo</span><span class="val">24 meses</span></div>
+        <div class="summary-row"><span class="lbl">Tasa</span><span class="val">1,1% E.M.</span></div>
+        <div class="summary-row"><span class="lbl">Tipo</span><span class="val">Crédito de consumo</span></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="goTo(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="btn primary" onclick="goTo(4)">Enviar a validación <i class="ti ti-cpu"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 4: VALIDACIÓN IA ═══ -->
+  <div id="s4" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 4 de 5 — Motor de Decisión IA</div>
+      <div class="card-title">Validación automática en curso</div>
+      <div class="card-sub">El sistema está consultando múltiples fuentes en paralelo. Esto toma menos de 60 segundos.</div>
+
+      <div class="val-list" id="val-list">
+        <div class="val-item" id="v1">
+          <div class="val-icon idle" id="vi1"><i class="ti ti-building-bank"></i></div>
+          <div style="flex:1;"><div class="val-name">DataCrédito Experian — Score crediticio</div><div class="progress-bar"><div class="pb-fill" id="pb1"></div></div></div>
+          <div class="val-status" id="vs1">En espera</div>
+        </div>
+        <div class="val-item" id="v2">
+          <div class="val-icon idle" id="vi2"><i class="ti ti-alert-octagon"></i></div>
+          <div style="flex:1;"><div class="val-name">UIAF / OFAC / Listas SARLAFT</div><div class="progress-bar"><div class="pb-fill" id="pb2"></div></div></div>
+          <div class="val-status" id="vs2">En espera</div>
+        </div>
+        <div class="val-item" id="v3">
+          <div class="val-icon idle" id="vi3"><i class="ti ti-users"></i></div>
+          <div style="flex:1;"><div class="val-name">Historial interno FondoUne</div><div class="progress-bar"><div class="pb-fill" id="pb3"></div></div></div>
+          <div class="val-status" id="vs3">En espera</div>
+        </div>
+        <div class="val-item" id="v4">
+          <div class="val-icon idle" id="vi4"><i class="ti ti-file-invoice"></i></div>
+          <div style="flex:1;"><div class="val-name">Análisis nómina — capacidad de pago</div><div class="progress-bar"><div class="pb-fill" id="pb4"></div></div></div>
+          <div class="val-status" id="vs4">En espera</div>
+        </div>
+        <div class="val-item" id="v5">
+          <div class="val-icon idle" id="vi5"><i class="ti ti-brain"></i></div>
+          <div style="flex:1;"><div class="val-name">Motor IA — Score compuesto y decisión</div><div class="progress-bar"><div class="pb-fill" id="pb5"></div></div></div>
+          <div class="val-status" id="vs5">En espera</div>
+        </div>
+      </div>
+
+      <div id="v-done" class="hidden">
+        <div class="note ok"><i class="ti ti-check"></i> Todas las validaciones completadas exitosamente. Sin alertas. Perfil de riesgo: <strong>BAJO</strong>.</div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="goTo(5)">Ver resultado <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 5: RESULTADO ═══ -->
+  <div id="s5" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 5 de 5 — Resultado</div>
+
+      <div class="result-hero">
+        <div class="result-ring approved"><i class="ti ti-circle-check"></i></div>
+        <div class="result-title">¡Solicitud pre-aprobada!</div>
+        <div class="result-sub">Tu perfil crediticio, identidad y capacidad de pago cumplen los requisitos. Un analista del fondo confirmará en las próximas 24 horas.</div>
+      </div>
+
+      <div class="metrics-band">
+        <div class="metric">
+          <div class="m-val">$8.000.000</div>
+          <div class="m-label">Monto aprobado</div>
+        </div>
+        <div class="metric">
+          <div class="m-val">$391.800</div>
+          <div class="m-label">Cuota mensual</div>
+        </div>
+        <div class="metric">
+          <div class="m-val">24 meses</div>
+          <div class="m-label">Plazo</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;">Detalle de la evaluación</div>
+
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-chart-bar" style="font-size:15px;"></i> Score DataCrédito</span>
+        <span class="val good">742 / 900 <span class="tag tag-green">Sin novedad</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-alert-octagon" style="font-size:15px;"></i> Listas UIAF / OFAC</span>
+        <span class="val good"><span class="tag tag-green">Sin reportes</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-history" style="font-size:15px;"></i> Historial FondoUne</span>
+        <span class="val good">2 créditos previos <span class="tag tag-green">Pagados a tiempo</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago</span>
+        <span class="val good">$945.000/mes disponible</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-percentage" style="font-size:15px;"></i> % compromiso ingreso</span>
+        <span class="val">30.4% <span class="tag tag-blue">Dentro del límite 35%</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-face-id" style="font-size:15px;"></i> Verificación biométrica</span>
+        <span class="val good">99.3% coincidencia <span class="tag tag-green">Aprobada</span></span>
+      </div>
+
+      <hr class="divider">
+      <div class="sources-block">
+        <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> DataCrédito Experian — API REST</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> UIAF / OFAC / Listas SARLAFT</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Historial de créditos</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
+        <div class="src-row src-pending"><i class="ti ti-clock"></i> Revisión analista humano — Pendiente ≤ 24 h</div>
+      </div>
+
+      <div class="note info" style="margin-top:1rem;">
+        <i class="ti ti-shield-lock"></i>
+        <span>No se solicitó, imprimió ni archivó ningún documento en papel. Toda la validación se realizó mediante integraciones seguras con consentimiento expreso. Datos cifrados AES-256. Log de auditoría registrado.</span>
+      </div>
+
+      <div class="note ok">
+        <i class="ti ti-mail-check"></i>
+        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong>carlos.g***@une.net.co</strong>. Tienes 48 horas para firmarlo.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
+        <button class="btn gold"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
+        <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="sb-item"><div class="sb-dot"></div> Sesión activa</div>
+  <div class="sb-item"><div class="sb-dot"></div> Cifrado TLS 1.3</div>
+  <div class="sb-item"><div class="sb-dot warn"></div> Prototipo v1.0</div>
+  <div class="sb-item" style="margin-left:auto;"><div class="sb-dot idle"></div> FondoUne — Portal Crédito Inteligente</div>
+</div>
+
+<script>
+// ── NAVIGATION ──
+let currentStep = 1;
+const steps = [1,2,3,4,5];
+
+function goTo(n) {
+  steps.forEach(i => {
+    const el = document.getElementById('s'+i);
+    if (el) el.classList.add('hidden');
+    const pt = document.getElementById('pt'+i);
+    const pd = document.getElementById('pd'+i);
+    if (pt && pd) {
+      pt.classList.remove('active','done');
+      if (i < n) { pt.classList.add('done'); if(i<=3) pd.innerHTML='<i class="ti ti-check" style="font-size:14px;"></i>'; }
+      else if (i === n) pt.classList.add('active');
+    }
+  });
+  const el = document.getElementById('s'+n);
+  if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  currentStep = n;
+  if (n === 4) startValidation();
+}
+
+// ── UPLOAD SIMULATION ──
+let uploadDone = { front: false, back: false };
+
+function simulateUpload(zoneId, statusId) {
+  const zone = document.getElementById(zoneId);
+  const status = document.getElementById(statusId);
+  const icon = document.getElementById(zoneId+'-icon');
+  if (zone.classList.contains('done')) return;
+  status.textContent = 'Procesando...';
+  icon.className = 'ti ti-loader spin';
+  setTimeout(() => {
+    zone.classList.add('done');
+    icon.className = 'ti ti-circle-check';
+    icon.style.color = 'var(--success)';
+    const key = zoneId.includes('front') ? 'front' : 'back';
+    uploadDone[key] = true;
+    status.textContent = zoneId.includes('front') ? '✓ Frente cargado' : '✓ Reverso cargado';
+    if (uploadDone.front && uploadDone.back) {
+      setTimeout(() => {
+        document.getElementById('ocr-result').classList.remove('hidden');
+        document.getElementById('kyc-next-btn').classList.remove('hidden');
+      }, 600);
+    }
+  }, 1200);
+}
+
+function simulateNomina() {
+  const zone = document.getElementById('uz-nomina');
+  const status = document.getElementById('uz-nomina-status');
+  const icon = document.getElementById('uz-nomina-icon');
+  if (zone.classList.contains('done')) return;
+  status.textContent = 'Leyendo nómina con IA...';
+  icon.className = 'ti ti-loader spin';
+  setTimeout(() => {
+    zone.classList.add('done');
+    icon.className = 'ti ti-circle-check';
+    status.textContent = '✓ Nómina procesada — Tigo-UNE Abril 2025';
+    document.getElementById('nomina-result').classList.remove('hidden');
+  }, 1800);
+}
+
+// ── LIVENESS ──
+function showLiveness() {
+  document.getElementById('kyc-doc-card').classList.add('hidden');
+  document.getElementById('kyc-liveness-card').classList.remove('hidden');
+  const view = document.getElementById('cam-view');
+  const instr = document.getElementById('lv-instruction');
+  const action = document.getElementById('lv-action');
+  const sequences = [
+    { instr: 'Detectando rostro...', action: 'Mira al frente', step: 'lv1', icon: 'ti ti-check' },
+    { instr: 'Liveness activo:', action: '↙ Gira la cabeza a la derecha', step: 'lv2', icon: 'ti ti-check' },
+    { instr: 'Verificando coincidencia facial...', action: 'Un momento...', step: 'lv3', icon: 'ti ti-check' },
+    { instr: 'Análisis anti-fraude:', action: 'Parpadea dos veces', step: 'lv4', icon: 'ti ti-check' },
+  ];
+  view.classList.add('capturing');
+  let i = 0;
+  function next() {
+    if (i >= sequences.length) {
+      instr.textContent = 'Verificación completada';
+      action.textContent = '✓ Identidad confirmada';
+      view.classList.remove('capturing');
+      document.getElementById('lv-done').classList.remove('hidden');
+      return;
+    }
+    const s = sequences[i];
+    instr.textContent = s.instr;
+    action.textContent = s.action;
+    const item = document.getElementById(s.step);
+    const vi = item.querySelector('.val-icon');
+    const vs = item.querySelector('.val-status');
+    item.classList.add('running');
+    vi.className = 'val-icon running';
+    vi.innerHTML = '<i class="ti ti-loader spin"></i>';
+    vs.textContent = 'Procesando...';
+    vs.className = 'val-status running';
+    setTimeout(() => {
+      item.classList.remove('running'); item.classList.add('ok');
+      vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
+      vs.textContent = 'Completado'; vs.className = 'val-status ok';
+      i++; setTimeout(next, 300);
+    }, 1400);
+  }
+  setTimeout(next, 600);
+}
+
+function show2FA() {
+  document.getElementById('kyc-liveness-card').classList.add('hidden');
+  document.getElementById('kyc-2fa-card').classList.remove('hidden');
+  // OTP timer
+  let t = 298;
+  const timer = document.getElementById('otp-timer');
+  const iv = setInterval(() => {
+    t--;
+    const m = Math.floor(t/60);
+    const s = t%60;
+    timer.textContent = m+':'+(s<10?'0':'')+s;
+    if (t<=0) clearInterval(iv);
+  }, 1000);
+}
+
+function otpMove(el, prevId, nextId) {
+  if (el.value && nextId) document.getElementById(nextId).focus();
+}
+
+// ── VALIDATION ENGINE ──
+const validations = [
+  { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
+  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
+  { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
+  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:'Cap. $945K/mes', detail:'30.4% compromiso' },
+  { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
+];
+
+function startValidation() {
+  let delay = 200;
+  validations.forEach((v, idx) => {
+    setTimeout(() => runValidation(v, idx), delay);
+    delay += v.time + 200;
+  });
+  const total = delay + 200;
+  setTimeout(() => {
+    document.getElementById('v-done').classList.remove('hidden');
+  }, total);
+}
+
+function runValidation(v, idx) {
+  const item = document.getElementById(v.id);
+  const vi = document.getElementById(v.vi);
+  const vs = document.getElementById(v.vs);
+  const pb = document.getElementById(v.pb);
+  item.classList.add('running');
+  vi.className = 'val-icon running';
+  vi.innerHTML = '<i class="ti ti-loader spin"></i>';
+  vs.textContent = 'Consultando...'; vs.className = 'val-status running';
+
+  let w = 0;
+  const iv = setInterval(() => {
+    w = Math.min(w + (100 / (v.time / 50)), 100);
+    pb.style.width = w + '%';
+    if (w >= 100) clearInterval(iv);
+  }, 50);
+
+  setTimeout(() => {
+    item.classList.remove('running'); item.classList.add('ok');
+    vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
+    vs.textContent = v.result; vs.className = 'val-status ok';
+    const nameEl = item.querySelector('.val-name');
+    if (nameEl) nameEl.innerHTML += ' <span class="tag tag-green" style="margin-left:6px;">'+v.detail+'</span>';
+  }, v.time);
+}
+
+// ── UPDATE SUMMARY ──
+function updateSummary() {
+  const monto = parseInt(document.getElementById('f-monto').value) || 0;
+  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
+  const tasa = 0.011;
+  const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
+  document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
+  document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
+}
+
+// ── RESET ──
+function resetPortal() {
+  location.reload();
+}
+
+// Init summary
+updateSummary();
+
+// Auto-upload both sides after 3s for demo UX
+setTimeout(() => {
+  if (!uploadDone.front) simulateUpload('uz-front','uz-front-status');
+  setTimeout(() => {
+    if (!uploadDone.back) simulateUpload('uz-back','uz-back-status');
+  }, 800);
+}, 500);
+</script>
+</body>
+</html>
