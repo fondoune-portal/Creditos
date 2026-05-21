@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FondoUne — Portal de Crédito</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0B2545; --navy2: #134074; --blue: #1A6BAD;
+      --gold: #C9963B; --gold2: #F0C060;
+      --cream: #F7F4EE; --white: #fff; --muted: #8A9BB5;
+      --border: rgba(11,37,69,0.12);
+      --success: #1A7A4A; --sucbg: #EAF5EE;
+      --danger: #C0392B; --danbg: #FDECEA;
+      --r: 14px; --r-sm: 10px;
+      --shadow: 0 4px 32px rgba(11,37,69,.10);
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 10% 15%, rgba(26,107,173,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 80%, rgba(201,150,59,0.06) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .login-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 1;
+      animation: fadeUp .35s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-mark {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .brand-mark i { font-size: 22px; color: var(--gold2); }
+    .brand-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); }
+    .brand-sub  { font-size: 12px; color: var(--muted); }
+    h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 1.75rem; line-height: 1.6; }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--navy); }
+    .field input {
+      padding: 11px 14px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--cream); color: var(--navy);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,107,173,.10);
+      background: var(--white);
+    }
+    .btn {
+      width: 100%; padding: 12px;
+      font-size: 14px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; border: none;
+      border-radius: var(--r-sm);
+      background: var(--navy); color: var(--white);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .2s;
+      margin-top: .5rem;
+    }
+    .btn:hover { background: var(--navy2); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .error-msg {
+      display: none;
+      background: var(--danbg); color: var(--danger);
+      border: 1px solid rgba(192,57,43,.2);
+      border-radius: var(--r-sm);
+      padding: 10px 14px; font-size: 13px;
+      margin-bottom: 14px; align-items: center; gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+    .forgot { text-align: center; font-size: 12px; color: var(--muted); margin-top: 1rem; }
+    .forgot a { color: var(--blue); text-decoration: none; }
+    .security-note {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--muted);
+      margin-top: 1.5rem; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .security-note i { color: var(--success); font-size: 14px; }
+    /* URL params feedback */
+    .param-msg {
+      padding: 10px 14px; border-radius: var(--r-sm);
+      font-size: 12px; margin-bottom: 1rem;
+      display: none; align-items: center; gap: 8px;
+    }
+    .param-msg.warn { background: #FEF6E6; color: #A06000; border: 1px solid rgba(160,96,0,.2); display: flex; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="brand">
+      <div class="brand-mark"><i class="ti ti-building-bank"></i></div>
+      <div>
+        <div class="brand-name">FondoUne</div>
+        <div class="brand-sub">Portal de Crédito Inteligente</div>
+      </div>
+    </div>
+
+    <h2>Bienvenido</h2>
+    <p class="subtitle">Ingresa con tu correo corporativo y contraseña para acceder al portal según tu rol.</p>
+
+    <!-- Mensaje de error por parámetro URL -->
+    <div class="param-msg warn" id="param-msg">
+      <i class="ti ti-alert-triangle"></i>
+      <span id="param-msg-txt"></span>
+    </div>
+
+    <!-- Error de autenticación -->
+    <div class="error-msg" id="error-msg">
+      <i class="ti ti-alert-circle"></i>
+      <span id="error-txt">Correo o contraseña incorrectos. Verifica tus datos.</span>
+    </div>
+
+    <div class="field">
+      <label>Correo corporativo</label>
+      <input type="email" id="inp-email" placeholder="nombre@une.net.co" autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn" id="btn-login" onclick="iniciarSesion()">
+      <i class="ti ti-login"></i> Ingresar
+    </button>
+
+    <p class="forgot">
+      ¿Olvidaste tu contraseña? <a href="#" onclick="recuperarPass()">Recupérala aquí</a>
+    </p>
+
+    <div class="security-note">
+      <i class="ti ti-shield-check"></i>
+      Conexión cifrada TLS 1.3 · Sesión segura · FondoUne
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail }
+                                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import firebaseConfig           from './firebase-config.js';
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Mapa de roles → URL de destino
+    const ROL_DESTINO = {
+      'asociado':     '/asociado/solicitud.html',
+      'analista':     '/analista/dashboard.html',
+      'jefe_credito': '/analista/dashboard.html',
+      'gerencia':     '/gerencia/panel.html',
+      'admin':        '/analista/dashboard.html'
+    };
+
+    // Mensajes por parámetro URL de motivo
+    const MOTIVOS = {
+      'sin-sesion':    'Tu sesión expiró. Por favor vuelve a ingresar.',
+      'sin-permiso':   'No tienes permiso para acceder a esa sección.',
+      'error-token':   'Ocurrió un problema con tu sesión. Ingresa de nuevo.'
+    };
+
+    // Mostrar mensaje si viene de un guard redirect
+    const params = new URLSearchParams(window.location.search);
+    const motivo = params.get('motivo');
+    if (motivo && MOTIVOS[motivo]) {
+      const el = document.getElementById('param-msg');
+      document.getElementById('param-msg-txt').textContent = MOTIVOS[motivo];
+      el.style.display = 'flex';
+    }
+
+    // Tecla Enter en los inputs
+    document.getElementById('inp-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('inp-pass').focus();
+    });
+    document.getElementById('inp-pass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    window.iniciarSesion = async function() {
+      const email    = document.getElementById('inp-email').value.trim();
+      const password = document.getElementById('inp-pass').value;
+      const btn      = document.getElementById('btn-login');
+      const errorEl  = document.getElementById('error-msg');
+
+      if (!email || !password) {
+        document.getElementById('error-txt').textContent = 'Completa el correo y la contraseña.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ti ti-loader" style="animation:spin .8s linear infinite"></i> Verificando...';
+      const style = document.createElement('style');
+      style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(style);
+      errorEl.classList.remove('show');
+
+      try {
+        const cred  = await signInWithEmailAndPassword(auth, email, password);
+        const token = await cred.user.getIdTokenResult(true);
+        const rol   = token.claims.rol;
+
+        if (!rol || !ROL_DESTINO[rol]) {
+          throw { code: 'auth/sin-rol' };
+        }
+
+        window.location.href = ROL_DESTINO[rol];
+
+      } catch (err) {
+        const msgs = {
+          'auth/invalid-credential':   'Correo o contraseña incorrectos.',
+          'auth/user-not-found':        'No existe una cuenta con ese correo.',
+          'auth/wrong-password':        'Contraseña incorrecta.',
+          'auth/too-many-requests':     'Demasiados intentos. Espera unos minutos.',
+          'auth/user-disabled':         'Esta cuenta está desactivada. Contacta al administrador.',
+          'auth/sin-rol':               'Tu cuenta no tiene un rol asignado. Contacta al administrador.',
+        };
+        document.getElementById('error-txt').textContent =
+          msgs[err.code] || 'Error al iniciar sesión. Intenta de nuevo.';
+        errorEl.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-login"></i> Ingresar';
+      }
+    };
+
+    window.recuperarPass = async function() {
+      const email = document.getElementById('inp-email').value.trim();
+      if (!email) {
+        document.getElementById('error-txt').textContent = 'Escribe tu correo primero para recuperar la contraseña.';
+        document.getElementById('error-msg').classList.add('show');
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        document.getElementById('error-txt').textContent = '✅ Te enviamos un correo para restablecer tu contraseña.';
+        document.getElementById('error-msg').style.background = '#EAF5EE';
+        document.getElementById('error-msg').style.color = '#1A7A4A';
+        document.getElementById('error-msg').classList.add('show');
+      } catch {
+        document.getElementById('error-txt').textContent = 'No se pudo enviar el correo. Verifica la dirección.';
+        document.getElementById('error-msg').classList.add('show');
+      }
+    };
+  </script>
+</body>
+</html>
