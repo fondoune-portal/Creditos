@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FondoUne — Firma y Desembolso</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
+  --gold:#C9963B;--gold2:#F0C060;--cream:#F7F4EE;--white:#fff;
+  --muted:#8A9BB5;--border:rgba(11,37,69,.1);
+  --success:#1A7A4A;--sucbg:#EAF5EE;--sucborder:rgba(26,122,74,.2);
+  --danger:#C0392B;--danbg:#FDECEA;
+  --warn:#A06000;--warnbg:#FEF6E6;--warnborder:rgba(160,96,0,.2);
+  --r:14px;--r-sm:10px;--r-xs:7px;
+  --shadow:0 4px 32px rgba(11,37,69,.10);
+  --shadow-lg:0 16px 64px rgba(11,37,69,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 5% 10%,rgba(26,107,173,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 95% 85%,rgba(201,150,59,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:2rem 1.25rem 6rem}
+
+/* HEADER */
+.header{display:flex;align-items:center;gap:12px;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.mark{width:42px;height:42px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,37,69,.25);flex-shrink:0}
+.mark i{font-size:22px;color:var(--gold2)}
+.htxt h1{font-family:'DM Serif Display',serif;font-size:18px;color:var(--navy)}
+.htxt p{font-size:12px;color:var(--muted)}
+.secure-pill{margin-left:auto;display:flex;align-items:center;gap:5px;background:var(--sucbg);color:var(--success);font-size:11px;font-weight:500;padding:5px 11px;border-radius:20px}
+
+/* APROBADO HERO */
+.approval-hero{background:var(--navy);border-radius:var(--r);padding:2rem;text-align:center;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.approval-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 120%,rgba(240,192,96,.12) 0%,transparent 70%)}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(26,122,74,.2);border:1px solid rgba(52,211,153,.2);color:#86efac;font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;margin-bottom:1rem;position:relative;z-index:1}
+.hero-title{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;margin-bottom:8px;position:relative;z-index:1;line-height:1.2}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;max-width:420px;margin:0 auto;position:relative;z-index:1}
+.hero-ref{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:12px;position:relative;z-index:1}
+
+/* CREDIT SUMMARY */
+.credit-banner{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.credit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+.cg-cell{background:var(--cream);border-radius:var(--r-sm);padding:14px;text-align:center}
+.cg-cell .cl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.cg-cell .cv{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy)}
+.cg-cell .cs{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* CONDITIONS TABLE */
+.cond-table{width:100%;border-collapse:collapse}
+.cond-table tr{border-bottom:1px solid var(--border)}
+.cond-table tr:last-child{border-bottom:none}
+.cond-table td{padding:9px 0;font-size:13px}
+.cond-table td:first-child{color:var(--muted)}
+.cond-table td:last-child{text-align:right;font-weight:500}
+
+/* PAGARE CARD */
+.pagare-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);margin-bottom:1.25rem;box-shadow:var(--shadow);overflow:hidden}
+.pagare-header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:center;gap:10px}
+.pagare-header i{font-size:20px;color:var(--gold2)}
+.pagare-header h2{font-family:'DM Serif Display',serif;font-size:16px;color:#fff}
+.pagare-header .ph-right{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4)}
+.pagare-body{padding:1.5rem;font-size:12px;color:var(--navy);line-height:1.9;max-height:180px;overflow-y:auto;border-bottom:1px solid var(--border)}
+.pagare-body::-webkit-scrollbar{width:4px}
+.pagare-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pagare-highlight{background:var(--cream);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 var(--r-xs) var(--r-xs) 0;margin:10px 0;font-weight:500;color:var(--navy)}
+.pagare-footer{padding:1rem 1.5rem;background:#FFFDF8;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
+.pagare-footer i{color:var(--gold);font-size:15px}
+
+/* CANVAS FIRMA */
+.firma-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r);margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.firma-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.firma-header h3{font-size:15px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:8px}
+.firma-header h3 i{font-size:18px;color:var(--blue)}
+.firma-tabs{display:flex;gap:4px}
+.firma-tab{padding:5px 12px;border-radius:var(--r-xs);font-size:11px;cursor:pointer;border:1px solid transparent;color:var(--muted);transition:all .15s}
+.firma-tab:hover{color:var(--navy)}
+.firma-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.canvas-wrap{padding:1.25rem;position:relative}
+#firma-canvas{width:100%;height:140px;border:2px dashed var(--border);border-radius:var(--r-sm);background:#FAFBFD;cursor:crosshair;display:block}
+#firma-canvas.has-sig{border-color:var(--blue);background:#F5F9FF}
+.canvas-placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--muted);pointer-events:none;transition:opacity .2s}
+.canvas-placeholder i{font-size:28px;display:block;margin-bottom:6px;opacity:.4}
+.canvas-placeholder p{font-size:12px}
+.canvas-controls{padding:0 1.25rem 1.25rem;display:flex;gap:8px;align-items:center}
+.firma-status{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.firma-status.signed{color:var(--success)}
+#firma-type-wrap{padding:1.25rem;display:none}
+#firma-type-input{width:100%;padding:12px 14px;font-size:22px;font-family:'DM Serif Display',serif;border:2px solid var(--border);border-radius:var(--r-sm);background:var(--cream);color:var(--navy);outline:none;text-align:center;transition:border-color .2s}
+#firma-type-input:focus{border-color:var(--blue);background:var(--white)}
+
+/* CONSENTIMIENTO */
+.consent-stack{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.consent-item{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--shadow);transition:border-color .2s}
+.consent-item.checked{border-color:var(--sucborder);background:var(--sucbg)}
+.consent-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.consent-check.checked{background:var(--success);border-color:var(--success)}
+.consent-check.checked i{display:block}
+.consent-check i{display:none;font-size:13px;color:#fff}
+.consent-txt .ct-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px}
+.consent-txt .ct-body{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* NOTE BOX */
+.note{border-radius:var(--r-sm);padding:11px 14px;font-size:12px;line-height:1.6;display:flex;gap:10px;align-items:flex-start;margin-bottom:1rem}
+.note i{font-size:15px;flex-shrink:0;margin-top:1px}
+.note.info{background:#EFF4FB;color:var(--navy2);border:1px solid rgba(26,107,173,.15)}
+.note.ok{background:var(--sucbg);color:var(--success);border:1px solid var(--sucborder)}
+.note.warn{background:var(--warnbg);color:var(--warn);border:1px solid var(--warnborder)}
+
+/* BUTTON */
+.btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:1rem}
+.btn{padding:11px 22px;border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--navy);display:inline-flex;align-items:center;gap:7px;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn:hover{background:var(--cream)}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+.btn.primary:hover{background:var(--navy2)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:600}
+.btn.gold:hover{background:var(--navy)}
+.btn.success-btn{background:var(--success);color:#fff;border-color:var(--success);font-weight:600}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* SUCCESS STATE */
+.success-state{display:none;text-align:center;padding:2rem 1rem}
+.success-ring{width:80px;height:80px;border-radius:50%;background:var(--sucbg);border:2px solid var(--sucborder);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-ring i{font-size:36px;color:var(--success)}
+.success-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--navy);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 1.5rem;line-height:1.6}
+
+/* DESEMBOLSO CARD */
+.desembolso-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;box-shadow:var(--shadow);text-align:left;margin:1.5rem 0}
+.dc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.dc-row:last-child{border-bottom:none}
+.dc-row .dl{color:var(--muted);display:flex;align-items:center;gap:6px}
+.dc-row .dv{font-weight:600;color:var(--navy)}
+.dc-row .dv.good{color:var(--success)}
+
+/* FOOTER STATUS */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:8px 20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.5);display:flex;gap:20px;z-index:100}
+.sb-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
+.sb-green{background:#4DA}
+.sb-gold{background:var(--gold2)}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;top:-10px;animation:fall linear forwards}
+@keyframes fall{to{top:110vh;transform:rotate(720deg)}}
+</style>
+  <!-- FondoUne: navegacion y sesion compartida -->
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script>FondouneNav.init('firma');</script>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="mark"><i class="ti ti-building-bank"></i></div>
+    <div class="htxt">
+      <h1>FondoUne</h1>
+      <p>Portal de Crédito · Módulo 4 — Firma y Desembolso</p>
+    </div>
+    <div class="secure-pill"><i class="ti ti-shield-check" style="font-size:13px"></i> Firma segura</div>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div id="main-content">
+
+    <!-- HERO APROBADO -->
+    <div class="approval-hero">
+      <div class="hero-badge"><i class="ti ti-circle-check" style="font-size:13px"></i> Solicitud aprobada</div>
+      <div class="hero-title">Tu crédito fue aprobado,<br><em>Carlos</em></div>
+      <div class="hero-sub">El analista del fondo revisó tu perfil crediticio y ha aprobado tu solicitud. Solo necesitas firmar el pagaré para recibir el desembolso.</div>
+      <div class="hero-ref">Ref: SOL-2025-0847 · Aprobado: 12/05/2025 10:15 a.m. · Analista: M. Rodríguez</div>
+    </div>
+
+    <!-- RESUMEN DEL CRÉDITO -->
+    <div class="credit-banner">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">Condiciones aprobadas</div>
+      <div class="credit-grid">
+        <div class="cg-cell">
+          <div class="cl">Monto aprobado</div>
+          <div class="cv">$8.000.000</div>
+          <div class="cs">COP</div>
+        </div>
+        <div class="cg-cell">
+          <div class="cl">Cuota mensual</div>
+          <div class="cv">$391.800</div>
+          <div class="cs">por 24 meses</div>
+        </div>
+        <div class="cg-cell">
+          <div class="cl">Primer pago</div>
+          <div class="cv">12 jun.</div>
+          <div class="cs">2025</div>
+        </div>
+      </div>
+      <table class="cond-table">
+        <tr><td>Tipo de crédito</td><td>Crédito de consumo</td></tr>
+        <tr><td>Tasa de interés</td><td>1.1% efectivo mensual · 14.03% E.A.</td></tr>
+        <tr><td>Plazo</td><td>24 meses (288 días hábiles)</td></tr>
+        <tr><td>Forma de pago</td><td>Libranza automática de nómina</td></tr>
+        <tr><td>Total a pagar</td><td><strong style="color:var(--navy)">$9.403.200</strong></td></tr>
+        <tr><td>Costo total del crédito</td><td>$1.403.200 (intereses + seguros)</td></tr>
+        <tr><td>Desembolso estimado</td><td>Hoy entre 2:00 y 4:00 p.m. · Cuenta Bancolombia</td></tr>
+      </table>
+    </div>
+
+    <!-- PAGARÉ -->
+    <div class="pagare-card">
+      <div class="pagare-header">
+        <i class="ti ti-file-certificate"></i>
+        <h2>Pagaré Electrónico en Blanco</h2>
+        <div class="ph-right">DOC-PAG-2025-0847 · Ley 527/1999</div>
+      </div>
+      <div class="pagare-body">
+        <strong>PAGARÉ EN BLANCO CON CARTA DE INSTRUCCIONES</strong><br><br>
+        Yo, <strong>Carlos Andrés Gil</strong>, identificado con cédula de ciudadanía No. <strong>1.045.678.901</strong> expedida en Medellín, Antioquia, me comprometo a pagar incondicionalmente y a la orden de <strong>FONDOUNE – Fondo de Empleados de Tigo-UNE</strong>, NIT 900.XXX.XXX-X, la suma de:
+        <div class="pagare-highlight">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
+        en veinticuatro (24) cuotas mensuales iguales y consecutivas de <strong>TRESCIENTOS NOVENTA Y UN MIL OCHOCIENTOS PESOS ($391.800,00)</strong> cada una, la primera con vencimiento el <strong>12 de junio de 2025</strong> y las siguientes el mismo día de cada mes subsiguiente.<br><br>
+        La tasa de interés corriente pactada es del <strong>1.1% efectivo mensual (14.03% E.A.)</strong>. En caso de mora se causarán intereses a la tasa máxima legal permitida por la Superintendencia Financiera de Colombia.<br><br>
+        El suscriptor autoriza al FONDO a llenar los espacios en blanco de este pagaré conforme a la carta de instrucciones suscrita en la misma fecha y a realizar el cobro mediante libranza de nómina sobre la empresa empleadora.<br><br>
+        El presente pagaré se suscribe en formato electrónico con plena validez jurídica conforme a la Ley 527 de 1999, el Decreto 2364 de 2012 y sus normas complementarias.
+      </div>
+      <div class="pagare-footer">
+        <i class="ti ti-shield-lock"></i>
+        <span>Documento generado y almacenado con cifrado AES-256 · Hash SHA-256: <span style="font-family:'DM Mono',monospace">a3f8c2d1…e9b7</span> · Timestamp: 12/05/2025 10:15:33 UTC-5</span>
+      </div>
+    </div>
+
+    <div class="note info">
+      <i class="ti ti-info-circle"></i>
+      <span>Puedes firmar dibujando tu firma con el mouse/dedo, o escribiéndola. La firma quedará vinculada criptográficamente a tu identidad verificada en el paso KYC, con fecha, hora e IP registrados.</span>
+    </div>
+
+    <!-- FIRMA -->
+    <div class="firma-section">
+      <div class="firma-header">
+        <h3><i class="ti ti-writing"></i> Tu firma electrónica</h3>
+        <div class="firma-tabs">
+          <div class="firma-tab active" id="tab-draw" onclick="switchFirma('draw')">Dibujar</div>
+          <div class="firma-tab" id="tab-type" onclick="switchFirma('type')">Escribir</div>
+        </div>
+      </div>
+
+      <!-- Canvas draw -->
+      <div id="firma-draw-wrap" class="canvas-wrap">
+        <canvas id="firma-canvas" width="600" height="140"></canvas>
+        <div class="canvas-placeholder" id="canvas-ph">
+          <i class="ti ti-pencil"></i>
+          <p>Dibuja tu firma aquí</p>
+        </div>
+      </div>
+
+      <!-- Type firma -->
+      <div id="firma-type-wrap">
+        <input type="text" id="firma-type-input" placeholder="Escribe tu nombre completo" oninput="onTypeSignature(this.value)" autocomplete="off">
+        <div id="firma-preview" style="text-align:center;padding:1rem 0;font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--navy);border-top:1px solid var(--border);margin-top:12px;min-height:60px"></div>
+      </div>
+
+      <div class="canvas-controls">
+        <button class="btn" id="clear-btn" onclick="clearFirma()"><i class="ti ti-eraser"></i> Limpiar</button>
+        <button class="btn" onclick="autoDemo()"><i class="ti ti-wand"></i> Demo</button>
+        <div class="firma-status" id="firma-status">
+          <i class="ti ti-pencil" style="font-size:14px"></i> Sin firma aún
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSENTIMIENTOS -->
+    <div class="consent-stack" id="consent-stack">
+      <div class="consent-item" id="c1" onclick="toggleConsent('c1','cb1')">
+        <div class="consent-check" id="cb1"><i class="ti ti-check"></i></div>
+        <div class="consent-txt">
+          <div class="ct-title">Acepto las condiciones del crédito y el pagaré electrónico</div>
+          <div class="ct-body">He leído y entiendo el pagaré en blanco con carta de instrucciones. Autorizo a FondoUne a llenarlo conforme a las condiciones aprobadas y realizar el descuento por nómina.</div>
+        </div>
+      </div>
+      <div class="consent-item" id="c2" onclick="toggleConsent('c2','cb2')">
+        <div class="consent-check" id="cb2"><i class="ti ti-check"></i></div>
+        <div class="consent-txt">
+          <div class="ct-title">Autorizo el desembolso a mi cuenta bancaria registrada</div>
+          <div class="ct-body">Confirmo que la cuenta Bancolombia No. *** *** 4821 registrada es la correcta para recibir el desembolso de $8.000.000 COP hoy.</div>
+        </div>
+      </div>
+      <div class="consent-item" id="c3" onclick="toggleConsent('c3','cb3')">
+        <div class="consent-check" id="cb3"><i class="ti ti-check"></i></div>
+        <div class="consent-txt">
+          <div class="ct-title">Declaro que la información suministrada es veraz</div>
+          <div class="ct-body">Los datos y documentos aportados en esta solicitud son verídicos. Entiendo que suministrar información falsa puede implicar consecuencias legales y la terminación del crédito.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note warn" id="nota-incompleta" style="display:none">
+      <i class="ti ti-alert-triangle"></i>
+      <span>Para continuar debes completar la firma y aceptar los tres consentimientos.</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir pagaré</button>
+      <button class="btn primary" id="btn-firmar" onclick="intentarFirmar()"><i class="ti ti-writing-sign"></i> Firmar y solicitar desembolso</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div class="success-state" id="success-state">
+    <div class="success-ring"><i class="ti ti-circle-check"></i></div>
+    <div class="success-title">¡Pagaré firmado con éxito!</div>
+    <div class="success-sub">Tu firma electrónica ha sido registrada y el pagaré sellado criptográficamente. El desembolso será procesado hoy entre las 2:00 y 4:00 p.m.</div>
+
+    <div class="desembolso-card">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Confirmación del desembolso</div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-coin" style="font-size:14px"></i> Monto a desembolsar</span><span class="dv good">$8.000.000 COP</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-building-bank" style="font-size:14px"></i> Cuenta destino</span><span class="dv">Bancolombia *** 4821</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-clock" style="font-size:14px"></i> Tiempo estimado</span><span class="dv">Hoy · 2:00 – 4:00 p.m.</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-calendar" style="font-size:14px"></i> Primera cuota</span><span class="dv">12 de junio, 2025 · $391.800</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-file-check" style="font-size:14px"></i> Número de pagaré</span><span class="dv" style="font-family:'DM Mono',monospace;font-size:12px">PAG-2025-0847-CG</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-fingerprint" style="font-size:14px"></i> Hash firma</span><span class="dv" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">a3f8c2d1…e9b7</span></div>
+    </div>
+
+    <div class="note ok" style="text-align:left">
+      <i class="ti ti-mail-check"></i>
+      <span>Te enviamos el pagaré firmado y el resumen del crédito a <strong>carlos.g***@une.net.co</strong>. Guárdalos para tus registros. También puedes descargarlo abajo.</span>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
+      <button class="btn" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir</button>
+      <button class="btn gold" onclick="showToast('Descargando pagaré PDF…','ok')"><i class="ti ti-download"></i> Descargar pagaré</button>
+      <button class="btn success-btn" onclick="showToast('Redirigiendo al inicio…','ok')"><i class="ti ti-home"></i> Ir al inicio</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span><span class="sb-dot sb-green"></span>Sesión segura</span>
+  <span><span class="sb-dot sb-green"></span>TLS 1.3</span>
+  <span><span class="sb-dot sb-gold"></span>Módulo 4 — Prototipo v1.0</span>
+  <span style="margin-left:auto"><span class="sb-dot sb-green"></span>FondoUne</span>
+</div>
+
+<script>
+// ── CANVAS FIRMA ──────────────────────────────────────
+const canvas = document.getElementById('firma-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false, hasSig = false;
+
+function resizeCanvas(){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = (rect.width - 40) * dpr;
+  canvas.height = 140 * dpr;
+  canvas.style.width = (rect.width - 40) + 'px';
+  canvas.style.height = '140px';
+  ctx.scale(dpr,dpr);
+  ctx.strokeStyle = '#0B2545';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+resizeCanvas();
+
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return {x: src.clientX - rect.left, y: src.clientY - rect.top};
+}
+canvas.addEventListener('mousedown', e => { drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); setSigned(); });
+canvas.addEventListener('mouseup', () => drawing=false);
+canvas.addEventListener('mouseleave', () => drawing=false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }, {passive:false});
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); setSigned(); }, {passive:false});
+canvas.addEventListener('touchend', () => drawing=false);
+
+function setSigned(){
+  if(!hasSig){
+    hasSig=true;
+    canvas.classList.add('has-sig');
+    document.getElementById('canvas-ph').style.opacity='0';
+    document.getElementById('firma-status').innerHTML='<i class="ti ti-check" style="font-size:14px"></i> Firma registrada';
+    document.getElementById('firma-status').className='firma-status signed';
+  }
+}
+
+function clearFirma(){
+  const dpr=window.devicePixelRatio||1;
+  ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
+  hasSig=false;
+  canvas.classList.remove('has-sig');
+  document.getElementById('canvas-ph').style.opacity='1';
+  document.getElementById('firma-status').innerHTML='<i class="ti ti-pencil" style="font-size:14px"></i> Sin firma aún';
+  document.getElementById('firma-status').className='firma-status';
+  if(currentFirmaMode==='type'){
+    document.getElementById('firma-type-input').value='';
+    document.getElementById('firma-preview').textContent='';
+  }
+}
+
+// Demo firma
+function autoDemo(){
+  clearFirma();
+  const w=canvas.offsetWidth, h=140;
+  const pts=[
+    [w*.15,h*.7],[w*.2,h*.4],[w*.25,h*.7],[w*.3,h*.55],[w*.35,h*.3],
+    [w*.42,h*.65],[w*.48,h*.35],[w*.52,h*.6],[w*.58,h*.3],[w*.62,h*.55],
+    [w*.68,h*.7],[w*.72,h*.4],[w*.78,h*.65],[w*.85,h*.5]
+  ];
+  ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>=pts.length){clearInterval(iv);setSigned();return;}
+    ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke();i++;
+  },30);
+}
+
+// Switch tabs
+let currentFirmaMode='draw';
+function switchFirma(mode){
+  currentFirmaMode=mode;
+  document.getElementById('tab-draw').classList.toggle('active',mode==='draw');
+  document.getElementById('tab-type').classList.toggle('active',mode==='type');
+  document.getElementById('firma-draw-wrap').style.display=mode==='draw'?'block':'none';
+  document.getElementById('firma-type-wrap').style.display=mode==='type'?'block':'none';
+  clearFirma();
+}
+
+let typedSignature='';
+function onTypeSignature(val){
+  typedSignature=val;
+  document.getElementById('firma-preview').textContent=val;
+  if(val.trim().length>3) setSigned();
+  else { hasSig=false; document.getElementById('firma-status').innerHTML='<i class="ti ti-pencil" style="font-size:14px"></i> Sin firma aún'; document.getElementById('firma-status').className='firma-status'; }
+}
+
+// ── CONSENTIMIENTOS ──────────────────────────────────
+const consents = {c1:false,c2:false,c3:false};
+function toggleConsent(id,cbId){
+  consents[id]=!consents[id];
+  const cb=document.getElementById(cbId);
+  const item=document.getElementById(id);
+  cb.classList.toggle('checked',consents[id]);
+  item.classList.toggle('checked',consents[id]);
+}
+function allConsentsOk(){return consents.c1&&consents.c2&&consents.c3;}
+
+// ── FIRMAR ───────────────────────────────────────────
+function intentarFirmar(){
+  const warn=document.getElementById('nota-incompleta');
+  if(!hasSig||!allConsentsOk()){
+    warn.style.display='flex';
+    warn.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  warn.style.display='none';
+  // Animate button
+  const btn=document.getElementById('btn-firmar');
+  btn.innerHTML='<i class="ti ti-loader" style="animation:spin .8s linear infinite"></i> Procesando firma…';
+  btn.disabled=true;
+  const style=document.createElement('style');
+  style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
+  setTimeout(()=>{
+    document.getElementById('main-content').style.display='none';
+    document.getElementById('success-state').style.display='block';
+    document.getElementById('success-state').scrollIntoView({behavior:'smooth'});
+    launchConfetti();
+  },2000);
+}
+
+// ── CONFETTI ─────────────────────────────────────────
+function launchConfetti(){
+  const colors=['#C9963B','#F0C060','#1A7A4A','#1A6BAD','#0B2545','#4DA8DA'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`
+      left:${Math.random()*100}vw;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*.5}s;
+      transform:rotate(${Math.random()*360}deg);
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+// ── TOAST ────────────────────────────────────────────
+function showToast(msg,type='ok'){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:60px;right:20px;z-index:999;background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:DM Sans,sans-serif;box-shadow:var(--shadow-lg);animation:tIn .25s ease;color:var(--navy);max-width:300px';
+  t.innerHTML=`<i class="ti ti-circle-check" style="color:var(--success);font-size:17px"></i><span>${msg}</span>`;
+  document.body.appendChild(t);
+  const s=document.createElement('style');
+  s.textContent='@keyframes tIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}';
+  document.head.appendChild(s);
+  setTimeout(()=>t.remove(),4000);
+}
+</script>
+</body>
+</html>
