@@ -4,8 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FondoUne — Firma y Desembolso</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<!-- Paso 2: preconnect para reducir latencia de red -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Fuentes críticas (DM Serif Display + DM Sans) -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!-- DM Mono: carga no bloqueante (solo se usa en textos legales) -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"></noscript>
+
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
@@ -149,16 +159,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* CONFETTI */
 .confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;top:-10px;animation:fall linear forwards}
 @keyframes fall{to{top:110vh;transform:rotate(720deg)}}
+/* Animaciones globales */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes tIn {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
 </style>
-  <!-- FondoUne: navegacion y sesion compartida -->
-  <script src="navigation.js" defer></script>
-  <script src="session.js" defer></script>
-  <script>FondouneNav.init('firma');</script>
+
+<!-- FondoUne: navegación y sesión compartida -->
+<script src="navigation.js" defer></script>
+<script src="session.js" defer></script>
+<script>FondouneNav.init('firma');</script>
+
 </head>
 <body>
 <div class="wrap">
-
-  <!-- HEADER -->
   <div class="header">
     <div class="mark"><i class="ti ti-building-bank"></i></div>
     <div class="htxt">
@@ -446,23 +472,26 @@ const canvas = document.getElementById('firma-canvas');
 const ctx = canvas.getContext('2d');
 let drawing = false, hasSig = false;
 
+// Variable global para cachear el rect del canvas
+let canvasRect = null;
+
 function resizeCanvas(){
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio||1;
-  canvas.width = (rect.width - 40) * dpr;
+  const dpr = window.devicePixelRatio || 1;
+  const width = canvas.parentElement.clientWidth - 40; // clientWidth no fuerza reflow
+  canvas.width = width * dpr;
   canvas.height = 140 * dpr;
-  canvas.style.width = (rect.width - 40) + 'px';
+  canvas.style.width = width + 'px';
   canvas.style.height = '140px';
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // setTransform evita acumulación de scale
   ctx.strokeStyle = '#0B2545';
   ctx.lineWidth = 2.5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  canvasRect = canvas.getBoundingClientRect(); // se cachea una sola vez al redimensionar
 }
-resizeCanvas();
 
 function getPos(e){
-  const rect = canvas.getBoundingClientRect();
+  const rect = canvasRect || canvas.getBoundingClientRect(); // usa el rect cacheado
   const src = e.touches ? e.touches[0] : e;
   return {x: src.clientX - rect.left, y: src.clientY - rect.top};
 }
@@ -558,9 +587,7 @@ function intentarFirmar(){
   const btn=document.getElementById('btn-firmar');
   btn.innerHTML='<i class="ti ti-loader" style="animation:spin .8s linear infinite"></i> Procesando firma…';
   btn.disabled=true;
-  const style=document.createElement('style');
-  style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
-  document.head.appendChild(style);
+
   setTimeout(()=>{
     document.getElementById('main-content').style.display='none';
     document.getElementById('success-state').style.display='block';
@@ -594,9 +621,7 @@ function showToast(msg,type='ok'){
   t.style.cssText='position:fixed;bottom:60px;right:20px;z-index:999;background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:DM Sans,sans-serif;box-shadow:var(--shadow-lg);animation:tIn .25s ease;color:var(--navy);max-width:300px';
   t.innerHTML=`<i class="ti ti-circle-check" style="color:var(--success);font-size:17px"></i><span>${msg}</span>`;
   document.body.appendChild(t);
-  const s=document.createElement('style');
-  s.textContent='@keyframes tIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}';
-  document.head.appendChild(s);
+
   setTimeout(()=>t.remove(),4000);
 }
 </script>
