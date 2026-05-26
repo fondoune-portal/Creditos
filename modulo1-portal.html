@@ -4,10 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FondoUne — Portal de Crédito Inteligente</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<style>
+7  <link rel="preconnect" href="https://fonts.googleapis.com">
+8  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+9  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+10 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+11 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"></noscript>
+
+12 <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"></noscript>
+13 <style>
   :root {
     --navy:   #0B2545;
     --navy2:  #134074;
@@ -374,25 +381,116 @@
   }
   .bank-btn:hover { border-color: var(--blue); background: var(--white); }
   .bank-btn.selected { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,37,69,0.08); }
-  .bank-btn .bk-logo {
-    width: 38px; height: 38px; border-radius: 10px;
-    margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700;
-  }
-  .bank-btn .bk-name { font-size: 11px; color: var(--muted); }
+    .bank-btn .bk-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
 
+.bank-btn .bk-name {
+  font-size: 11px;
+  color: var(--muted);
+}
   /* Responsive */
   @media (max-width: 540px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .metrics-band { grid-template-columns: 1fr 1fr; }
-    .sec-layers { grid-template-columns: 1fr; }
-    .bank-grid { grid-template-columns: repeat(2,1fr); }
+    .portal {
+      padding: 0 12px 88px;
+    }
+
+    .topbar {
+      padding: 0 14px;
+      height: auto;
+      min-height: 60px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tb-left,
+    .tb-right {
+      width: 100%;
+    }
+
+    .tb-right {
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tb-sub,
+    .tb-env {
+      display: none;
+    }
+
+    .form-grid,
+    .sec-layers {
+      grid-template-columns: 1fr;
+    }
+
+    .metrics-band {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .bank-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .btn-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn-row .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .progress-track {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .otp-row {
+      gap: 6px;
+      justify-content: space-between;
+    }
+
+    .otp-box {
+      width: 42px;
+      height: 52px;
+    }
+
+    .status-bar {
+      font-size: 10px;
+      gap: 10px;
+      padding: 8px 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-card,
+    .section,
+    .glass-card {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
   }
 </style>
   <!-- FondoUne: navegacion y sesion compartida -->
-  <script src="navigation.js"></script>
-  <script src="session.js"></script>
-  <script>FondouneNav.init('solicitud');</script>
+  <script src="navigation.js" defer></script>
+  <script src="session.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof FondouneNav !== 'undefined') {
+        FondouneNav.init('solicitud');
+      }
+    });
+  </script>
 </head>
 <body>
 
