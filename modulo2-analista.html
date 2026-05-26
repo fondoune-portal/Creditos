@@ -266,7 +266,26 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
-  <script>FondouneNav.init('analista');</script>
+  <script>
+    FondouneNav.init('analista');
+
+    // ── CONTROL DE ACCESO ─────────────────────────────────────────
+    (function() {
+      if (!FondouneSession.isLoggedIn()) {
+        window.location.replace('index.html');
+        return;
+      }
+      const u      = FondouneSession.getUser();
+      const rol    = u?.role || 'asociado';
+      const acceso = FondouneNav.ACCESO_ROL[rol] || [];
+      if (!acceso.includes('analista')) {
+        FondouneSession.queueNotif(
+          'No tienes permiso para acceder al módulo de analista.', 'error'
+        );
+        window.location.replace('modulo1-portal.html');
+      }
+    })();
+  </script>
 </head>
 <body>
 
