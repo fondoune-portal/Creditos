@@ -4,59 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FondoUne — Portal de Crédito Inteligente</title>
-7  <link rel="preconnect" href="https://fonts.googleapis.com">
-8  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-9  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-
-10 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-11 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"></noscript>
-
-12 <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"></noscript>
-13 <style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
   :root {
-    --navy:   #12324A;
-    --navy2:  #1C4968;
-    --blue:   #2A6F97;
-    --sky:    #6FA9C9;
-    --gold:   #B38A3D;
-    --gold2:  #D6B36A;
-    --cream:  #F4F6F8;
+    --navy:   #0B2545;
+    --navy2:  #134074;
+    --blue:   #1A6BAD;
+    --sky:    #4DA8DA;
+    --gold:   #C9963B;
+    --gold2:  #F0C060;
+    --cream:  #F7F4EE;
     --white:  #FFFFFF;
-    --muted:  #6E7D8B;
-    --border: rgba(18,50,74,0.12);
-    --success:#2E6B4B;
-    --sucbg:  #EAF3EE;
-    --danger: #B5473E;
-    --danbg:  #FAECEA;
-    --warn:   #8C6A2A;
-    --warnbg: #FBF5E8;
-    --shadow: 0 8px 30px rgba(18,50,74,0.08);
-    --shadow-lg: 0 18px 50px rgba(18,50,74,0.12);
+    --muted:  #8A9BB5;
+    --border: rgba(11,37,69,0.12);
+    --success:#1A7A4A;
+    --sucbg:  #EAF5EE;
+    --danger: #C0392B;
+    --danbg:  #FDECEA;
+    --warn:   #A06000;
+    --warnbg: #FEF6E6;
+    --shadow: 0 4px 32px rgba(11,37,69,0.10);
+    --shadow-lg: 0 12px 60px rgba(11,37,69,0.16);
     --r: 16px;
     --r-sm: 10px;
   }
   * { box-sizing: border-box; margin:0; padding:0; }
   html { scroll-behavior: smooth; }
   body {
-  font-family: 'DM Sans', sans-serif;
-  background: linear-gradient(180deg, #F7F9FB 0%, #F2F5F8 100%);
-  color: #1E2E3B;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
   /* ── BACKGROUND PATTERN ── */
   body::before {
     content:'';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background:
-      radial-gradient(ellipse 55% 45% at 12% 14%, rgba(42,111,151,0.04) 0%, transparent 65%),
-      radial-gradient(ellipse 45% 35% at 88% 82%, rgba(179,138,61,0.035) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
+      radial-gradient(ellipse 60% 50% at 10% 15%, rgba(26,107,173,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(201,150,59,0.06) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
   }
 
   /* ── LAYOUT ── */
@@ -70,36 +61,24 @@
     border-bottom: 1px solid var(--border);
   }
   .logo-block {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 24px rgba(18,50,74,0.18);
-  flex-shrink: 0;
-}
-.logo-text h1 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 22px;
-  color: var(--navy);
-  letter-spacing: -0.4px;
-}
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--navy); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(11,37,69,0.25);
+    flex-shrink: 0;
+  }
+  .logo-block i { font-size: 24px; color: var(--gold2); }
+  .logo-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--navy); letter-spacing: -0.3px;
+  }
   .logo-text p { font-size: 12px; color: var(--muted); margin-top: 1px; }
   .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .secure-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #EDF5F0;
-  color: var(--success);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(46,107,75,0.14);
-}
+    display: flex; align-items: center; gap: 5px;
+    background: var(--sucbg); color: var(--success);
+    font-size: 11px; font-weight: 500;
+    padding: 5px 10px; border-radius: 20px;
+  }
 
   /* ── PROGRESS ── */
   .progress-track { display: flex; align-items: center; margin-bottom: 2rem; gap: 0; }
@@ -395,115 +374,87 @@
   }
   .bank-btn:hover { border-color: var(--blue); background: var(--white); }
   .bank-btn.selected { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,37,69,0.08); }
-    .bank-btn .bk-logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  margin: 0 auto 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-}
+  .bank-btn .bk-logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .bank-btn .bk-name { font-size: 11px; color: var(--muted); }
 
-.bank-btn .bk-name {
-  font-size: 11px;
-  color: var(--muted);
-}
+  /* ── SELECTOR DE LÍNEA ── */
+  .linea-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0; }
+  .linea-card {
+    border:1.5px solid var(--border); border-radius:var(--r-sm);
+    padding:12px 10px; text-align:center; cursor:pointer;
+    background:var(--cream); transition:all 0.2s;
+  }
+  .linea-card:hover { border-color:var(--blue); background:var(--white); }
+  .linea-card.selected {
+    border-color:var(--navy); background:var(--white);
+    box-shadow:0 0 0 3px rgba(11,37,69,0.10);
+  }
+  .lc-icon {
+    width:36px; height:36px; border-radius:9px;
+    margin:0 auto 7px; display:flex; align-items:center; justify-content:center; font-size:17px;
+  }
+  .lc-name { font-size:11px; font-weight:600; color:var(--navy); margin-bottom:2px; line-height:1.3; }
+  .lc-tasa { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .linea-desc-box {
+    background:#EFF4FB; border:1px solid rgba(26,107,173,0.18);
+    border-radius:var(--r-sm); padding:12px 14px;
+    font-size:12px; color:var(--navy2); line-height:1.6;
+    margin:10px 0;
+  }
+  .linea-dest-tag {
+    display:inline-flex; align-items:center; gap:4px;
+    background:var(--cream); border:1px solid var(--border);
+    border-radius:4px; padding:3px 8px; font-size:11px;
+    color:var(--navy); margin:2px;
+  }
+
+  /* ── SELECTOR DE PLAZO ── */
+  .plazo-grid { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+  .plazo-btn {
+    border:1.5px solid var(--border); border-radius:var(--r-sm);
+    padding:7px 14px; font-size:12px; font-family:'DM Mono',monospace;
+    background:var(--cream); color:var(--navy); cursor:pointer; transition:all 0.15s;
+  }
+  .plazo-btn:hover { border-color:var(--blue); background:var(--white); }
+  .plazo-btn.selected { border-color:var(--navy); background:var(--navy); color:var(--white); }
+
+  /* ── SIMULADOR ── */
+  .sim-card {
+    background:linear-gradient(135deg, var(--navy), var(--navy2));
+    border-radius:var(--r-sm); padding:18px 20px; color:var(--white); margin:14px 0;
+  }
+  .sim-title { font-size:11px; opacity:.6; text-transform:uppercase; letter-spacing:.07em; margin-bottom:10px; }
+  .sim-cuota { font-family:'DM Serif Display',serif; font-size:32px; margin-bottom:4px; }
+  .sim-cuota span { font-size:14px; opacity:.6; font-family:'DM Sans',sans-serif; }
+  .sim-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
+  .sim-cell { background:rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; }
+  .sim-cell .sc-l { font-size:10px; opacity:.5; margin-bottom:3px; }
+  .sim-cell .sc-v { font-size:13px; font-weight:600; font-family:'DM Mono',monospace; }
+
   /* Responsive */
   @media (max-width: 540px) {
-    .portal {
-      padding: 0 12px 88px;
-    }
-
-    .topbar {
-      padding: 0 14px;
-      height: auto;
-      min-height: 60px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .tb-left,
-    .tb-right {
-      width: 100%;
-    }
-
-    .tb-right {
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tb-sub,
-    .tb-env {
-      display: none;
-    }
-
-    .form-grid,
-    .sec-layers {
-      grid-template-columns: 1fr;
-    }
-
-    .metrics-band {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .bank-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .btn-row {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .btn-row .btn {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .progress-track {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .otp-row {
-      gap: 6px;
-      justify-content: space-between;
-    }
-
-    .otp-box {
-      width: 42px;
-      height: 52px;
-    }
-
-    .status-bar {
-      font-size: 10px;
-      gap: 10px;
-      padding: 8px 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .hero-card,
-    .section,
-    .glass-card {
-      padding-left: 14px;
-      padding-right: 14px;
-    }
+    .linea-grid { grid-template-columns:repeat(2,1fr); }
+    .sim-grid { grid-template-columns:1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .metrics-band { grid-template-columns: 1fr 1fr; }
+    .sec-layers { grid-template-columns: 1fr; }
+    .bank-grid { grid-template-columns: repeat(2,1fr); }
   }
 </style>
-  <!-- FondoUne: navegacion y sesion compartida -->
-  <script src="navigation.js" defer></script>
-  <script src="session.js" defer></script>
+  <script src="creditos-config.js"></script>
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      if (typeof FondouneNav !== 'undefined') {
-        FondouneNav.init('solicitud');
+    FondouneNav.init('solicitud');
+    (function() {
+      if (!FondouneSession.isLoggedIn()) {
+        window.location.replace('index.html');
       }
-    });
+    })();
   </script>
 </head>
 <body>
@@ -515,7 +466,7 @@
     <div class="logo-block"><i class="ti ti-building-bank"></i></div>
     <div class="logo-text">
       <h1>FondoUne</h1>
-      <p>Portal de Crédito Inteligente — Prototipo v1.0</p>
+      <p>Portal de Crédito Inteligente · FondoUne</p>
     </div>
     <div class="header-right">
       <div class="secure-badge"><i class="ti ti-shield-check" style="font-size:13px;"></i> Sesión segura</div>
@@ -685,44 +636,43 @@
       <div class="card-title">Configura tu crédito</div>
       <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
 
-      <div class="form-grid">
+      <!-- LÍNEA DE CRÉDITO -->
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;">
+        Línea de crédito <span style="color:var(--danger)">*</span>
+      </div>
+      <div class="linea-grid" id="linea-grid">
+        <!-- Construido por buildLineaGrid() -->
+        <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px">
+          Cargando líneas de crédito...
+        </div>
+      </div>
+      <div class="linea-desc-box hidden" id="linea-desc-box">
+        <span id="linea-desc-txt"></span>
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap" id="linea-dest-tags"></div>
+      </div>
+
+      <!-- MONTO Y PLAZO -->
+      <div class="form-grid" style="margin-top:14px">
         <div class="field">
           <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
           <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
-          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
+          <span class="hint" id="monto-hint">Ingresa el monto que necesitas</span>
         </div>
         <div class="field">
           <label>Plazo <span style="color:var(--danger)">*</span></label>
-          <select id="f-plazo" onchange="updateSummary()">
-            <option>12 meses</option>
-            <option>18 meses</option>
-            <option selected>24 meses</option>
-            <option>36 meses</option>
-            <option>48 meses</option>
-          </select>
+          <div class="plazo-grid" id="plazo-grid">
+            <!-- Construido por selectLinea() -->
+          </div>
+          <input type="hidden" id="f-plazo" value="24">
         </div>
       </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Tipo de crédito</label>
-          <select>
-            <option selected>Crédito de consumo</option>
-            <option>Educativo</option>
-            <option>Vivienda</option>
-            <option>Emergencia médica</option>
-            <option>Libranza especial</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Destino</label>
-          <select>
-            <option>Gastos personales</option>
-            <option>Educación</option>
-            <option>Salud</option>
-            <option>Remodelación hogar</option>
-            <option>Consolidación deudas</option>
-          </select>
-        </div>
+
+      <!-- DESTINO -->
+      <div class="field" style="margin-bottom:14px">
+        <label>Destino del crédito <span style="color:var(--danger)">*</span></label>
+        <select id="f-destino" onchange="updateSummary()" style="background:var(--cream)">
+          <option>Selecciona la línea primero</option>
+        </select>
       </div>
 
       <!-- Validación capacidad de pago -->
@@ -759,13 +709,21 @@
       </div>
 
       <hr class="divider">
-      <div style="background:var(--cream);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Resumen preliminar <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span></div>
-        <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
-        <div class="summary-row"><span class="lbl">Plazo</span><span class="val">24 meses</span></div>
-        <div class="summary-row"><span class="lbl">Tasa</span><span class="val">1,1% E.M.</span></div>
-        <div class="summary-row"><span class="lbl">Tipo</span><span class="val">Crédito de consumo</span></div>
+      <!-- SIMULADOR VISUAL -->
+      <div class="sim-card" id="sim-card">
+        <div class="sim-title">Simulación de tu crédito</div>
+        <div class="sim-cuota"><span>$</span><span id="sim-cuota-val">0</span><span>/mes</span></div>
+        <div style="font-size:11px;opacity:.5;margin-bottom:2px;" id="sim-tasa-lbl">Tasa: — E.A.</div>
+        <div class="sim-grid">
+          <div class="sim-cell"><div class="sc-l">Monto</div><div class="sc-v" id="sum-monto">$0</div></div>
+          <div class="sim-cell"><div class="sc-l">Plazo</div><div class="sc-v" id="sum-plazo">— meses</div></div>
+          <div class="sim-cell"><div class="sc-l">Total a pagar</div><div class="sc-v" id="sum-total">$0</div></div>
+        </div>
       </div>
+      <span id="cuota-estimada" style="display:none"></span>
+
+      <!-- Notas especiales de la línea -->
+      <div class="note info hidden" id="linea-nota-especial" style="margin:8px 0"></div>
 
       <div class="btn-row">
         <button class="btn" onclick="goTo(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
@@ -829,18 +787,22 @@
         <div class="result-sub">Tu perfil crediticio, identidad y capacidad de pago cumplen los requisitos. Un analista del fondo confirmará en las próximas 24 horas.</div>
       </div>
 
-      <div class="metrics-band">
+      <div class="metrics-band" style="grid-template-columns:repeat(4,1fr)">
         <div class="metric">
-          <div class="m-val">$8.000.000</div>
+          <div class="m-val" id="res-monto">$8.000.000</div>
           <div class="m-label">Monto aprobado</div>
         </div>
         <div class="metric">
-          <div class="m-val">$391.800</div>
+          <div class="m-val" id="res-cuota">$—</div>
           <div class="m-label">Cuota mensual</div>
         </div>
         <div class="metric">
-          <div class="m-val">24 meses</div>
+          <div class="m-val" id="res-plazo">— meses</div>
           <div class="m-label">Plazo</div>
+        </div>
+        <div class="metric">
+          <div class="m-val" style="font-size:16px" id="res-linea">—</div>
+          <div class="m-label">Línea de crédito</div>
         </div>
       </div>
 
@@ -895,7 +857,7 @@
 
       <div class="btn-row">
         <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
-        <button class="btn gold"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
+        <button class="btn gold" onclick="FondouneNav.navigateTo('firma')"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
         <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
       </div>
     </div>
@@ -907,7 +869,7 @@
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot"></div> Sesión activa</div>
   <div class="sb-item"><div class="sb-dot"></div> Cifrado TLS 1.3</div>
-  <div class="sb-item"><div class="sb-dot warn"></div> Prototipo v1.0</div>
+  
   <div class="sb-item" style="margin-left:auto;"><div class="sb-dot idle"></div> FondoUne — Portal Crédito Inteligente</div>
 </div>
 
@@ -932,6 +894,7 @@ function goTo(n) {
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
   if (n === 4) startValidation();
+  if (n === 5) buildResult();
 }
 
 // ── UPLOAD SIMULATION ──
@@ -1085,25 +1048,200 @@ function runValidation(v, idx) {
   }, v.time);
 }
 
-// ── UPDATE SUMMARY ──
+// ── ESTADO SOLICITUD ──────────────────────────────────────────────
+let selectedLinea = 'libre_inversion';
+let selectedPlazo = 24;
+let _solicitudData = {};
+
+// ── BUILD GRID DE LÍNEAS ───────────────────────────────────────────
+function buildLineaGrid() {
+  const grid = document.getElementById('linea-grid');
+  if (!grid) return;
+  if (typeof FondouneCreditos === 'undefined') {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:12px">creditos-config.js no disponible</div>';
+    return;
+  }
+  grid.innerHTML = Object.values(FondouneCreditos.LINEAS).map(lin => {
+    const isDefault = lin.id === 'libre_inversion';
+    const tasaMin   = Math.min(...lin.tasas.map(t=>t.tasaEA));
+    return `<div class="linea-card${isDefault?' selected':''}" id="lc-${lin.id}" onclick="selectLinea('${lin.id}')">
+      <div class="lc-icon" style="background:${lin.color}15;color:${lin.color}"><i class="ti ${lin.icono}"></i></div>
+      <div class="lc-name">${lin.nombre}</div>
+      <div class="lc-tasa">desde ${tasaMin.toFixed(2)}% EA</div>
+    </div>`;
+  }).join('');
+  selectLinea('libre_inversion');
+}
+
+// ── SELECCIONAR LÍNEA ──────────────────────────────────────────────
+function selectLinea(lineaId) {
+  selectedLinea = lineaId;
+  document.querySelectorAll('.linea-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('lc-'+lineaId);
+  if (card) card.classList.add('selected');
+
+  if (typeof FondouneCreditos === 'undefined') return;
+  const lin = FondouneCreditos.getLinea(lineaId);
+  if (!lin) return;
+
+  // Descripción y destinos
+  const descBox  = document.getElementById('linea-desc-box');
+  const descTxt  = document.getElementById('linea-desc-txt');
+  const destTags = document.getElementById('linea-dest-tags');
+  if (descBox && descTxt) {
+    descTxt.textContent = lin.descripcion || '';
+    descTags.innerHTML  = (lin.destinacion||[]).map(d => `<span class="linea-dest-tag"><i class="ti ti-check" style="font-size:10px;color:var(--success)"></i>${d}</span>`).join('');
+    descBox.classList.remove('hidden');
+  }
+
+  // Hint de monto
+  const hint = document.getElementById('monto-hint');
+  if (hint) {
+    if (lin.montoMax) hint.textContent = 'Máximo: $'+lin.montoMax.toLocaleString('es-CO');
+    else hint.textContent = 'Ingresa el monto que necesitas';
+  }
+
+  // Grid de plazos
+  const { min, max } = lin.plazos;
+  const opcionesPlazo = generarOpciones(min, max);
+  const plazoGrid = document.getElementById('plazo-grid');
+  if (plazoGrid) {
+    plazoGrid.innerHTML = opcionesPlazo.map(p => {
+      const isRec = (p===24&&max>=24)||(p===12&&max<24);
+      const isSel = p === Math.min(selectedPlazo, max);
+      return `<button type="button" class="plazo-btn${isSel?' selected':''}" onclick="selectPlazo(${p})">${p}m${isRec?' ★':''}</button>`;
+    }).join('');
+    const first = opcionesPlazo.find(p=>p<=Math.max(min,selectedPlazo)&&p<=max) || opcionesPlazo[0];
+    selectPlazo(first, false);
+  }
+
+  // Destino
+  const dest = document.getElementById('f-destino');
+  if (dest) {
+    dest.innerHTML = (lin.destinacion||['Libre destinación']).map(d => `<option>${d}</option>`).join('');
+  }
+
+  // Notas especiales
+  if (lin.notasEspeciales && lin.notasEspeciales.length) {
+    const notaHtml = lin.notasEspeciales.map(n=>`<div style="display:flex;gap:6px;align-items:center"><i class="ti ti-info-circle" style="font-size:13px;color:var(--blue);flex-shrink:0"></i>${n}</div>`).join('');
+    const existNote = document.getElementById('linea-nota-especial');
+    if (existNote) { existNote.innerHTML = notaHtml; existNote.classList.remove('hidden'); }
+  } else {
+    const existNote = document.getElementById('linea-nota-especial');
+    if (existNote) existNote.classList.add('hidden');
+  }
+
+  updateSummary();
+}
+
+function generarOpciones(min, max) {
+  const base = [3,6,9,12,18,24,36,48,60,72,84,96,120,180];
+  return base.filter(p => p >= min && p <= max);
+}
+
+function selectPlazo(p, doUpdate=true) {
+  selectedPlazo = p;
+  document.getElementById('f-plazo').value = p;
+  document.querySelectorAll('.plazo-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.textContent) === p || b.textContent.startsWith(p+'m'));
+  });
+  if (doUpdate) updateSummary();
+}
+
+// ── SIMULADOR EN TIEMPO REAL ───────────────────────────────────────
 function updateSummary() {
   const monto = parseInt(document.getElementById('f-monto').value) || 0;
-  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
-  const tasa = 0.011;
-  const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
-  document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
-  document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
+  const plazo = selectedPlazo || 24;
+  let cuota, tasaEA, tasaEM, totalPagar;
+
+  if (typeof FondouneCreditos !== 'undefined') {
+    const sim = FondouneCreditos.simularCredito(selectedLinea, monto, plazo);
+    if (sim) {
+      cuota     = sim.cuota;
+      tasaEA    = sim.tasaEA;
+      tasaEM    = sim.tasaEM;
+      totalPagar= sim.totalPagar;
+    }
+  }
+  if (!cuota) {
+    const tm = 0.011;
+    cuota = Math.round(monto * (tm * Math.pow(1+tm,plazo)) / (Math.pow(1+tm,plazo)-1));
+    tasaEA = '16.11% E.A.'; tasaEM = '1.100% E.M.';
+    totalPagar = cuota * plazo;
+  }
+
+  const fmtCOP = n => n ? n.toLocaleString('es-CO') : '0';
+
+  const cuotaEl = document.getElementById('sim-cuota-val');
+  if (cuotaEl) cuotaEl.textContent = fmtCOP(cuota);
+  const tasaEl = document.getElementById('sim-tasa-lbl');
+  if (tasaEl) tasaEl.textContent = `Tasa: ${tasaEA} · ${tasaEM}`;
+  const montoEl = document.getElementById('sum-monto');
+  if (montoEl) montoEl.textContent = '$'+fmtCOP(monto);
+  const plazoEl = document.getElementById('sum-plazo');
+  if (plazoEl) plazoEl.textContent = plazo+' meses';
+  const totalEl = document.getElementById('sum-total');
+  if (totalEl) totalEl.textContent = '$'+fmtCOP(Math.round(totalPagar||0));
+
+  // Guardar estado para paso 5
+  _solicitudData = { lineaId: selectedLinea, monto, plazo, cuota, tasaEA, tasaEM, totalPagar };
 }
 
-// ── RESET ──
-function resetPortal() {
-  location.reload();
+// ── RESULTADO FINAL ────────────────────────────────────────────────
+function buildResult() {
+  const d     = _solicitudData;
+  const monto = d.monto  || 8000000;
+  const cuota = d.cuota  || 0;
+  const plazo = d.plazo  || 24;
+  const fmtCOP = n => Math.round(n).toLocaleString('es-CO');
+
+  if (typeof FondouneCreditos !== 'undefined') {
+    const lin = FondouneCreditos.getLinea(d.lineaId);
+    if (lin) {
+      const resLinea = document.getElementById('res-linea');
+      if (resLinea) resLinea.textContent = lin.nombre;
+    }
+  }
+  const rm = document.getElementById('res-monto'); if(rm) rm.textContent='$'+fmtCOP(monto);
+  const rc = document.getElementById('res-cuota'); if(rc) rc.textContent='$'+fmtCOP(cuota);
+  const rp = document.getElementById('res-plazo'); if(rp) rp.textContent=plazo+' meses';
+
+  // Guardar en sesión
+  if (typeof FondouneSession !== 'undefined') {
+    const cedula = document.getElementById('f-cedula')?.value || '';
+    const email  = document.getElementById('f-email')?.value  || '';
+    FondouneSession.saveCreditApp({
+      lineaId: d.lineaId,
+      tipo:    d.lineaId,
+      monto, plazo, cuota,
+      tasaEA:  d.tasaEA,
+      tasaEM:  d.tasaEM,
+      totalPagar: d.totalPagar,
+      cedula, email,
+      radicado: 'SOL-'+new Date().getFullYear()+'-'+Math.floor(Math.random()*9000+1000),
+      fechaSolicitud: new Date().toISOString(),
+    });
+  }
 }
 
-// Init summary
-updateSummary();
+// ── RESET ──────────────────────────────────────────────────────────
+function resetPortal() { location.reload(); }
 
-// Auto-upload both sides after 3s for demo UX
+// ── INIT ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Pre-fill desde sesión si existe
+  if (typeof FondouneSession !== 'undefined' && FondouneSession.isLoggedIn()) {
+    const u = FondouneSession.getUser();
+    const cedEl = document.getElementById('f-cedula');
+    const emEl  = document.getElementById('f-email');
+    if (u.id   && cedEl) cedEl.value = u.id;
+    if (u.email && emEl) emEl.value  = u.email;
+  }
+  buildLineaGrid();
+  updateSummary();
+});
+
+// Auto-carga para demo KYC
 setTimeout(() => {
   if (!uploadDone.front) simulateUpload('uz-front','uz-front-status');
   setTimeout(() => {
