@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FondoUne — Dashboard Analista v2</title>
+<title>FondoUne — Dashboard Analista</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
@@ -22,15 +22,13 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:13px}
-
-/* Scrollbars */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--bg5)}
 
-/* ── TOP NAV ── */
-.topnav{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:200}
+/* TOP NAV */
+.topnav{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:200;position:relative}
 .logo{display:flex;align-items:center;gap:9px}
 .logo-mark{width:28px;height:28px;border-radius:7px;background:var(--gold);display:flex;align-items:center;justify-content:center}
 .logo-mark i{font-size:15px;color:#07090F}
@@ -45,23 +43,51 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .icon-btn{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .15s}
 .icon-btn:hover{background:var(--bg4)}
 .icon-btn i{font-size:15px;color:var(--text2)}
-.notif-pip{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--red2);border:1.5px solid var(--bg2)}
-.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#07090F;cursor:pointer;font-family:'Syne',sans-serif}
+.notif-pip{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--red2);border:1.5px solid var(--bg2);display:none}
+.avatar-btn{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#07090F;cursor:pointer;font-family:'Syne',sans-serif;border:none;position:relative}
 
-/* ── LAYOUT ── */
+/* USER DROPDOWN */
+.user-dropdown{position:absolute;top:44px;right:12px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:6px;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:500;display:none;animation:mIn .15s ease}
+.user-dropdown.open{display:block}
+.ud-head{padding:10px 12px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.ud-name{font-size:13px;font-weight:600;color:var(--text)}
+.ud-role{font-size:10px;color:var(--muted);margin-top:2px}
+.ud-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;transition:background .1s}
+.ud-item:hover{background:var(--bg3);color:var(--text)}
+.ud-item i{font-size:14px}
+.ud-sep{height:1px;background:var(--border);margin:4px 0}
+
+/* NOTIFICATION PANEL */
+.notif-panel{position:fixed;top:48px;right:0;bottom:0;width:300px;background:var(--bg2);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);z-index:300;display:flex;flex-direction:column}
+.notif-panel.open{transform:translateX(0)}
+.np-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.np-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+.np-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+.np-list{flex:1;overflow-y:auto;padding:8px}
+.np-item{padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);margin-bottom:6px;background:var(--bg3);cursor:pointer;transition:background .12s}
+.np-item:hover{background:var(--bg4)}
+.np-item-top{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.np-ico{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.np-txt{font-size:11px;color:var(--text2);line-height:1.5}
+.np-txt strong{color:var(--text)}
+.np-time{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:4px}
+.np-empty{text-align:center;color:var(--muted);font-size:12px;padding:40px 20px}
+.np-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0}
+
+/* LAYOUT */
 .layout{display:flex;flex:1;overflow:hidden}
 
-/* ── SIDEBAR ── */
+/* SIDEBAR */
 .sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;padding:12px 8px;overflow-y:auto}
 .sb-grp{margin-bottom:4px}
 .sb-grp-label{font-size:9px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:6px 8px 3px}
-.sb-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);font-size:12px;color:var(--text2);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);font-size:12px;color:var(--text2);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap;border:none;background:none;width:100%;text-align:left;font-family:inherit}
 .sb-item:hover{background:var(--bg3);color:var(--text)}
 .sb-item.active{background:var(--bg3);color:var(--text)}
 .sb-item.active::after{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2.5px;border-radius:0 2px 2px 0;background:var(--gold)}
 .sb-item i{font-size:15px;flex-shrink:0;opacity:.7}
 .sb-item.active i{opacity:1}
-.sb-ct{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center}
+.sb-ct{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;flex-shrink:0}
 .ct-red{background:rgba(220,38,38,.2);color:var(--red2)}
 .ct-amber{background:rgba(217,119,6,.2);color:var(--amber3)}
 .ct-green{background:rgba(5,150,105,.2);color:var(--green2)}
@@ -72,7 +98,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .sb-user .uname{font-size:11px;font-weight:600;color:var(--text)}
 .sb-user .urole{font-size:9px;color:var(--muted)}
 
-/* ── MAIN ── */
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
 /* Stats bar */
@@ -87,8 +113,28 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .stat-d{font-size:10px;margin-top:3px;display:flex;align-items:center;gap:3px}
 .trend-up{color:var(--green2)}.trend-dn{color:var(--red2)}.trend-n{color:var(--muted)}
 
-/* Content area */
-.content{flex:1;display:flex;overflow:hidden}
+/* VIEW PANELS */
+#view-container{flex:1;display:flex;overflow:hidden}
+.view-panel{display:none;flex:1;overflow:hidden}
+.view-panel.active{display:flex}
+#view-solicitudes.active{flex-direction:row}
+#view-reportes.active,#view-asociados.active,#view-auditoria.active,
+#view-motor.active,#view-cartera.active,#view-parametros.active,
+#view-seguridad.active{flex-direction:column;overflow-y:auto}
+.view-scroll{padding:24px 28px 48px}
+.view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.view-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px}
+.view-title i{font-size:20px;color:var(--gold2)}
+.view-subtitle{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* TABLE */
+.fu-table{width:100%;border-collapse:collapse;font-size:12px}
+.fu-table thead th{text-align:left;padding:8px 12px;font-size:9px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg3)}
+.fu-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+.fu-table tbody tr:hover{background:var(--bg3)}
+.fu-table tbody td{padding:10px 12px;color:var(--text2);vertical-align:middle}
+.fu-table tbody td:first-child{color:var(--text)}
+.fu-table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
 
 /* List panel */
 .list-panel{width:360px;display:flex;flex-direction:column;border-right:1px solid var(--border);flex-shrink:0;overflow:hidden}
@@ -100,7 +146,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .searchbox input::placeholder{color:var(--muted)}
 .filter-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:1px}
 .filter-tabs::-webkit-scrollbar{display:none}
-.ftab{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap;border:1px solid transparent;color:var(--muted);transition:all .12s}
+.ftab{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap;border:1px solid transparent;color:var(--muted);transition:all .12s;background:none}
 .ftab:hover{color:var(--text);border-color:var(--border2)}
 .ftab.active{background:var(--bg4);color:var(--text);border-color:var(--border2)}
 .list-count{padding:6px 12px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);flex-shrink:0;font-family:'IBM Plex Mono',monospace}
@@ -129,15 +175,14 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .rc-score-chip{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;text-align:right;flex-shrink:0}
 .rc-score-num{font-size:13px;font-weight:600}
 
-/* ── DETAIL PANEL ── */
+/* DETAIL PANEL */
 .detail-panel{flex:1;overflow-y:auto;background:var(--bg)}
 .empty-state{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted)}
 .empty-state i{font-size:44px;opacity:.25}
 .empty-state p{font-size:13px}
-
-/* Detail body */
 .detail-body{padding:20px 24px 40px;animation:dIn .2s ease}
 @keyframes dIn{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
+@keyframes mIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* Detail header */
 .dhead{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
@@ -159,6 +204,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .btn-ask:hover{background:rgba(217,119,6,.22)}
 .btn-gold{background:var(--gold);color:#07090F;border-color:var(--gold);font-weight:700}
 .btn-gold:hover{background:var(--gold2)}
+.btn-sm{padding:5px 10px;font-size:10px}
 
 /* Sections */
 .sec{margin-bottom:18px}
@@ -183,7 +229,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .gauge-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .gauge-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--gold2);line-height:1}
 .gauge-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.gauge-status{text-align:right}
 .gauge-bar{height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:6px}
 .gauge-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--gold2));transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%}
 .gauge-marks{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
@@ -219,11 +264,11 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .rb-seg{flex:1;height:5px;border-radius:3px;background:var(--bg4)}
 .rb-green{background:var(--green2)}.rb-amber{background:var(--amber2)}.rb-red{background:var(--red2)}
 
-/* Timeline / audit */
+/* Timeline */
 .tl{position:relative;padding-left:22px}
 .tl::before{content:'';position:absolute;left:7px;top:8px;bottom:4px;width:1px;background:var(--border2)}
 .tl-item{position:relative;margin-bottom:13px}
-.tl-dot{position:absolute;left:-18px;top:2px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2);flex-shrink:0}
+.tl-dot{position:absolute;left:-18px;top:2px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2)}
 .tl-dot.dot-green{background:var(--green2)}.tl-dot.dot-blue{background:var(--blue2)}.tl-dot.dot-gold{background:var(--gold2)}.tl-dot.dot-red{background:var(--red2)}.tl-dot.dot-amber{background:var(--amber2)}.tl-dot.dot-muted{background:var(--muted)}
 .tl-time{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:2px}
 .tl-txt{font-size:11px;color:var(--text2);line-height:1.5}
@@ -242,7 +287,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 /* Modal */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(3px)}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-lg);padding:24px;width:420px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:mIn .2s ease}
-@keyframes mIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:22px}
 .modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px}
 .modal-body{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:16px}
@@ -260,18 +304,34 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .toast i{font-size:17px;flex-shrink:0}
 .toast-close{margin-left:auto;cursor:pointer;opacity:.5;padding-left:8px}
 
-/* Divider */
+/* Info card for views */
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px}
+.info-card-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.info-card-title i{font-size:15px;color:var(--gold2)}
+.info-card-body{font-size:11px;color:var(--muted);line-height:1.6}
 .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
 </style>
-  <!-- FondoUne: módulo 2 analista -->
+  <script src="creditos-config.js"></script>
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script>
+    FondouneNav.init('analista');
+    (function() {
+      if (!FondouneSession.isLoggedIn()) { window.location.replace('index.html'); return; }
+      const u = FondouneSession.getUser();
+      const rol = u?.role || 'asociado';
+      const acceso = FondouneNav.ACCESO_ROL[rol] || [];
+      if (!acceso.includes('analista')) {
+        FondouneSession.queueNotif('No tienes permiso para acceder al módulo de analista.', 'error');
+        window.location.replace('modulo1-portal.html');
+      }
+    })();
+  </script>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- TOP NAV -->
 <div class="topnav">
-  <a href="index.html" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);text-decoration:none;padding:4px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);transition:all .15s;flex-shrink:0;" onmouseover="this.style.borderColor='var(--border3)'" onmouseout="this.style.borderColor='var(--border2)'">
-    <i class="ti ti-chevron-left" style="font-size:12px;"></i> Inicio
-  </a>
   <div class="logo">
     <div class="logo-mark"><i class="ti ti-building-bank"></i></div>
     <div><div class="logo-name">FondoUne</div><div class="logo-badge">Sistema de crédito</div></div>
@@ -281,12 +341,49 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <div class="nav-r">
     <div class="live"><div class="live-dot"></div>EN VIVO</div>
     <div class="vsep"></div>
-    <a href="modulo3-gerencia.html" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);text-decoration:none;padding:4px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">
-      <i class="ti ti-chart-pie" style="font-size:13px;"></i> Gerencia
-    </a>
-    <div class="icon-btn" title="Notificaciones" id="notif-btn"><i class="ti ti-bell"></i><div class="notif-pip" id="notif-pip"></div></div>
-    <div class="icon-btn" title="Ayuda"><i class="ti ti-help-circle"></i></div>
-    <div class="avatar" title="María Rodríguez">MR</div>
+    <div class="icon-btn" title="Notificaciones" id="notif-btn" onclick="toggleNotifPanel()">
+      <i class="ti ti-bell"></i>
+      <div class="notif-pip" id="notif-pip"></div>
+    </div>
+    <div class="icon-btn" title="Ayuda" onclick="showToast('Documentación disponible en el portal interno FondoUne.','toast-blue','ti-help-circle')">
+      <i class="ti ti-help-circle"></i>
+    </div>
+    <button class="avatar-btn" id="avatar-btn" onclick="toggleUserMenu()" title="Mi cuenta">
+      <span id="nav-initials">AN</span>
+    </button>
+    <!-- Dropdown usuario -->
+    <div class="user-dropdown" id="user-dropdown">
+      <div class="ud-head">
+        <div class="ud-name" id="ud-name">Analista</div>
+        <div class="ud-role" id="ud-role">Analista de Crédito</div>
+      </div>
+      <div class="ud-item" onclick="showToast('Perfil en construcción.','toast-blue','ti-user')">
+        <i class="ti ti-user-circle"></i> Mi perfil
+      </div>
+      <div class="ud-item" onclick="showToast('Configuración próximamente.','toast-blue','ti-settings')">
+        <i class="ti ti-settings"></i> Configuración
+      </div>
+      <div class="ud-sep"></div>
+      <div class="ud-item" style="color:var(--red2)" onclick="FondouneNav.logout()">
+        <i class="ti ti-logout"></i> Cerrar sesión
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL NOTIFICACIONES -->
+<div class="notif-panel" id="notif-panel">
+  <div class="np-head">
+    <span class="np-title">Notificaciones</span>
+    <button class="np-close" onclick="toggleNotifPanel()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="np-list" id="np-list">
+    <div class="np-empty"><i class="ti ti-bell-off" style="font-size:28px;opacity:.3;display:block;margin-bottom:8px"></i>Sin notificaciones nuevas</div>
+  </div>
+  <div class="np-footer">
+    <button class="btn" style="width:100%;justify-content:center" onclick="clearNotifs()">
+      <i class="ti ti-check"></i> Marcar todas como leídas
+    </button>
   </div>
 </div>
 
@@ -296,29 +393,56 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <div class="sidebar">
     <div class="sb-grp">
       <div class="sb-grp-label">Solicitudes</div>
-      <div class="sb-item active" onclick="setFilter('todas')"><i class="ti ti-layout-list"></i> Todas <div class="sb-ct ct-muted" id="ct-todas">7</div></div>
-      <div class="sb-item" onclick="setFilter('pendiente')"><i class="ti ti-clock"></i> Pendientes <div class="sb-ct ct-amber" id="ct-pend">4</div></div>
-      <div class="sb-item" onclick="setFilter('revision')"><i class="ti ti-alert-circle"></i> En revisión <div class="sb-ct ct-amber" id="ct-rev">1</div></div>
-      <div class="sb-item" onclick="setFilter('aprobado')"><i class="ti ti-circle-check"></i> Aprobadas <div class="sb-ct ct-green" id="ct-apro">1</div></div>
-      <div class="sb-item" onclick="setFilter('rechazado')"><i class="ti ti-circle-x"></i> Rechazadas <div class="sb-ct ct-red" id="ct-rech">1</div></div>
+      <button class="sb-item active" id="sb-solicitudes" onclick="showView('solicitudes');setFilter('todas',null)">
+        <i class="ti ti-layout-list"></i> Todas <div class="sb-ct ct-muted" id="ct-todas">7</div>
+      </button>
+      <button class="sb-item" id="sb-pendientes" onclick="showView('solicitudes');setFilter('pendiente',null)">
+        <i class="ti ti-clock"></i> Pendientes <div class="sb-ct ct-amber" id="ct-pend">4</div>
+      </button>
+      <button class="sb-item" id="sb-revision" onclick="showView('solicitudes');setFilter('revision',null)">
+        <i class="ti ti-alert-circle"></i> En revisión <div class="sb-ct ct-amber" id="ct-rev">1</div>
+      </button>
+      <button class="sb-item" id="sb-aprobadas" onclick="showView('solicitudes');setFilter('aprobado',null)">
+        <i class="ti ti-circle-check"></i> Aprobadas <div class="sb-ct ct-green" id="ct-apro">1</div>
+      </button>
+      <button class="sb-item" id="sb-rechazadas" onclick="showView('solicitudes');setFilter('rechazado',null)">
+        <i class="ti ti-circle-x"></i> Rechazadas <div class="sb-ct ct-red" id="ct-rech">1</div>
+      </button>
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Análisis</div>
-      <div class="sb-item"><i class="ti ti-chart-bar"></i> Reportes</div>
-      <div class="sb-item"><i class="ti ti-users"></i> Asociados</div>
-      <div class="sb-item"><i class="ti ti-shield-check"></i> Auditoría KYC</div>
-      <div class="sb-item"><i class="ti ti-brain"></i> Motor IA</div>
-      <div class="sb-item"><i class="ti ti-coin"></i> Cartera activa</div>
+      <button class="sb-item" id="sb-reportes" onclick="showView('reportes')">
+        <i class="ti ti-chart-bar"></i> Reportes
+      </button>
+      <button class="sb-item" id="sb-asociados" onclick="showView('asociados')">
+        <i class="ti ti-users"></i> Asociados
+      </button>
+      <button class="sb-item" id="sb-auditoria" onclick="showView('auditoria')">
+        <i class="ti ti-shield-check"></i> Auditoría KYC
+      </button>
+      <button class="sb-item" id="sb-motor" onclick="showView('motor')">
+        <i class="ti ti-brain"></i> Motor IA
+      </button>
+      <button class="sb-item" id="sb-cartera" onclick="showView('cartera')">
+        <i class="ti ti-coin"></i> Cartera activa
+      </button>
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Config.</div>
-      <div class="sb-item"><i class="ti ti-adjustments"></i> Parámetros</div>
-      <div class="sb-item"><i class="ti ti-lock"></i> Seguridad</div>
+      <button class="sb-item" id="sb-parametros" onclick="showView('parametros')">
+        <i class="ti ti-adjustments"></i> Parámetros
+      </button>
+      <button class="sb-item" id="sb-seguridad" onclick="showView('seguridad')">
+        <i class="ti ti-lock"></i> Seguridad
+      </button>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
-      <div class="av">MR</div>
-      <div><div class="uname">María Rodríguez</div><div class="urole">Analista de crédito</div></div>
+      <div class="av" id="sb-avatar">AN</div>
+      <div>
+        <div class="uname" id="sb-uname">Analista</div>
+        <div class="urole" id="sb-urole">Analista de Crédito</div>
+      </div>
     </div>
   </div>
 
@@ -327,75 +451,268 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 
     <!-- STATS BAR -->
     <div class="stats-bar">
-      <div class="stat active">
+      <div class="stat active" onclick="showView('solicitudes')">
         <div class="stat-l">Total hoy</div>
-        <div class="stat-v" id="sv-total">26</div>
+        <div class="stat-v" id="sv-total">7</div>
         <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>+8 vs ayer</div>
       </div>
-      <div class="stat">
+      <div class="stat" onclick="showView('solicitudes');setFilter('pendiente',null)">
         <div class="stat-l">Pendientes</div>
         <div class="stat-v" id="sv-pend" style="color:var(--amber3)">4</div>
         <div class="stat-d trend-n">Requieren acción</div>
       </div>
       <div class="stat">
         <div class="stat-l">Pre-aprobadas IA</div>
-        <div class="stat-v" id="sv-pre" style="color:var(--green2)">15</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>57.7% tasa</div>
+        <div class="stat-v" style="color:var(--green2)" id="sv-ia">5</div>
+        <div class="stat-d trend-n">Recomendaciones</div>
       </div>
       <div class="stat">
         <div class="stat-l">Rechazadas auto</div>
-        <div class="stat-v" style="color:var(--red2)">4</div>
-        <div class="stat-d trend-n">Riesgo alto</div>
+        <div class="stat-v" style="color:var(--red2)" id="sv-rech-ia">1</div>
+        <div class="stat-d trend-n">Riesgo alto IA</div>
       </div>
-      <div class="stat">
-        <div class="stat-l">Tiempo prom.</div>
-        <div class="stat-v" style="color:var(--blue2)">4.2m</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>vs 3 días anterior</div>
+      <div class="stat" onclick="showView('parametros')">
+        <div class="stat-l">Tasa mín. vigente</div>
+        <div class="stat-v" style="color:var(--blue2)">12.56%</div>
+        <div class="stat-d trend-n">Salud 1–2 años</div>
       </div>
-      <div class="stat">
-        <div class="stat-l">Monto COP</div>
-        <div class="stat-v">$184M</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>solicitado hoy</div>
+      <div class="stat" onclick="showView('cartera')">
+        <div class="stat-l">En cartera</div>
+        <div class="stat-v" id="sv-monto">$51M</div>
+        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>solicitado</div>
       </div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
+    <!-- VIEW CONTAINER -->
+    <div id="view-container">
 
-      <!-- LIST -->
-      <div class="list-panel">
-        <div class="list-toolbar">
-          <div class="search-wrap">
-            <div class="searchbox">
-              <i class="ti ti-search"></i>
-              <input type="text" placeholder="Buscar nombre, cédula, empresa..." id="search-inp" oninput="applyFilters()">
+      <!-- VISTA: SOLICITUDES -->
+      <div id="view-solicitudes" class="view-panel active">
+        <div class="list-panel">
+          <div class="list-toolbar">
+            <div class="search-wrap">
+              <div class="searchbox">
+                <i class="ti ti-search"></i>
+                <input type="text" placeholder="Buscar nombre, cédula, empresa..." id="search-inp" oninput="applyFilters()">
+              </div>
+              <button class="btn" style="padding:6px 10px" onclick="clearSearch()"><i class="ti ti-x" style="font-size:12px"></i></button>
             </div>
-            <div class="btn" style="padding:6px 10px" onclick="clearSearch()"><i class="ti ti-x" style="font-size:12px"></i></div>
+            <div class="filter-tabs" id="filter-tabs">
+              <button class="ftab active" onclick="setFilter('todas',this)">Todas</button>
+              <button class="ftab" onclick="setFilter('pendiente',this)">Pendientes</button>
+              <button class="ftab" onclick="setFilter('revision',this)">En revisión</button>
+              <button class="ftab" onclick="setFilter('aprobado',this)">Aprobadas</button>
+              <button class="ftab" onclick="setFilter('rechazado',this)">Rechazadas</button>
+            </div>
           </div>
-          <div class="filter-tabs" id="filter-tabs">
-            <div class="ftab active" onclick="setFilter('todas',this)">Todas</div>
-            <div class="ftab" onclick="setFilter('pendiente',this)">Pendientes</div>
-            <div class="ftab" onclick="setFilter('revision',this)">En revisión</div>
-            <div class="ftab" onclick="setFilter('aprobado',this)">Aprobadas</div>
-            <div class="ftab" onclick="setFilter('rechazado',this)">Rechazadas</div>
-          </div>
+          <div class="list-count" id="list-count">7 solicitudes · ordenadas por reciente</div>
+          <div class="list-scroll" id="req-list"></div>
         </div>
-        <div class="list-count" id="list-count">7 solicitudes · ordenadas por reciente</div>
-        <div class="list-scroll" id="req-list"></div>
+        <div class="detail-panel" id="detail-panel">
+          <div class="empty-state" id="empty-state">
+            <i class="ti ti-file-search"></i>
+            <p>Selecciona una solicitud para ver el análisis completo</p>
+          </div>
+          <div id="detail-body" style="display:none"></div>
+        </div>
       </div>
 
-      <!-- DETAIL -->
-      <div class="detail-panel" id="detail-panel">
-        <div class="empty-state" id="empty-state">
-          <i class="ti ti-file-search"></i>
-          <p>Selecciona una solicitud para ver el análisis completo</p>
+      <!-- VISTA: REPORTES -->
+      <div id="view-reportes" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-chart-bar"></i>Reportes de crédito</div>
+              <div class="view-subtitle">Resumen del período actual por línea de crédito</div>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir reporte</button>
+          </div>
+          <div class="grid-4" style="margin-bottom:20px" id="rpt-stats"></div>
+          <div class="fu-table-wrap" style="margin-bottom:20px">
+            <table class="fu-table">
+              <thead><tr>
+                <th>Línea de crédito</th><th>Solicitudes</th><th>Monto total</th>
+                <th>Pendientes</th><th>Aprobadas</th><th>Rechazadas</th><th>Tasa ref. EA</th>
+              </tr></thead>
+              <tbody id="rpt-tabla"></tbody>
+            </table>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title"><i class="ti ti-info-circle"></i>Nota</div>
+            <div class="info-card-body">Las tasas mostradas corresponden a un plazo de referencia de 24 meses. Consulta la vista <strong>Parámetros</strong> para ver la tabla completa de tasas vigentes por plazo y línea.</div>
+          </div>
         </div>
-        <div id="detail-body" style="display:none"></div>
       </div>
 
-    </div>
-  </div>
-</div>
+      <!-- VISTA: ASOCIADOS -->
+      <div id="view-asociados" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-users"></i>Asociados</div>
+              <div class="view-subtitle">Personas con solicitudes en el sistema</div>
+            </div>
+            <div class="searchbox" style="width:240px">
+              <i class="ti ti-search"></i>
+              <input type="text" placeholder="Buscar asociado..." id="asc-search" oninput="filterAsociados()">
+            </div>
+          </div>
+          <div class="fu-table-wrap">
+            <table class="fu-table">
+              <thead><tr>
+                <th>Nombre</th><th>Cédula</th><th>Empresa</th><th>Cargo</th>
+                <th>Score</th><th>Solicitudes</th><th>Estado</th><th></th>
+              </tr></thead>
+              <tbody id="asc-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: AUDITORÍA KYC -->
+      <div id="view-auditoria" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-shield-check"></i>Auditoría KYC</div>
+              <div class="view-subtitle">Registro de verificaciones de identidad y cumplimiento</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" onclick="filterKYC('all')">Todas</button>
+              <button class="btn btn-sm btn-ok" onclick="filterKYC('ok')">Solo OK</button>
+              <button class="btn btn-sm btn-ask" onclick="filterKYC('alerta')">Solo alertas</button>
+            </div>
+          </div>
+          <div class="fu-table-wrap">
+            <table class="fu-table">
+              <thead><tr>
+                <th>Solicitud</th><th>Asociado</th><th>Cédula OCR</th><th>RNEC</th>
+                <th>Liveness</th><th>Biometría</th><th>SARLAFT</th><th>UIAF</th><th>Resultado</th>
+              </tr></thead>
+              <tbody id="kyc-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: MOTOR IA -->
+      <div id="view-motor" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-brain"></i>Motor IA – Parámetros</div>
+              <div class="view-subtitle">Reglas del modelo de decisión automático</div>
+            </div>
+            <span class="badge b-green" style="font-size:10px;padding:4px 10px"><i class="ti ti-bolt" style="font-size:11px"></i> Activo v2.4</span>
+          </div>
+          <div class="grid-3" style="margin-bottom:20px">
+            <div class="cell"><div class="cl">Score mínimo aprobación</div><div class="cv good">650 pts</div><div class="cs">Por debajo → revisión manual</div></div>
+            <div class="cell"><div class="cl">Score rechazo automático</div><div class="cv bad">&lt; 550 pts</div><div class="cs">Requiere regularización</div></div>
+            <div class="cell"><div class="cl">% compromiso máximo</div><div class="cv warn">35%</div><div class="cs">Del ingreso neto mensual</div></div>
+            <div class="cell"><div class="cl">Moras activas</div><div class="cv bad">0 toleradas</div><div class="cs">Mora activa = rechazo automático</div></div>
+            <div class="cell"><div class="cl">Alertas SARLAFT</div><div class="cv warn">Revisión</div><div class="cs">Derivar a jefe de crédito</div></div>
+            <div class="cell"><div class="cl">Historial moras resueltas</div><div class="cv warn">> 6 meses</div><div class="cs">Mora resuelta aceptable si > 6m</div></div>
+          </div>
+          <div class="sec-title"><i class="ti ti-chart-pie"></i>Distribución de recomendaciones — sesión actual</div>
+          <div class="grid-3" style="margin-bottom:20px" id="ia-dist"></div>
+          <div class="fu-table-wrap">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted)">Detalle de recomendaciones emitidas</div>
+            <table class="fu-table">
+              <thead><tr><th>Solicitud</th><th>Asociado</th><th>Score</th><th>% Compromiso</th><th>SARLAFT</th><th>Recomendación IA</th></tr></thead>
+              <tbody id="ia-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: CARTERA ACTIVA -->
+      <div id="view-cartera" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-coin"></i>Cartera activa</div>
+              <div class="view-subtitle">Solicitudes aprobadas en el sistema</div>
+            </div>
+            <button class="btn btn-sm" onclick="showToast('Exportación próximamente disponible.','toast-blue','ti-download')">
+              <i class="ti ti-download"></i> Exportar
+            </button>
+          </div>
+          <div class="fu-table-wrap">
+            <table class="fu-table">
+              <thead><tr>
+                <th>Solicitud</th><th>Asociado</th><th>Línea</th><th>Monto</th>
+                <th>Plazo</th><th>Cuota</th><th>Tasa EA</th><th>Estado</th>
+              </tr></thead>
+              <tbody id="car-tabla"></tbody>
+            </table>
+          </div>
+          <div id="car-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
+            <i class="ti ti-inbox" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>
+            No hay solicitudes aprobadas aún
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: PARÁMETROS -->
+      <div id="view-parametros" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-adjustments"></i>Parámetros y tasas vigentes</div>
+              <div class="view-subtitle">Tabla oficial de tasas — FondoUne (actualización marzo 2026)</div>
+            </div>
+            <span class="badge b-blue" style="font-size:10px;padding:4px 10px">Solo lectura para analista</span>
+          </div>
+          <div class="fu-table-wrap" style="margin-bottom:16px">
+            <table class="fu-table">
+              <thead><tr><th>Línea de crédito</th><th>Plazo</th><th>Tasa E.A.</th><th>Tasa E.M. aprox.</th><th>Notas</th></tr></thead>
+              <tbody id="param-tabla"></tbody>
+            </table>
+          </div>
+          <div class="grid-2">
+            <div class="info-card">
+              <div class="info-card-title"><i class="ti ti-calculator"></i>SMMLV 2025</div>
+              <div class="info-card-body">
+                <strong style="color:var(--text);font-size:16px">$1.423.500</strong><br>
+                CrediExpress: hasta 5 SMMLV = <strong style="color:var(--gold2)">$7.117.500</strong><br>
+                Creditributo: hasta 20 SMMLV = <strong style="color:var(--gold2)">$28.470.000</strong>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title"><i class="ti ti-clock"></i>Horario de atención</div>
+              <div class="info-card-body">
+                Lunes a jueves: 7:00 a.m. – 5:00 p.m.<br>
+                Viernes: 7:00 a.m. – 3:00 p.m.<br>
+                <strong style="color:var(--text)">fondoune@fondoune.com</strong><br>
+                302 228 7890
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: SEGURIDAD -->
+      <div id="view-seguridad" class="view-panel">
+        <div class="view-scroll">
+          <div class="view-header">
+            <div>
+              <div class="view-title"><i class="ti ti-lock"></i>Registro de seguridad</div>
+              <div class="view-subtitle">Trazabilidad de acciones y decisiones en la sesión actual</div>
+            </div>
+            <span class="badge b-green" style="font-size:10px;padding:4px 10px"><i class="ti ti-shield-lock" style="font-size:11px"></i> Sesión activa</span>
+          </div>
+          <div class="fu-table-wrap">
+            <table class="fu-table">
+              <thead><tr><th>Hora</th><th>Usuario</th><th>Acción</th><th>Solicitud</th><th>Resultado</th></tr></thead>
+              <tbody id="seg-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-container -->
+  </div><!-- /main -->
+</div><!-- /layout -->
 
 <!-- MODAL -->
 <div class="overlay" id="modal-overlay" style="display:none">
@@ -413,201 +730,61 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────
-// Tasas vigentes Febrero 2025 — FONDOUNE
-const TASAS = {
-  'Libre inversión':    { ea: 14.03 },
-  'CrediExpress':       { ea: 14.03 },
-  'Educativo':          { ea: (m) => m<=12?13.73:m<=24?14.91:16.11 },
-  'Vivienda':           { ea: (m) => m<=120?13.73:16.11 },
-  'Salud':              { ea: (m) => m<=24?12.56:13.73 },
-  'Vehículos':          { ea: (m) => m<=36?16.11:18.55 },
-  'Vacacional':         { ea: 14.03 },
-  'Creditributo':       { ea: 13.73 },
-  'Solidario':          { ea: 12.56 },
-  'Especial':           { ea: (m) => m<=36?13.88:m<=60?16.00:17.04 },
-  'Crediprima':         { ea: 14.03 },
-};
+// ── SESIÓN ─────────────────────────────────────────────────────────
+let _usuario = { nombre:'Analista', iniciales:'AN', rol:'analista' };
 
-function getTasaEA(tipo, plazoMeses) {
-  const t = TASAS[tipo];
-  if (!t) return 14.03;
-  return typeof t.ea === 'function' ? t.ea(plazoMeses) : t.ea;
+function initSession() {
+  if (typeof FondouneSession !== 'undefined' && FondouneSession.isLoggedIn()) {
+    const u = FondouneSession.getUser();
+    _usuario.nombre    = u.name     || 'Analista';
+    _usuario.rol       = u.role     || 'analista';
+    _usuario.iniciales = u.initials ||
+      (u.name ? u.name.split(' ').filter(Boolean).slice(0,2).map(n=>n[0].toUpperCase()).join('') : 'AN');
+  }
+  const rolLabel = {analista:'Analista de Crédito',jefe_credito:'Jefe de Crédito',gerencia:'Gerencia'}[_usuario.rol] || 'Analista de Crédito';
+  document.getElementById('nav-initials').textContent = _usuario.iniciales;
+  document.getElementById('avatar-btn').title          = _usuario.nombre;
+  document.getElementById('ud-name').textContent        = _usuario.nombre;
+  document.getElementById('ud-role').textContent        = rolLabel;
+  document.getElementById('sb-avatar').textContent      = _usuario.iniciales;
+  document.getElementById('sb-uname').textContent       = _usuario.nombre;
+  document.getElementById('sb-urole').textContent       = rolLabel;
 }
 
+// ── DATOS ──────────────────────────────────────────────────────────
 const DATA = [
   {
     id:'SOL-2025-0847', nombre:'Carlos Andrés Gil', ced:'1.045.678.901',
     empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes', tiempo:'Hace 18 min', ts:'09:42',
-    monto:8000000, plazo:24, tipo:'Libre inversión', destino:'A voluntad del asociado',
+    monto:8000000, plazo:24, lineaId:'libre_inversion', tipo:'Libre Inversión',
+    destino:'Gastos personales — equipos del hogar',
     score:742, sp:82, riesgo:'bajo', estado:'pendiente',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:742,estado:'Sin novedad',obli:1,endeuda:1200000,comp:'Paga los primeros 5 días del mes'},
     nom:{bas:3800000,dev:4250000,ded:1100000,neto:3150000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:945000, cuota:391800, pct:30.4,
-    hist:'2 créditos previos · Pagados a tiempo · Sin moras',
-    rec:'APROBAR', col:'#3B82F6', ini:'CG',
-    log:[
-      {ts:'09:42',txt:'Solicitud recibida · Línea: Libre inversión · $8.000.000 / 24 meses',dot:'dot-blue'},
-      {ts:'09:42',txt:'KYC completado · Identidad verificada · Liveness OK',dot:'dot-green'},
-      {ts:'09:42',txt:'DataCrédito consultado · Score 742 · Sin novedad',dot:'dot-green'},
-      {ts:'09:43',txt:'Nómina Tigo-UNE leída por IA · Capacidad $945.000/mes · 30.4% compromiso',dot:'dot-green'},
-      {ts:'09:43',txt:'Tasa aplicable: 14.03% E.A. (tasa vigente Libre inversión 24 meses)',dot:'dot-blue'},
-      {ts:'09:43',txt:'Motor IA emite recomendación: <strong>APROBAR</strong>',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0846', nombre:'Valentina Ospina', ced:'1.152.445.230',
-    empresa:'Emtelco S.A.', cargo:'Asesora Call Center', tiempo:'Hace 42 min', ts:'09:18',
-    monto:5000000, plazo:18, tipo:'Educativo', destino:'Matrícula posgrado EAFIT',
-    score:811, sp:90, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:811,estado:'Sin novedad',obli:0,endeuda:0,comp:'Sin deudas activas · Historia limpia'},
-    nom:{bas:2800000,dev:3100000,ded:650000,neto:2450000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:857500, cuota:317400, pct:36.8,
-    hist:'Primer crédito con el fondo',
-    rec:'APROBAR', col:'#10B981', ini:'VO',
-    log:[
-      {ts:'09:18',txt:'Solicitud recibida · Línea: Educativo · Posgrado EAFIT',dot:'dot-blue'},
-      {ts:'09:19',txt:'KYC verificado exitosamente en todos los controles',dot:'dot-green'},
-      {ts:'09:19',txt:'Score 811 · Percentil 90 de la cartera del fondo',dot:'dot-green'},
-      {ts:'09:20',txt:'Tasa aplicable: 14.91% E.A. (Educativo 2 años — tabla Feb 2025)',dot:'dot-blue'},
-      {ts:'09:20',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Sin restricciones',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0845', nombre:'Jhon Fredy Morales', ced:'71.783.990.1',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Supervisor Regional', tiempo:'Hace 1 h', ts:'08:42',
-    monto:15000000, plazo:36, tipo:'Especial', destino:'Compra de cartera — tarjeta de crédito',
-    score:614, sp:68, riesgo:'medio', estado:'revision',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:614,estado:'Mora resuelta hace 8m',obli:3,endeuda:4800000,comp:'Mora ≤30 días resuelta hace 8 meses'},
-    nom:{bas:5200000,dev:6100000,ded:2900000,neto:3200000,lib:1800000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:320000, cuota:516800, pct:64.2,
-    hist:'1 crédito previo · Mora resuelta hace 8 meses',
-    rec:'REVISAR', col:'#F59E0B', ini:'JM',
-    log:[
-      {ts:'08:42',txt:'Solicitud recibida · Línea: Especial / Compra cartera · $15.000.000',dot:'dot-blue'},
-      {ts:'08:43',txt:'KYC verificado · Todos los controles OK',dot:'dot-green'},
-      {ts:'08:43',txt:'DataCrédito: Mora ≤30d resuelta hace 8 meses · Score 614',dot:'dot-amber'},
-      {ts:'08:44',txt:'Tasa aplicable: 13.88% E.A. (Especial 1-3 años — tabla Feb 2025)',dot:'dot-blue'},
-      {ts:'08:44',txt:'% compromiso ingreso supera el límite: 64.2% > 35%',dot:'dot-amber'},
-      {ts:'08:44',txt:'Motor IA: <strong>REVISAR</strong> · Requiere validación analista',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0844', nombre:'Sandra Patricia Ruiz', ced:'43.720.881.0',
-    empresa:'Emtelco S.A.', cargo:'Analista de Datos', tiempo:'Hace 2 h', ts:'07:55',
-    monto:3000000, plazo:12, tipo:'Salud', destino:'Cirugía no cubierta por POS',
-    score:756, sp:84, riesgo:'bajo', estado:'aprobado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:756,estado:'Sin novedad',obli:1,endeuda:900000,comp:'Excelente historial · Paga antes del vencimiento'},
-    nom:{bas:3200000,dev:3450000,ded:720000,neto:2730000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:955500, cuota:266100, pct:28.0,
-    hist:'3 créditos previos · Todos pagados a tiempo',
-    rec:'APROBAR', col:'#8B5CF6', ini:'SR',
-    log:[
-      {ts:'07:55',txt:'Solicitud recibida · Línea: Salud · Cirugía no cubierta por POS',dot:'dot-blue'},
-      {ts:'07:56',txt:'KYC completado exitosamente',dot:'dot-green'},
-      {ts:'07:56',txt:'Score 756 · Excelente historial interno',dot:'dot-green'},
-      {ts:'07:57',txt:'Tasa aplicable: 12.56% E.A. (Salud 1-2 años — mejor tasa del fondo)',dot:'dot-blue'},
-      {ts:'07:57',txt:'Motor IA: <strong>APROBAR</strong>',dot:'dot-gold'},
-      {ts:'08:10',txt:'<strong>Aprobado por analista</strong> · María Rodríguez',dot:'dot-green'},
-      {ts:'08:11',txt:'Pagaré electrónico enviado al módulo de firma · Pendiente firma asociada',dot:'dot-blue'},
-    ]
-  },
-  {
-    id:'SOL-2025-0843', nombre:'Rodrigo Alberto Ríos', ced:'98.610.441.5',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Ingeniero de Soporte', tiempo:'Hace 3 h', ts:'06:58',
-    monto:20000000, plazo:48, tipo:'Vehículos', destino:'Compra vehículo particular',
-    score:501, sp:55, riesgo:'alto', estado:'rechazado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'alerta',uiaf:'ok'},
-    dc:{score:501,estado:'Mora activa',obli:5,endeuda:12000000,comp:'3 reportes negativos activos · No apto'},
-    nom:{bas:4100000,dev:4500000,ded:3100000,neto:1400000,lib:2200000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:0, cuota:575600, pct:100,
-    hist:'Mora activa en centrales de riesgo · No apto',
-    rec:'RECHAZAR', col:'#EF4444', ini:'RR',
-    log:[
-      {ts:'06:58',txt:'Solicitud recibida · Línea: Vehículos · $20.000.000 / 48 meses',dot:'dot-blue'},
-      {ts:'06:59',txt:'Alerta SARLAFT detectada · Revisión adicional activada',dot:'dot-amber'},
-      {ts:'07:00',txt:'Score 501 · 3 obligaciones en mora activa · Tasa sería 18.55% E.A.',dot:'dot-red'},
-      {ts:'07:00',txt:'Capacidad de pago: negativa · Neto insuficiente para cuota',dot:'dot-red'},
-      {ts:'07:01',txt:'Motor IA: <strong>RECHAZAR</strong> automático · Riesgo alto',dot:'dot-red'},
-      {ts:'07:05',txt:'<strong>Rechazado por analista</strong> · Mora activa · Recomendado regularizar centrales primero',dot:'dot-red'},
-    ]
-  },
-  {
-    id:'SOL-2025-0842', nombre:'Luz Marina Cardona', ced:'32.540.117.8',
-    empresa:'Emtelco S.A.', cargo:'Coordinadora RRHH', tiempo:'Hace 4 h', ts:'05:50',
-    monto:10000000, plazo:24, tipo:'Vivienda', destino:'Mejoras y adecuaciones del hogar',
-    score:693, sp:77, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:693,estado:'Sin novedad',obli:2,endeuda:2200000,comp:'Buen comportamiento de pago'},
-    nom:{bas:4800000,dev:5200000,ded:1600000,neto:3600000,lib:500000,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:760000, cuota:489700, pct:43.3,
-    hist:'1 crédito previo · Al día · Sin novedades',
-    rec:'REVISAR', col:'#06B6D4', ini:'LC',
-    log:[
-      {ts:'05:50',txt:'Solicitud recibida · Línea: Vivienda · Mejoras del hogar',dot:'dot-blue'},
-      {ts:'05:51',txt:'KYC completado · Identidad verificada',dot:'dot-green'},
-      {ts:'05:52',txt:'Score 693 · Dentro del rango aprobable',dot:'dot-green'},
-      {ts:'05:52',txt:'Tasa aplicable: 13.73% E.A. (Vivienda 1-10 años — tabla Feb 2025)',dot:'dot-blue'},
-      {ts:'05:52',txt:'% compromiso: 43.3% · Supera límite estándar del 35%',dot:'dot-amber'},
-      {ts:'05:53',txt:'Motor IA: <strong>REVISAR</strong> · Analista debe evaluar excepción de plazo',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0841', nombre:'Mauricio Estrada', ced:'70.561.228.3',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Director Comercial', tiempo:'Hace 5 h', ts:'04:42',
-    monto:25000000, plazo:48, tipo:'Libre inversión', destino:'A voluntad del asociado',
-    score:878, sp:97, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:878,estado:'Excelente',obli:1,endeuda:3000000,comp:'Siempre paga anticipado · Percentil 97'},
-    nom:{bas:9500000,dev:11200000,ded:2800000,neto:8400000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:2940000, cuota:660100, pct:22.5,
-    hist:'5 créditos previos · Récord impecable',
-    rec:'APROBAR', col:'#D4A843', ini:'ME',
-    log:[
-      {ts:'04:42',txt:'Solicitud recibida · Línea: Libre inversión · $25.000.000 / 48 meses',dot:'dot-blue'},
-      {ts:'04:43',txt:'KYC verificado · Sin anomalías',dot:'dot-green'},
-      {ts:'04:43',txt:'Score 878 · Top 3% de la cartera del fondo',dot:'dot-green'},
-      {ts:'04:44',txt:'Tasa aplicable: 14.03% E.A. · Capacidad $2.940.000/mes · Amplio margen',dot:'dot-green'},
-      {ts:'04:44',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Perfil VIP',dot:'dot-gold'},
-    ]
-  },
-];
-  {
-    id:'SOL-2025-0847', nombre:'Carlos Andrés Gil', ced:'1.045.678.901',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes', tiempo:'Hace 18 min', ts:'09:42',
-    monto:8000000, plazo:24, tipo:'Consumo', destino:'Gastos personales',
-    score:742, sp:82, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:742,estado:'Sin novedad',obli:1,endeuda:1200000,comp:'Paga los primeros 5 días del mes'},
-    nom:{bas:3800000,dev:4250000,ded:1100000,neto:3150000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:945000, cuota:391800, pct:30.4,
     hist:'2 créditos previos · Pagados a tiempo · Sin moras',
     rec:'APROBAR', col:'#3B82F6', ini:'CG',
     log:[
       {ts:'09:42',txt:'Solicitud recibida y validada por el sistema',dot:'dot-blue'},
       {ts:'09:42',txt:'KYC completado · Identidad verificada · Liveness OK',dot:'dot-green'},
       {ts:'09:42',txt:'DataCrédito consultado · Score 742 · Sin novedad',dot:'dot-green'},
-      {ts:'09:43',txt:'Nómina leída por IA · Capacidad $945.000/mes confirmada',dot:'dot-green'},
+      {ts:'09:43',txt:'Nómina leída por IA · Capacidad confirmada',dot:'dot-green'},
       {ts:'09:43',txt:'Motor IA emite recomendación: <strong>APROBAR</strong>',dot:'dot-gold'},
     ]
   },
   {
     id:'SOL-2025-0846', nombre:'Valentina Ospina', ced:'1.152.445.230',
     empresa:'Emtelco S.A.', cargo:'Asesora Call Center', tiempo:'Hace 42 min', ts:'09:18',
-    monto:5000000, plazo:18, tipo:'Educativo', destino:'Posgrado EAFIT',
+    monto:5000000, plazo:18, lineaId:'educativo', tipo:'Educativo',
+    destino:'Matrícula posgrado — Universidad EAFIT',
     score:811, sp:90, riesgo:'bajo', estado:'pendiente',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:811,estado:'Sin novedad',obli:0,endeuda:0,comp:'Sin deudas activas · Historia limpia'},
     nom:{bas:2800000,dev:3100000,ded:650000,neto:2450000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:857500, cuota:317400, pct:36.8,
     hist:'Primer crédito con el fondo',
     rec:'APROBAR', col:'#10B981', ini:'VO',
     log:[
-      {ts:'09:18',txt:'Solicitud recibida · Tipo: Educativo',dot:'dot-blue'},
+      {ts:'09:18',txt:'Solicitud recibida · Línea: Educativo',dot:'dot-blue'},
       {ts:'09:19',txt:'KYC verificado exitosamente en todos los controles',dot:'dot-green'},
       {ts:'09:19',txt:'Score 811 · Por encima del percentil 85 de la cartera',dot:'dot-green'},
       {ts:'09:20',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Sin restricciones',dot:'dot-gold'},
@@ -616,122 +793,169 @@ const DATA = [
   {
     id:'SOL-2025-0845', nombre:'Jhon Fredy Morales', ced:'71.783.990.1',
     empresa:'Tigo-UNE S.A.S.', cargo:'Supervisor Regional', tiempo:'Hace 1 h', ts:'08:42',
-    monto:15000000, plazo:36, tipo:'Consumo', destino:'Consolidación deudas',
+    monto:15000000, plazo:36, lineaId:'especial', tipo:'Especial',
+    destino:'Compra de cartera — consolidación deudas financieras',
     score:614, sp:68, riesgo:'medio', estado:'revision',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:614,estado:'Mora resuelta hace 8m',obli:3,endeuda:4800000,comp:'Mora ≤30 días resuelta hace 8 meses'},
     nom:{bas:5200000,dev:6100000,ded:2900000,neto:3200000,lib:1800000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:320000, cuota:516800, pct:64.2,
     hist:'1 crédito previo · Mora resuelta hace 8 meses',
     rec:'REVISAR', col:'#F59E0B', ini:'JM',
     log:[
-      {ts:'08:42',txt:'Solicitud recibida',dot:'dot-blue'},
+      {ts:'08:42',txt:'Solicitud recibida · Línea: Especial (compra cartera)',dot:'dot-blue'},
       {ts:'08:43',txt:'KYC verificado · Todos los controles OK',dot:'dot-green'},
       {ts:'08:43',txt:'DataCrédito: Mora ≤30d resuelta hace 8 meses · Score 614',dot:'dot-amber'},
-      {ts:'08:44',txt:'% compromiso ingreso supera el límite: 64.2% > 35%',dot:'dot-amber'},
+      {ts:'08:44',txt:'% compromiso ingreso supera el límite permitido',dot:'dot-amber'},
       {ts:'08:44',txt:'Motor IA: <strong>REVISAR</strong> · Requiere validación analista',dot:'dot-amber'},
     ]
   },
   {
     id:'SOL-2025-0844', nombre:'Sandra Patricia Ruiz', ced:'43.720.881.0',
     empresa:'Emtelco S.A.', cargo:'Analista de Datos', tiempo:'Hace 2 h', ts:'07:55',
-    monto:3000000, plazo:12, tipo:'Emergencia médica', destino:'Cirugía familiar',
+    monto:3000000, plazo:24, lineaId:'salud', tipo:'Salud',
+    destino:'Cirugía no cubierta por POS — familiar',
     score:756, sp:84, riesgo:'bajo', estado:'aprobado',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:756,estado:'Sin novedad',obli:1,endeuda:900000,comp:'Excelente historial · Paga antes del vencimiento'},
     nom:{bas:3200000,dev:3450000,ded:720000,neto:2730000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:955500, cuota:266100, pct:28.0,
     hist:'3 créditos previos · Todos pagados a tiempo',
     rec:'APROBAR', col:'#8B5CF6', ini:'SR',
     log:[
-      {ts:'07:55',txt:'Solicitud recibida · Tipo: Emergencia médica',dot:'dot-blue'},
+      {ts:'07:55',txt:'Solicitud recibida · Línea: Salud',dot:'dot-blue'},
       {ts:'07:56',txt:'KYC completado exitosamente',dot:'dot-green'},
       {ts:'07:56',txt:'Score 756 · Excelente historial interno',dot:'dot-green'},
       {ts:'07:57',txt:'Motor IA: <strong>APROBAR</strong>',dot:'dot-gold'},
-      {ts:'08:10',txt:'<strong>Aprobado por analista</strong> · María Rodríguez',dot:'dot-green'},
+      {ts:'08:10',txt:'<strong>Aprobado por analista</strong>',dot:'dot-green'},
       {ts:'08:11',txt:'Pagaré electrónico enviado · Pendiente firma asociada',dot:'dot-blue'},
     ]
   },
   {
     id:'SOL-2025-0843', nombre:'Rodrigo Alberto Ríos', ced:'98.610.441.5',
     empresa:'Tigo-UNE S.A.S.', cargo:'Ingeniero de Soporte', tiempo:'Hace 3 h', ts:'06:58',
-    monto:20000000, plazo:48, tipo:'Consumo', destino:'Vehículo',
+    monto:20000000, plazo:60, lineaId:'vehiculos', tipo:'Vehículos',
+    destino:'Compra de vehículo — modelo 2024',
     score:501, sp:55, riesgo:'alto', estado:'rechazado',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'alerta',uiaf:'ok'},
     dc:{score:501,estado:'Mora activa',obli:5,endeuda:12000000,comp:'3 reportes negativos activos · No apto'},
     nom:{bas:4100000,dev:4500000,ded:3100000,neto:1400000,lib:2200000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:0, cuota:575600, pct:100,
     hist:'Mora activa en centrales de riesgo · No apto',
     rec:'RECHAZAR', col:'#EF4444', ini:'RR',
     log:[
-      {ts:'06:58',txt:'Solicitud recibida',dot:'dot-blue'},
+      {ts:'06:58',txt:'Solicitud recibida · Línea: Vehículos',dot:'dot-blue'},
       {ts:'06:59',txt:'Alerta SARLAFT detectada · Revisión adicional activada',dot:'dot-amber'},
       {ts:'07:00',txt:'Score 501 · 3 obligaciones en mora activa',dot:'dot-red'},
-      {ts:'07:00',txt:'Capacidad de pago: negativa · Neto insuficiente para cuota',dot:'dot-red'},
+      {ts:'07:00',txt:'Capacidad de pago negativa · Neto insuficiente',dot:'dot-red'},
       {ts:'07:01',txt:'Motor IA: <strong>RECHAZAR</strong> automático · Riesgo alto',dot:'dot-red'},
-      {ts:'07:05',txt:'<strong>Rechazado por analista</strong> · Mora activa no superable · Recomendado regularizar primero',dot:'dot-red'},
+      {ts:'07:05',txt:'<strong>Rechazado por analista</strong> · Mora activa · Regularizar primero',dot:'dot-red'},
     ]
   },
   {
     id:'SOL-2025-0842', nombre:'Luz Marina Cardona', ced:'32.540.117.8',
     empresa:'Emtelco S.A.', cargo:'Coordinadora RRHH', tiempo:'Hace 4 h', ts:'05:50',
-    monto:10000000, plazo:24, tipo:'Vivienda', destino:'Mejoras del hogar',
+    monto:10000000, plazo:60, lineaId:'vivienda', tipo:'Vivienda',
+    destino:'Mejoras y adecuaciones del hogar — construcción lote propio',
     score:693, sp:77, riesgo:'bajo', estado:'pendiente',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:693,estado:'Sin novedad',obli:2,endeuda:2200000,comp:'Buen comportamiento de pago'},
     nom:{bas:4800000,dev:5200000,ded:1600000,neto:3600000,lib:500000,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:760000, cuota:489700, pct:43.3,
     hist:'1 crédito previo · Al día · Sin novedades',
     rec:'REVISAR', col:'#06B6D4', ini:'LC',
     log:[
-      {ts:'05:50',txt:'Solicitud recibida · Tipo: Vivienda',dot:'dot-blue'},
+      {ts:'05:50',txt:'Solicitud recibida · Línea: Vivienda',dot:'dot-blue'},
       {ts:'05:51',txt:'KYC completado · Identidad verificada',dot:'dot-green'},
       {ts:'05:52',txt:'Score 693 · Dentro del rango aprobable',dot:'dot-green'},
-      {ts:'05:52',txt:'% compromiso: 43.3% · Supera límite estándar del 35%',dot:'dot-amber'},
+      {ts:'05:52',txt:'% compromiso: supera límite estándar del 35%',dot:'dot-amber'},
       {ts:'05:53',txt:'Motor IA: <strong>REVISAR</strong> · Analista debe evaluar excepciones',dot:'dot-amber'},
     ]
   },
   {
     id:'SOL-2025-0841', nombre:'Mauricio Estrada', ced:'70.561.228.3',
     empresa:'Tigo-UNE S.A.S.', cargo:'Director Comercial', tiempo:'Hace 5 h', ts:'04:42',
-    monto:25000000, plazo:48, tipo:'Libranza especial', destino:'Inversión personal',
+    monto:25000000, plazo:48, lineaId:'libre_inversion', tipo:'Libre Inversión',
+    destino:'Inversión personal — capital de trabajo',
     score:878, sp:97, riesgo:'bajo', estado:'pendiente',
     kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
     dc:{score:878,estado:'Excelente',obli:1,endeuda:3000000,comp:'Siempre paga anticipado · Percentil 97'},
     nom:{bas:9500000,dev:11200000,ded:2800000,neto:8400000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:2940000, cuota:660100, pct:22.5,
     hist:'5 créditos previos · Récord impecable',
     rec:'APROBAR', col:'#D4A843', ini:'ME',
     log:[
       {ts:'04:42',txt:'Solicitud recibida · Monto alto: $25.000.000',dot:'dot-blue'},
       {ts:'04:43',txt:'KYC verificado · Sin anomalías',dot:'dot-green'},
       {ts:'04:43',txt:'Score 878 · Top 3% de la cartera del fondo',dot:'dot-green'},
-      {ts:'04:44',txt:'Capacidad de pago $2.94M/mes · Amplio margen',dot:'dot-green'},
+      {ts:'04:44',txt:'Amplio margen de capacidad de pago',dot:'dot-green'},
       {ts:'04:44',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Perfil VIP',dot:'dot-gold'},
     ]
   },
 ];
 
+// Log de seguridad de la sesión
+const SEG_LOG = [
+  {hora:'04:42',usuario:null,accion:'Ingreso al sistema',sol:'—',res:'OK'},
+  {hora:'04:42',usuario:null,accion:'Vista solicitud SOL-2025-0841',sol:'SOL-2025-0841',res:'Lectura'},
+  {hora:'07:05',usuario:null,accion:'Rechazo confirmado',sol:'SOL-2025-0843',res:'Rechazado'},
+  {hora:'08:10',usuario:null,accion:'Aprobación confirmada',sol:'SOL-2025-0844',res:'Aprobado'},
+];
+
 let currentFilter='todas', currentSearch='', selectedId=null;
 let pendingAction=null, pendingSolId=null;
+let notifCount = 0;
+const NOTIFS = [];
 
-const fmt = n => '$'+n.toLocaleString('es-CO');
+const fmt = n => '$'+Math.round(n).toLocaleString('es-CO');
 
-// ── FILTERS ──────────────────────────────────────────
+// ── VISTA SISTEMA ──────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view-panel').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  const panel = document.getElementById('view-' + name);
+  if (panel) {
+    panel.classList.add('active');
+    panel.style.display = 'flex';
+  }
+  // Sidebar active
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const sbKeys = {
+    solicitudes:'sb-solicitudes', pendientes:'sb-pendientes', revision:'sb-revision',
+    aprobadas:'sb-aprobadas', rechazadas:'sb-rechazadas',
+    reportes:'sb-reportes', asociados:'sb-asociados', auditoria:'sb-auditoria',
+    motor:'sb-motor', cartera:'sb-cartera', parametros:'sb-parametros', seguridad:'sb-seguridad'
+  };
+  const sbEl = document.getElementById(sbKeys[name] || 'sb-solicitudes');
+  if (sbEl) sbEl.classList.add('active');
+  // Lazy build views
+  const builders = {
+    reportes: buildReportes, asociados: buildAsociados, auditoria: buildAuditoria,
+    motor: buildMotor, cartera: buildCartera, parametros: buildParametros, seguridad: buildSeguridad
+  };
+  if (builders[name]) builders[name]();
+}
+
+// ── TASAS REALES ───────────────────────────────────────────────────
+function getSim(s) {
+  if (typeof FondouneCreditos !== 'undefined') {
+    const sim = FondouneCreditos.simularCredito(s.lineaId, s.monto, s.plazo, s.nom.neto);
+    if (sim) return sim;
+  }
+  // Fallback si no cargó creditos-config.js
+  const tasaEM = 0.011;
+  const cuota  = Math.round(s.monto * (tasaEM * Math.pow(1+tasaEM,s.plazo)) / (Math.pow(1+tasaEM,s.plazo)-1));
+  return { tasaEA:'16.11% E.A.', tasaEM:'1.1% E.M.', cuota, pctCompromiso:((cuota/s.nom.neto)*100).toFixed(1), capacidadOk:cuota/s.nom.neto<=0.35 };
+}
+
+// ── FILTROS ────────────────────────────────────────────────────────
 function setFilter(f, el) {
   currentFilter = f;
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  // sync sidebar
-  document.querySelectorAll('.sb-item').forEach(i=>{
-    i.classList.remove('active');
-    const txt = i.textContent.trim().toLowerCase();
-    if(f==='todas'&&txt.startsWith('todas')) i.classList.add('active');
-    if(f==='pendiente'&&txt.startsWith('pendiente')) i.classList.add('active');
-    if(f==='revision'&&txt.startsWith('en revisión')) i.classList.add('active');
-    if(f==='aprobado'&&txt.startsWith('aprobadas')) i.classList.add('active');
-    if(f==='rechazado'&&txt.startsWith('rechazadas')) i.classList.add('active');
-  });
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.ftab').forEach(t => {
+      const map = {todas:'Todas',pendiente:'Pendientes',revision:'En revisión',aprobado:'Aprobadas',rechazado:'Rechazadas'};
+      if (t.textContent.trim() === (map[f]||'')) t.classList.add('active');
+    });
+  }
   applyFilters();
 }
 
@@ -750,11 +974,11 @@ function applyFilters() {
 }
 
 function clearSearch() {
-  document.getElementById('search-inp').value='';
+  document.getElementById('search-inp').value = '';
   applyFilters();
 }
 
-// ── RENDER LIST ───────────────────────────────────────
+// ── RENDER LISTA ───────────────────────────────────────────────────
 function renderList(data) {
   const c = document.getElementById('req-list');
   c.innerHTML = '';
@@ -762,10 +986,10 @@ function renderList(data) {
     `${data.length} solicitud${data.length!==1?'es':''} · ordenadas por reciente`;
 
   data.forEach(s => {
+    const sim  = getSim(s);
     const card = document.createElement('div');
     card.className = 'rcard' + (s.id===selectedId?' sel':'');
     card.onclick = () => selectSol(s.id);
-
     const eB = {
       pendiente:'<span class="badge b-amber">● Pendiente</span>',
       revision: '<span class="badge b-amber">⚠ En revisión</span>',
@@ -778,7 +1002,8 @@ function renderList(data) {
       RECHAZAR:'<span class="badge b-red">IA: Rechazar</span>',
     }[s.rec]||'';
     const sc = s.score>=700?'var(--green2)':s.score>=600?'var(--amber3)':'var(--red2)';
-
+    const linNombre = (typeof FondouneCreditos!=='undefined' && FondouneCreditos.getLinea(s.lineaId))
+      ? FondouneCreditos.getLinea(s.lineaId).nombre : s.tipo;
     card.innerHTML = `
       <div class="rc-row1">
         <div class="rc-av" style="background:${s.col}20;color:${s.col}">${s.ini}</div>
@@ -788,7 +1013,7 @@ function renderList(data) {
         </div>
         <div class="rc-ago">${s.tiempo}</div>
       </div>
-      <div class="rc-monto">${fmt(s.monto)} <span style="font-size:11px;color:var(--muted);font-weight:400">${s.plazo}m · ${s.tipo}</span></div>
+      <div class="rc-monto">${fmt(s.monto)} <span style="font-size:11px;color:var(--muted);font-weight:400">${s.plazo}m · ${linNombre}</span></div>
       <div class="rc-tags">
         ${eB}${rB}
         <div class="rc-score-chip" style="margin-left:auto">
@@ -798,61 +1023,75 @@ function renderList(data) {
       </div>`;
     c.appendChild(card);
   });
-
   updateCounts();
 }
 
 function updateCounts() {
   const count = f => DATA.filter(s=>s.estado===f).length;
+  const total = DATA.reduce((a,s)=>a+s.monto,0);
   document.getElementById('ct-todas').textContent = DATA.length;
   document.getElementById('ct-pend').textContent  = count('pendiente');
   document.getElementById('ct-rev').textContent   = count('revision');
   document.getElementById('ct-apro').textContent  = count('aprobado');
   document.getElementById('ct-rech').textContent  = count('rechazado');
   document.getElementById('sv-pend').textContent  = count('pendiente');
+  document.getElementById('sv-total').textContent = DATA.length;
+  document.getElementById('sv-ia').textContent    = DATA.filter(s=>s.rec==='APROBAR').length;
+  document.getElementById('sv-rech-ia').textContent = DATA.filter(s=>s.rec==='RECHAZAR').length;
+  document.getElementById('sv-monto').textContent = '$'+Math.round(total/1000000)+'M';
 }
 
-// ── SELECT ────────────────────────────────────────────
+// ── SELECCIONAR SOLICITUD ──────────────────────────────────────────
 function selectSol(id) {
   selectedId = id;
   const s = DATA.find(x=>x.id===id);
-  if(!s) return;
+  if (!s) return;
   applyFilters();
-  document.getElementById('empty-state').style.display='none';
+  document.getElementById('empty-state').style.display = 'none';
   const db = document.getElementById('detail-body');
-  db.style.display='block';
+  db.style.display = 'block';
   db.innerHTML = buildDetail(s);
-  // Animate bars after render
   setTimeout(() => {
-    const gf=document.getElementById('gf-'+id);   if(gf) gf.style.width=s.sp+'%';
-    const cf=document.getElementById('cf-'+id);   if(cf) cf.style.width=Math.min(Math.max((s.cap/s.nom.neto)*100,0),100)+'%';
-    const pf=document.getElementById('pf-'+id);   if(pf) pf.style.width=Math.min(s.pct,100)+'%';
-    const cvf=document.getElementById('cvf-'+id); if(cvf) cvf.style.width=Math.min((s.cuota/s.nom.neto)*100,100)+'%';
-  }, 100);
+    const sim = getSim(s);
+    const gf = document.getElementById('gf-'+id);   if(gf) gf.style.width=s.sp+'%';
+    const pf = document.getElementById('pf-'+id);
+    if (pf) pf.style.width = Math.min(parseFloat(sim.pctCompromiso)||0, 100)+'%';
+    const cvf = document.getElementById('cvf-'+id);
+    if (cvf) cvf.style.width = Math.min((sim.cuota/(s.nom.neto||1))*100, 100)+'%';
+    const cf = document.getElementById('cf-'+id);
+    const cap = s.nom.neto - sim.cuota - s.nom.lib;
+    if (cf) cf.style.width = Math.min(Math.max((cap/(s.nom.neto||1))*100, 0), 100)+'%';
+  }, 120);
+  // Log seguridad
+  addSegLog('Vista solicitud '+id, id, 'Lectura');
 }
 
-// ── BUILD DETAIL ──────────────────────────────────────
+// ── BUILD DETAIL ───────────────────────────────────────────────────
 function buildDetail(s) {
-  const canAct = s.estado!=='aprobado' && s.estado!=='rechazado';
-  const rColor = {bajo:'var(--green2)',medio:'var(--amber3)',alto:'var(--red2)'}[s.riesgo];
-  const rLabel = {bajo:'Riesgo bajo',medio:'Riesgo medio',alto:'Riesgo alto'}[s.riesgo];
-  const pcColor = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber3)':'var(--red2)';
-  const pcBarCol = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber2)':'var(--red2)';
-  const capColor = s.cap>0?'var(--green2)':'var(--red2)';
-  const capBarCol = s.cap>0?'var(--green2)':'var(--red2)';
+  const sim     = getSim(s);
+  const canAct  = s.estado!=='aprobado' && s.estado!=='rechazado';
+  const rColor  = {bajo:'var(--green2)',medio:'var(--amber3)',alto:'var(--red2)'}[s.riesgo];
+  const rLabel  = {bajo:'Riesgo bajo',medio:'Riesgo medio',alto:'Riesgo alto'}[s.riesgo];
+  const pcColor = parseFloat(sim.pctCompromiso)<=35?'var(--green2)':parseFloat(sim.pctCompromiso)<=50?'var(--amber3)':'var(--red2)';
+  const pcBarC  = parseFloat(sim.pctCompromiso)<=35?'var(--green2)':parseFloat(sim.pctCompromiso)<=50?'var(--amber2)':'var(--red2)';
+  const cap     = s.nom.neto - sim.cuota - s.nom.lib;
+  const capColor= cap>0?'var(--green2)':'var(--red2)';
 
-  const kycR = (label,field,extra) => {
+  const linea = (typeof FondouneCreditos!=='undefined') ? FondouneCreditos.getLinea(s.lineaId) : null;
+  const lineaLabel = linea ? linea.nombre : s.tipo;
+  const lineaColor = linea ? linea.color  : s.col;
+
+  const kycR = (label,field) => {
     const v=s.kyc[field];
     const cls=v==='ok'?'ok':v==='alerta'?'warn':'fail';
     const ic=v==='ok'?'ti-check':v==='alerta'?'ti-alert-triangle':'ti-x';
-    const txt=v==='ok'?'Verificado':v==='alerta'?'Alerta detectada':'Fallo';
-    const rowCls=v==='alerta'?' warn-row':'';
-    return `<div class="krow${rowCls}"><div class="k-ico k-${cls}"><i class="ti ${ic}"></i></div><div class="k-nm">${label}</div><div class="k-res ${cls}">${txt}${extra?` · ${extra}`:''}</div></div>`;
+    const txt=v==='ok'?'Verificado':v==='alerta'?'Alerta':' Fallo';
+    return `<div class="krow${v==='alerta'?' warn-row':''}"><div class="k-ico k-${cls}"><i class="ti ${ic}"></i></div><div class="k-nm">${label}</div><div class="k-res ${cls}">${txt}</div></div>`;
   };
 
   const riskSegs = () => {
-    const n=10,f=s.riesgo==='bajo'?3:s.riesgo==='medio'?6:9;
-    const fc=s.riesgo==='bajo'?'rb-green':s.riesgo==='medio'?'rb-amber':'rb-red';
+    const n=10,f={bajo:3,medio:6,alto:9}[s.riesgo];
+    const fc={bajo:'rb-green',medio:'rb-amber',alto:'rb-red'}[s.riesgo];
     return Array.from({length:n},(_,i)=>`<div class="rb-seg ${i<f?fc:''}"></div>`).join('');
   };
 
@@ -868,10 +1107,8 @@ function buildDetail(s) {
 
   return `
 <div class="detail-body">
-
-  <!-- HEADER -->
   <div class="dhead">
-    <div class="d-av" style="background:${s.col}20;color:${s.col}">${s.ini}</div>
+    <div class="d-av" style="background:${lineaColor}20;color:${lineaColor}">${s.ini}</div>
     <div style="flex:1;min-width:0">
       <div class="d-nm">${s.nombre}</div>
       <div class="d-meta">
@@ -882,36 +1119,32 @@ function buildDetail(s) {
       </div>
       <div class="d-badges">
         <span class="badge b-muted" style="font-family:'IBM Plex Mono',monospace">${s.id}</span>
-        <span class="badge" style="background:${s.col}15;color:${s.col}">${rLabel.toUpperCase()}</span>
+        <span class="badge" style="background:${lineaColor}15;color:${lineaColor}">${lineaLabel.toUpperCase()}</span>
         <span class="badge b-muted">${s.ts}</span>
       </div>
     </div>
     <div class="d-actions">${actionBtns}</div>
   </div>
 
-  <!-- SOLICITUD -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-currency-dollar"></i>Datos de la solicitud</div>
     <div class="grid-4">
-      <div class="cell"><div class="cl">Monto</div><div class="cv mono">${fmt(s.monto)}</div></div>
+      <div class="cell"><div class="cl">Monto solicitado</div><div class="cv mono">${fmt(s.monto)}</div></div>
       <div class="cell"><div class="cl">Plazo</div><div class="cv">${s.plazo} meses</div></div>
-      <div class="cell"><div class="cl">Tipo de crédito</div><div class="cv">${s.tipo}</div></div>
-      <div class="cell"><div class="cl">Cuota estimada</div><div class="cv mono" style="color:var(--gold2)">${fmt(s.cuota)}</div><div class="cs">Tasa 1.1% E.M.</div></div>
+      <div class="cell"><div class="cl">Línea de crédito</div><div class="cv" style="color:${lineaColor}">${lineaLabel}</div></div>
+      <div class="cell"><div class="cl">Cuota estimada</div><div class="cv mono" style="color:var(--gold2)">${fmt(sim.cuota)}</div><div class="cs">${sim.tasaEA} · ${sim.tasaEM}</div></div>
     </div>
     <div class="cell" style="margin-top:8px"><div class="cl">Destino declarado</div><div class="cv" style="font-size:12px">${s.destino}</div></div>
+    ${linea && linea.destinacion ? `<div class="gauge-info" style="margin-top:8px"><i class="ti ti-check-circle" style="font-size:12px;color:var(--green2)"></i>&nbsp;Destino válido para línea ${lineaLabel}: ${linea.destinacion.slice(0,2).join(' · ')}</div>` : ''}
   </div>
 
-  <!-- SCORE + KYC -->
   <div class="grid-2" style="margin-bottom:18px">
-
     <div>
       <div class="sec-title"><i class="ti ti-chart-bar"></i>Score DataCrédito</div>
       <div class="gauge-card">
         <div class="gauge-top">
           <div><div class="gauge-num">${s.score}</div><div class="gauge-sub">sobre 900 puntos</div></div>
-          <div class="gauge-status">
-            <div class="badge ${s.score>=700?'b-green':s.score>=600?'b-amber':'b-red'}" style="font-size:11px;padding:4px 9px">${s.dc.estado}</div>
-          </div>
+          <div><div class="badge ${s.score>=700?'b-green':s.score>=600?'b-amber':'b-red'}" style="font-size:11px;padding:4px 9px">${s.dc.estado}</div></div>
         </div>
         <div class="gauge-bar"><div class="gauge-fill" id="gf-${s.id}"></div></div>
         <div class="gauge-marks"><span>300</span><span>500</span><span>700</span><span>900</span></div>
@@ -919,16 +1152,15 @@ function buildDetail(s) {
           <div class="cell"><div class="cl">Obligaciones activas</div><div class="cv">${s.dc.obli}</div></div>
           <div class="cell"><div class="cl">Endeudamiento actual</div><div class="cv mono">${fmt(s.dc.endeuda)}</div></div>
         </div>
-        <div class="gauge-info"><i class="ti ti-clock" style="font-size:12px"></i> ${s.dc.comp}</div>
+        <div class="gauge-info">${s.dc.comp}</div>
       </div>
     </div>
-
     <div>
       <div class="sec-title"><i class="ti ti-shield-check"></i>Verificación KYC · 6 controles</div>
       <div class="kyc-list">
         ${kycR('Cédula — OCR & validación','cedula')}
         ${kycR('RNEC — Registraduría Nacional','rnec')}
-        ${kycR('Liveness activo biométrico','liveness','99.3% match')}
+        ${kycR('Liveness activo biométrico','liveness')}
         ${kycR('Match facial vs documento','biometria')}
         ${kycR('Listas SARLAFT Colombia','sarlaft')}
         ${kycR('UIAF / OFAC / ONU','uiaf')}
@@ -936,7 +1168,6 @@ function buildDetail(s) {
     </div>
   </div>
 
-  <!-- NÓMINA -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-file-invoice"></i>Análisis de nómina — ${s.nom.emp} · ${s.nom.per} <span class="badge b-green" style="margin-left:4px">Leída por IA</span></div>
     <div class="grid-4" style="margin-bottom:12px">
@@ -946,26 +1177,23 @@ function buildDetail(s) {
       <div class="cell"><div class="cl">Neto pagado</div><div class="cv mono ${s.nom.neto>2000000?'good':'bad'}">${fmt(s.nom.neto)}</div></div>
     </div>
     <div class="pbar-row">
-      <div class="pbar-top"><span class="pbar-lbl">Disponible para nueva cuota</span><span class="pbar-val" style="color:${capColor}">${fmt(s.cap)}/mes</span></div>
-      <div class="pbar-track"><div class="pbar-fill" id="cf-${s.id}" style="background:${capBarCol}"></div></div>
+      <div class="pbar-top"><span class="pbar-lbl">Disponible para nueva cuota</span><span class="pbar-val" style="color:${capColor}">${fmt(cap)}/mes</span></div>
+      <div class="pbar-track"><div class="pbar-fill" id="cf-${s.id}" style="background:${capColor}"></div></div>
     </div>
     <div class="pbar-row">
-      <div class="pbar-top"><span class="pbar-lbl">Cuota nueva como % del neto</span><span class="pbar-val" style="color:var(--text2)">${((s.cuota/s.nom.neto)*100).toFixed(1)}%</span></div>
+      <div class="pbar-top"><span class="pbar-lbl">Cuota nueva como % del neto</span><span class="pbar-val">${ ((sim.cuota/(s.nom.neto||1))*100).toFixed(1)}%</span></div>
       <div class="pbar-track"><div class="pbar-fill" id="cvf-${s.id}" style="background:var(--blue2)"></div></div>
     </div>
     <div class="pbar-row">
-      <div class="pbar-top"><span class="pbar-lbl">% compromiso total del ingreso neto</span><span class="pbar-val" style="color:${pcColor}">${s.pct}% ${s.pct>35?'⚠ supera límite':''}</span></div>
-      <div class="pbar-track"><div class="pbar-fill" id="pf-${s.id}" style="background:${pcBarCol}"></div></div>
+      <div class="pbar-top"><span class="pbar-lbl">% compromiso total del ingreso neto</span><span class="pbar-val" style="color:${pcColor}">${sim.pctCompromiso}% ${parseFloat(sim.pctCompromiso)>35?'⚠ supera límite':''}</span></div>
+      <div class="pbar-track"><div class="pbar-fill" id="pf-${s.id}" style="background:${pcBarC}"></div></div>
     </div>
   </div>
 
-  <!-- HISTORIAL + DECISIÓN IA -->
   <div class="grid-2" style="margin-bottom:18px">
     <div>
       <div class="sec-title"><i class="ti ti-history"></i>Historial FondoUne</div>
-      <div class="cell" style="min-height:90px">
-        <div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div>
-      </div>
+      <div class="cell" style="min-height:90px"><div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div></div>
     </div>
     <div>
       <div class="sec-title"><i class="ti ti-brain"></i>Recomendación motor IA</div>
@@ -983,7 +1211,6 @@ function buildDetail(s) {
     </div>
   </div>
 
-  <!-- TIMELINE -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-timeline"></i>Registro de auditoría · trazabilidad completa</div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
@@ -992,55 +1219,79 @@ function buildDetail(s) {
   </div>
 
   ${canAct ? `
-  <!-- NOTA + ACCIÓN -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-pencil"></i>Decisión del analista</div>
     <textarea class="nota-area" id="nota-${s.id}" rows="3" placeholder="Escribe tu observación antes de tomar la decisión (obligatorio para el registro de auditoría)..."></textarea>
   </div>
   <div class="qd-strip">
-    <div class="qd-info">Solicitud <strong>${s.id}</strong> · ${s.nombre} · ${fmt(s.monto)} · ${s.plazo} meses</div>
+    <div class="qd-info">Solicitud <strong>${s.id}</strong> · ${s.nombre} · ${fmt(s.monto)} · ${s.plazo} meses · <span style="color:${lineaColor}">${lineaLabel}</span></div>
     <button class="btn btn-no" onclick="openModal('rechazar','${s.id}')"><i class="ti ti-x"></i> Rechazar</button>
     <button class="btn btn-ask" onclick="openModal('info','${s.id}')"><i class="ti ti-send"></i> Pedir info</button>
     <button class="btn btn-ok" onclick="openModal('aprobar','${s.id}')"><i class="ti ti-check"></i> Aprobar solicitud</button>
   </div>` : `
   <div class="qd-strip">
     <div class="qd-info">Esta solicitud ya fue <strong>${s.estado}</strong>. Consulta el registro de auditoría arriba.</div>
-    <button class="btn"><i class="ti ti-printer"></i> Imprimir</button>
-    <button class="btn btn-gold"><i class="ti ti-download"></i> Exportar PDF</button>
+    <button class="btn" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir</button>
+    <button class="btn btn-gold" onclick="exportarResumen('${s.id}')"><i class="ti ti-download"></i> Exportar resumen</button>
   </div>`}
-
 </div>`;
 }
 
-// ── MODAL ─────────────────────────────────────────────
+// ── EXPORTAR RESUMEN ───────────────────────────────────────────────
+function exportarResumen(id) {
+  const s = DATA.find(x=>x.id===id);
+  if (!s) return;
+  const sim = getSim(s);
+  const w   = window.open('','_blank');
+  w.document.write(`
+    <html><head><title>Resumen ${s.id}</title>
+    <style>body{font-family:Arial,sans-serif;padding:32px;max-width:700px;margin:0 auto}
+    h1{font-size:18px}table{width:100%;border-collapse:collapse;margin:16px 0}
+    td,th{border:1px solid #ddd;padding:8px 12px;font-size:12px;text-align:left}
+    th{background:#f5f5f5;font-weight:600}.ok{color:#059669}.red{color:#DC2626}
+    </style></head><body>
+    <h1>FondoUne — Resumen de Solicitud</h1>
+    <p style="color:#666;font-size:12px">${new Date().toLocaleString('es-CO')} · ${_usuario.nombre}</p>
+    <table>
+      <tr><th>Solicitud</th><td>${s.id}</td><th>Estado</th><td class="${s.estado==='aprobado'?'ok':'red'}">${s.estado.toUpperCase()}</td></tr>
+      <tr><th>Asociado</th><td>${s.nombre}</td><th>Cédula</th><td>${s.ced}</td></tr>
+      <tr><th>Empresa</th><td>${s.empresa}</td><th>Cargo</th><td>${s.cargo}</td></tr>
+      <tr><th>Línea</th><td>${s.tipo}</td><th>Destino</th><td>${s.destino}</td></tr>
+      <tr><th>Monto</th><td>${fmt(s.monto)}</td><th>Plazo</th><td>${s.plazo} meses</td></tr>
+      <tr><th>Cuota</th><td>${fmt(sim.cuota)}</td><th>Tasa</th><td>${sim.tasaEA}</td></tr>
+      <tr><th>Score</th><td>${s.score}</td><th>% Compromiso</th><td>${sim.pctCompromiso}%</td></tr>
+      <tr><th>Neto nómina</th><td>${fmt(s.nom.neto)}</td><th>Capacidad libre</th><td>${fmt(s.nom.neto-sim.cuota-s.nom.lib)}</td></tr>
+      <tr><th>Recomendación IA</th><td>${s.rec}</td><th>Riesgo</th><td>${s.riesgo.toUpperCase()}</td></tr>
+    </table>
+    <p style="font-size:11px;color:#999">Documento generado por el sistema de crédito FondoUne · NIT 811018807-8</p>
+    <script>window.print();<\/script></body></html>`);
+  w.document.close();
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────
 const MDEFS = {
   aprobar:{
     title:'Aprobar solicitud de crédito',
     body:'Esta decisión queda registrada de forma permanente con tu firma digital, fecha, hora e IP. El asociado recibirá notificación inmediata y el pagaré para firma electrónica.',
-    ico:'<i class="ti ti-circle-check" style="font-size:22px;color:var(--green2)"></i>',
-    icoBg:'rgba(5,150,105,.15)',
-    warn:null,
-    cc:'btn-ok', cl:'<i class="ti ti-check"></i> Confirmar aprobación', est:'aprobado',
+    ico:'<i class="ti ti-circle-check" style="font-size:22px;color:var(--green2)"></i>',icoBg:'rgba(5,150,105,.15)',
+    warn:null,cc:'btn-ok',cl:'<i class="ti ti-check"></i> Confirmar aprobación',est:'aprobado',
     logTxt:'<strong>Aprobado por analista</strong>',
     toast:{msg:'Solicitud aprobada correctamente',cls:'toast-ok',ic:'ti-circle-check'}
   },
   rechazar:{
     title:'Rechazar solicitud de crédito',
-    body:'El asociado será notificado con el motivo del rechazo. La nota que escribas será incluida en la comunicación. Esta acción puede ser revertida por el Jefe de Crédito.',
-    ico:'<i class="ti ti-circle-x" style="font-size:22px;color:var(--red2)"></i>',
-    icoBg:'rgba(220,38,38,.15)',
+    body:'El asociado será notificado con el motivo del rechazo. La nota que escribas será incluida en la comunicación.',
+    ico:'<i class="ti ti-circle-x" style="font-size:22px;color:var(--red2)"></i>',icoBg:'rgba(220,38,38,.15)',
     warn:'Verificar que el motivo del rechazo esté claramente redactado antes de confirmar.',
-    cc:'btn-no', cl:'<i class="ti ti-x"></i> Confirmar rechazo', est:'rechazado',
+    cc:'btn-no',cl:'<i class="ti ti-x"></i> Confirmar rechazo',est:'rechazado',
     logTxt:'<strong>Rechazado por analista</strong>',
     toast:{msg:'Solicitud rechazada. Asociado notificado.',cls:'toast-err',ic:'ti-circle-x'}
   },
   info:{
     title:'Solicitar información adicional',
-    body:'Se enviará un mensaje al asociado con las observaciones que incluyas. La solicitud quedará en estado "En revisión" hasta recibir la respuesta.',
-    ico:'<i class="ti ti-send" style="font-size:22px;color:var(--amber3)"></i>',
-    icoBg:'rgba(217,119,6,.15)',
-    warn:null,
-    cc:'btn-ask', cl:'<i class="ti ti-send"></i> Enviar solicitud', est:'revision',
+    body:'Se enviará un mensaje al asociado con las observaciones que incluyas. La solicitud quedará en estado "En revisión" hasta recibir respuesta.',
+    ico:'<i class="ti ti-send" style="font-size:22px;color:var(--amber3)"></i>',icoBg:'rgba(217,119,6,.15)',
+    warn:null,cc:'btn-ask',cl:'<i class="ti ti-send"></i> Enviar solicitud',est:'revision',
     logTxt:'Analista solicitó información adicional',
     toast:{msg:'Solicitud de información enviada al asociado.',cls:'toast-warn',ic:'ti-send'}
   }
@@ -1057,9 +1308,9 @@ function openModal(action, solId) {
   const wb=document.getElementById('modal-warn-box');
   if(d.warn){wb.style.display='flex';document.getElementById('modal-warn-txt').textContent=d.warn;}
   else wb.style.display='none';
-  // Pre-fill from detail textarea if exists
   const notaEl=document.getElementById('nota-'+solId);
   document.getElementById('modal-nota').value=notaEl?notaEl.value:'';
+  document.getElementById('modal-nota').style.borderColor='';
   const cb=document.getElementById('modal-confirm');
   cb.className='btn '+d.cc; cb.innerHTML=d.cl;
   document.getElementById('modal-overlay').style.display='flex';
@@ -1075,28 +1326,248 @@ function confirmDecision(){
   if(!nota){
     document.getElementById('modal-nota').style.borderColor='var(--red2)';
     document.getElementById('modal-nota').focus();
-    document.getElementById('modal-nota').placeholder='⚠ La nota es obligatoria para continuar';
     return;
   }
   closeModal();
   const s=DATA.find(x=>x.id===pendingSolId);
-  if(!s)return;
+  if(!s) return;
   const d=MDEFS[pendingAction];
   s.estado=d.est;
-  // Add to log
   const now=new Date();
-  const ts=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  const ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const dotMap={aprobado:'dot-green',rechazado:'dot-red',revision:'dot-amber'};
-  s.log.push({ts,txt:`${d.logTxt} · María Rodríguez · "${nota}"`,dot:dotMap[d.est]||'dot-muted'});
+  s.log.push({ts,txt:`${d.logTxt} · ${_usuario.nombre} · "${nota}"`,dot:dotMap[d.est]||'dot-muted'});
   if(d.est==='aprobado') s.log.push({ts,txt:'Pagaré electrónico generado · Enviado al correo del asociado',dot:'dot-blue'});
-  // Toast
-  const t=d.toast;
-  showToast(t.msg,t.cls,t.ic);
+  addSegLog(d.est==='aprobado'?'Aprobación confirmada':d.est==='rechazado'?'Rechazo confirmado':'Info solicitada', s.id, d.est.charAt(0).toUpperCase()+d.est.slice(1));
+  addNotif(d.est==='aprobado'?'Solicitud aprobada':d.est==='rechazado'?'Solicitud rechazada':'Info solicitada',
+    `${s.nombre} · ${s.id}`,
+    d.est==='aprobado'?'#059669':d.est==='rechazado'?'#DC2626':'#D97706',
+    d.est==='aprobado'?'ti-check':'ti-x');
+  showToast(d.toast.msg,d.toast.cls,d.toast.ic);
   applyFilters();
   selectSol(s.id);
 }
 
-// ── TOAST ─────────────────────────────────────────────
+// ── NOTIFICACIONES ─────────────────────────────────────────────────
+function toggleNotifPanel() {
+  document.getElementById('notif-panel').classList.toggle('open');
+  document.getElementById('notif-pip').style.display='none';
+}
+
+function clearNotifs() {
+  notifCount=0;
+  document.getElementById('np-list').innerHTML=
+    '<div class="np-empty"><i class="ti ti-bell-off" style="font-size:28px;opacity:.3;display:block;margin-bottom:8px"></i>Sin notificaciones nuevas</div>';
+  document.getElementById('notif-pip').style.display='none';
+}
+
+function addNotif(titulo, subtitulo, color, icon) {
+  notifCount++;
+  document.getElementById('notif-pip').style.display='block';
+  const list = document.getElementById('np-list');
+  const empty = list.querySelector('.np-empty');
+  if (empty) empty.remove();
+  const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  const item = document.createElement('div');
+  item.className='np-item';
+  item.innerHTML=`
+    <div class="np-item-top">
+      <div class="np-ico" style="background:${color}20;color:${color}"><i class="ti ${icon}"></i></div>
+      <strong style="font-size:11px;color:var(--text)">${titulo}</strong>
+    </div>
+    <div class="np-txt">${subtitulo}</div>
+    <div class="np-time">${hora}</div>`;
+  list.insertBefore(item, list.firstChild);
+}
+
+// ── USUARIO DROPDOWN ───────────────────────────────────────────────
+function toggleUserMenu() {
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#avatar-btn') && !e.target.closest('#user-dropdown'))
+    document.getElementById('user-dropdown').classList.remove('open');
+  if (!e.target.closest('#notif-btn') && !e.target.closest('#notif-panel'))
+    document.getElementById('notif-panel').classList.remove('open');
+});
+
+// ── SEGURIDAD LOG ──────────────────────────────────────────────────
+function addSegLog(accion, sol, res) {
+  const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  SEG_LOG.push({hora, usuario:null, accion, sol, res});
+}
+
+// ── BUILD VIEWS ────────────────────────────────────────────────────
+function buildReportes() {
+  // Stats cards
+  const aprobadas = DATA.filter(s=>s.estado==='aprobado').length;
+  const rechazadas = DATA.filter(s=>s.estado==='rechazado').length;
+  const montoTotal = DATA.reduce((a,s)=>a+s.monto,0);
+  const pctAprob = ((aprobadas/DATA.length)*100).toFixed(0);
+  document.getElementById('rpt-stats').innerHTML = `
+    <div class="cell"><div class="cl">Total solicitudes</div><div class="cv">${DATA.length}</div></div>
+    <div class="cell"><div class="cl">Tasa aprobación</div><div class="cv good">${pctAprob}%</div></div>
+    <div class="cell"><div class="cl">Monto total</div><div class="cv mono">${fmt(montoTotal)}</div></div>
+    <div class="cell"><div class="cl">Rechazadas</div><div class="cv bad">${rechazadas}</div></div>`;
+
+  // Tabla por línea
+  const lineas = {};
+  DATA.forEach(s => {
+    const k = s.lineaId||'libre_inversion';
+    if (!lineas[k]) lineas[k]={count:0,monto:0,aprobadas:0,rechazadas:0,pendientes:0};
+    lineas[k].count++;
+    lineas[k].monto += s.monto;
+    if (s.estado==='aprobado') lineas[k].aprobadas++;
+    else if (s.estado==='rechazado') lineas[k].rechazadas++;
+    else lineas[k].pendientes++;
+  });
+  const linConfig = (typeof FondouneCreditos!=='undefined') ? FondouneCreditos.LINEAS : {};
+  document.getElementById('rpt-tabla').innerHTML = Object.entries(lineas).map(([id,info]) => {
+    const lin = linConfig[id] || {nombre:id,icono:'ti-file',color:'var(--muted)'};
+    const tasaEA = (typeof FondouneCreditos!=='undefined') ? FondouneCreditos.getTasaEA(id,24) : null;
+    return `<tr>
+      <td><span style="display:flex;align-items:center;gap:6px"><i class="ti ${lin.icono}" style="color:${lin.color}"></i>${lin.nombre}</span></td>
+      <td style="text-align:center">${info.count}</td>
+      <td style="font-family:'IBM Plex Mono',monospace">${fmt(info.monto)}</td>
+      <td style="color:var(--amber3)">${info.pendientes}</td>
+      <td style="color:var(--green2)">${info.aprobadas}</td>
+      <td style="color:${info.rechazadas>0?'var(--red2)':'var(--muted)'}">${info.rechazadas}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold2)">${tasaEA?tasaEA.toFixed(2)+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildAsociados() {
+  const q = (document.getElementById('asc-search')||{}).value||'';
+  const filtered = DATA.filter(s=>!q||s.nombre.toLowerCase().includes(q.toLowerCase())||s.ced.includes(q));
+  document.getElementById('asc-tabla').innerHTML = filtered.map(s => {
+    const eColor = {pendiente:'var(--amber3)',revision:'var(--amber2)',aprobado:'var(--green2)',rechazado:'var(--red2)'}[s.estado];
+    return `<tr onclick="showView('solicitudes');setTimeout(()=>selectSol('${s.id}'),100)">
+      <td><strong>${s.nombre}</strong></td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${s.ced}</td>
+      <td>${s.empresa}</td>
+      <td style="font-size:11px;color:var(--muted)">${s.cargo}</td>
+      <td><span style="color:${s.score>=700?'var(--green2)':s.score>=600?'var(--amber3)':'var(--red2)'}"><strong>${s.score}</strong></span></td>
+      <td style="text-align:center">1</td>
+      <td><span style="color:${eColor};font-size:11px;font-weight:600">${s.estado.charAt(0).toUpperCase()+s.estado.slice(1)}</span></td>
+      <td><i class="ti ti-arrow-right" style="color:var(--muted)"></i></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterAsociados() { buildAsociados(); }
+
+function buildAuditoria() {
+  document.getElementById('kyc-tabla').innerHTML = DATA.map(s => {
+    const cel = k => {
+      const v=s.kyc[k];
+      return `<td style="color:${v==='ok'?'var(--green2)':v==='alerta'?'var(--amber3)':'var(--red2)'}">
+        <i class="ti ${v==='ok'?'ti-check':v==='alerta'?'ti-alert-triangle':'ti-x'}"></i> ${v==='ok'?'OK':v==='alerta'?'Alerta':'Fallo'}</td>`;
+    };
+    const all = Object.values(s.kyc).every(v=>v==='ok');
+    return `<tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${s.id}</td>
+      <td><strong>${s.nombre}</strong></td>
+      ${cel('cedula')}${cel('rnec')}${cel('liveness')}${cel('biometria')}${cel('sarlaft')}${cel('uiaf')}
+      <td><span class="badge ${all?'b-green':Object.values(s.kyc).some(v=>v==='alerta')?'b-amber':'b-red'}">${all?'OK completo':'Con alertas'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterKYC(tipo) {
+  const rows = document.querySelectorAll('#kyc-tabla tr');
+  rows.forEach(r => {
+    if (tipo==='all') { r.style.display=''; return; }
+    const text = r.textContent;
+    r.style.display = tipo==='ok'&&text.includes('OK completo')? '' : tipo==='alerta'&&text.includes('Con alertas')? '' : tipo==='all'? '' : 'none';
+  });
+}
+
+function buildMotor() {
+  const aprob  = DATA.filter(s=>s.rec==='APROBAR').length;
+  const rev    = DATA.filter(s=>s.rec==='REVISAR').length;
+  const rech   = DATA.filter(s=>s.rec==='RECHAZAR').length;
+  document.getElementById('ia-dist').innerHTML = `
+    <div class="cell"><div class="cl">Recomendar aprobar</div><div class="cv good">${aprob}</div><div class="cs">${((aprob/DATA.length)*100).toFixed(0)}% del total</div></div>
+    <div class="cell"><div class="cl">Recomendar revisar</div><div class="cv warn">${rev}</div><div class="cs">${((rev/DATA.length)*100).toFixed(0)}% del total</div></div>
+    <div class="cell"><div class="cl">Recomendar rechazar</div><div class="cv bad">${rech}</div><div class="cs">${((rech/DATA.length)*100).toFixed(0)}% del total</div></div>`;
+  document.getElementById('ia-tabla').innerHTML = DATA.map(s => {
+    const sim = getSim(s);
+    const rColor = {APROBAR:'var(--green2)',REVISAR:'var(--amber3)',RECHAZAR:'var(--red2)'}[s.rec];
+    const sarlaft = s.kyc.sarlaft==='alerta'?'<span style="color:var(--amber3)">Alerta</span>':'<span style="color:var(--green2)">OK</span>';
+    return `<tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${s.id}</td>
+      <td>${s.nombre}</td>
+      <td style="color:${s.score>=700?'var(--green2)':s.score>=600?'var(--amber3)':'var(--red2)'}"><strong>${s.score}</strong></td>
+      <td style="color:${parseFloat(sim.pctCompromiso)>35?'var(--amber3)':'var(--green2)'}">${sim.pctCompromiso}%</td>
+      <td>${sarlaft}</td>
+      <td><strong style="color:${rColor}">${s.rec}</strong></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildCartera() {
+  const aprobadas = DATA.filter(s=>s.estado==='aprobado');
+  if (aprobadas.length===0) {
+    document.getElementById('car-tabla').innerHTML='';
+    document.getElementById('car-empty').style.display='block';
+    return;
+  }
+  document.getElementById('car-empty').style.display='none';
+  const linConfig = (typeof FondouneCreditos!=='undefined') ? FondouneCreditos.LINEAS : {};
+  document.getElementById('car-tabla').innerHTML = aprobadas.map(s => {
+    const sim = getSim(s);
+    const lin = linConfig[s.lineaId]||{nombre:s.tipo,color:'var(--muted)',icono:'ti-file'};
+    return `<tr onclick="showView('solicitudes');setTimeout(()=>selectSol('${s.id}'),100)">
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${s.id}</td>
+      <td><strong>${s.nombre}</strong></td>
+      <td><span style="color:${lin.color}"><i class="ti ${lin.icono}"></i> ${lin.nombre}</span></td>
+      <td style="font-family:'IBM Plex Mono',monospace">${fmt(s.monto)}</td>
+      <td>${s.plazo} meses</td>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold2)">${fmt(sim.cuota)}/mes</td>
+      <td style="font-size:11px">${sim.tasaEA}</td>
+      <td><span class="badge b-green">Activo</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildParametros() {
+  if (typeof FondouneCreditos === 'undefined') {
+    document.getElementById('param-tabla').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">creditos-config.js no cargado</td></tr>';
+    return;
+  }
+  const rows = [];
+  Object.values(FondouneCreditos.LINEAS).forEach(lin => {
+    lin.tasas.forEach((t,i) => {
+      const em = (FondouneCreditos.eaAMensual(t.tasaEA)*100).toFixed(4);
+      rows.push(`<tr>
+        ${i===0?`<td rowspan="${lin.tasas.length}" style="color:${lin.color}"><i class="ti ${lin.icono}"></i> <strong>${lin.nombre}</strong></td>`:''}
+        <td>${t.nota||`${t.plazoDesde}–${t.plazoHasta} meses`}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold2);font-weight:600">${t.tasaEA.toFixed(2)}%</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--muted)">${em}%</td>
+        <td style="font-size:11px;color:var(--muted)">${t.nota||''}</td>
+      </tr>`);
+    });
+  });
+  document.getElementById('param-tabla').innerHTML = rows.join('');
+}
+
+function buildSeguridad() {
+  const usuario = _usuario.nombre;
+  document.getElementById('seg-tabla').innerHTML = SEG_LOG.slice().reverse().map(r => {
+    const resColor = r.res==='OK'||r.res==='Lectura'?'var(--muted)':r.res==='Aprobado'?'var(--green2)':r.res==='Rechazado'?'var(--red2)':'var(--amber3)';
+    return `<tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${r.hora}</td>
+      <td>${r.usuario||usuario}</td>
+      <td>${r.accion}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px">${r.sol}</td>
+      <td style="color:${resColor};font-weight:600">${r.res}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
 function showToast(msg, cls, icon) {
   const t=document.createElement('div');
   t.className=`toast ${cls}`;
@@ -1105,15 +1576,18 @@ function showToast(msg, cls, icon) {
   setTimeout(()=>t&&t.remove(),5000);
 }
 
-// ── INIT ──────────────────────────────────────────────
-renderList(DATA);
-setTimeout(()=>selectSol(DATA[0].id),150);
-
-// Simular nueva solicitud entrante
-setTimeout(()=>{
-  showToast('🔔 Nueva solicitud: Luis F. Gómez · $6.500.000 · Consumo','toast-blue','ti-bell-ringing');
-  document.getElementById('notif-pip').style.display='block';
-},6000);
+// ── INIT ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initSession();
+  SEG_LOG.forEach(r => { if(!r.usuario) r.usuario = _usuario.nombre; });
+  renderList(DATA);
+  setTimeout(() => selectSol(DATA[0].id), 150);
+  // Notificación de bienvenida
+  setTimeout(() => {
+    addNotif('Nueva solicitud entrante','Luis F. Gómez · $6.500.000 · Vacacional','#06B6D4','ti-bell-ringing');
+    showToast('🔔 Nueva solicitud: Luis F. Gómez · $6.500.000 · Vacacional','toast-blue','ti-bell-ringing');
+  }, 5000);
+});
 </script>
 </body>
 </html>
