@@ -412,28 +412,34 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 </div>
 
+<script src="creditos-config.js"></script>
 <script>
-// ── DATA ──────────────────────────────────────────────
-// Tasas vigentes Febrero 2025 — FONDOUNE
-const TASAS = {
-  'Libre inversión':    { ea: 14.03 },
-  'CrediExpress':       { ea: 14.03 },
-  'Educativo':          { ea: (m) => m<=12?13.73:m<=24?14.91:16.11 },
-  'Vivienda':           { ea: (m) => m<=120?13.73:16.11 },
-  'Salud':              { ea: (m) => m<=24?12.56:13.73 },
-  'Vehículos':          { ea: (m) => m<=36?16.11:18.55 },
-  'Vacacional':         { ea: 14.03 },
-  'Creditributo':       { ea: 13.73 },
-  'Solidario':          { ea: 12.56 },
-  'Especial':           { ea: (m) => m<=36?13.88:m<=60?16.00:17.04 },
-  'Crediprima':         { ea: 14.03 },
+// ── TASAS (creditos-config.js) ────────────────────────
+const TIPO_A_LINEA = {
+  'Libre inversión': 'libre_inversion',
+  'CrediExpress':    'crediexpress',
+  'Educativo':       'educativo',
+  'Vivienda':        'vivienda',
+  'Salud':           'salud',
+  'Vehículos':       'vehiculos',
+  'Vacacional':      'vacacional',
+  'Creditributo':    'creditributo',
+  'Solidario':       'solidario',
+  'Especial':        'especial',
+  'Crediprima':      'crediprima',
 };
 
-function getTasaEA(tipo, plazoMeses) {
-  const t = TASAS[tipo];
-  if (!t) return 14.03;
-  return typeof t.ea === 'function' ? t.ea(plazoMeses) : t.ea;
+function getTasaEA(tipoNombre, plazoMeses) {
+  const lineaId = TIPO_A_LINEA[tipoNombre];
+  if (!lineaId) return 16.11;
+  return FondouneCreditos.getTasaEA(lineaId, plazoMeses) ?? 16.11;
 }
+
+function getTasaEM(tipoNombre, plazoMeses) {
+  return FondouneCreditos.eaAMensual(getTasaEA(tipoNombre, plazoMeses)) * 100;
+}
+
+// ── DATA ──────────────────────────────────────────────
 
 const DATA = [
   {
@@ -576,141 +582,6 @@ const DATA = [
     ]
   },
 ];
-  {
-    id:'SOL-2025-0847', nombre:'Carlos Andrés Gil', ced:'1.045.678.901',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes', tiempo:'Hace 18 min', ts:'09:42',
-    monto:8000000, plazo:24, tipo:'Consumo', destino:'Gastos personales',
-    score:742, sp:82, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:742,estado:'Sin novedad',obli:1,endeuda:1200000,comp:'Paga los primeros 5 días del mes'},
-    nom:{bas:3800000,dev:4250000,ded:1100000,neto:3150000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:945000, cuota:391800, pct:30.4,
-    hist:'2 créditos previos · Pagados a tiempo · Sin moras',
-    rec:'APROBAR', col:'#3B82F6', ini:'CG',
-    log:[
-      {ts:'09:42',txt:'Solicitud recibida y validada por el sistema',dot:'dot-blue'},
-      {ts:'09:42',txt:'KYC completado · Identidad verificada · Liveness OK',dot:'dot-green'},
-      {ts:'09:42',txt:'DataCrédito consultado · Score 742 · Sin novedad',dot:'dot-green'},
-      {ts:'09:43',txt:'Nómina leída por IA · Capacidad $945.000/mes confirmada',dot:'dot-green'},
-      {ts:'09:43',txt:'Motor IA emite recomendación: <strong>APROBAR</strong>',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0846', nombre:'Valentina Ospina', ced:'1.152.445.230',
-    empresa:'Emtelco S.A.', cargo:'Asesora Call Center', tiempo:'Hace 42 min', ts:'09:18',
-    monto:5000000, plazo:18, tipo:'Educativo', destino:'Posgrado EAFIT',
-    score:811, sp:90, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:811,estado:'Sin novedad',obli:0,endeuda:0,comp:'Sin deudas activas · Historia limpia'},
-    nom:{bas:2800000,dev:3100000,ded:650000,neto:2450000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:857500, cuota:317400, pct:36.8,
-    hist:'Primer crédito con el fondo',
-    rec:'APROBAR', col:'#10B981', ini:'VO',
-    log:[
-      {ts:'09:18',txt:'Solicitud recibida · Tipo: Educativo',dot:'dot-blue'},
-      {ts:'09:19',txt:'KYC verificado exitosamente en todos los controles',dot:'dot-green'},
-      {ts:'09:19',txt:'Score 811 · Por encima del percentil 85 de la cartera',dot:'dot-green'},
-      {ts:'09:20',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Sin restricciones',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0845', nombre:'Jhon Fredy Morales', ced:'71.783.990.1',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Supervisor Regional', tiempo:'Hace 1 h', ts:'08:42',
-    monto:15000000, plazo:36, tipo:'Consumo', destino:'Consolidación deudas',
-    score:614, sp:68, riesgo:'medio', estado:'revision',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:614,estado:'Mora resuelta hace 8m',obli:3,endeuda:4800000,comp:'Mora ≤30 días resuelta hace 8 meses'},
-    nom:{bas:5200000,dev:6100000,ded:2900000,neto:3200000,lib:1800000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:320000, cuota:516800, pct:64.2,
-    hist:'1 crédito previo · Mora resuelta hace 8 meses',
-    rec:'REVISAR', col:'#F59E0B', ini:'JM',
-    log:[
-      {ts:'08:42',txt:'Solicitud recibida',dot:'dot-blue'},
-      {ts:'08:43',txt:'KYC verificado · Todos los controles OK',dot:'dot-green'},
-      {ts:'08:43',txt:'DataCrédito: Mora ≤30d resuelta hace 8 meses · Score 614',dot:'dot-amber'},
-      {ts:'08:44',txt:'% compromiso ingreso supera el límite: 64.2% > 35%',dot:'dot-amber'},
-      {ts:'08:44',txt:'Motor IA: <strong>REVISAR</strong> · Requiere validación analista',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0844', nombre:'Sandra Patricia Ruiz', ced:'43.720.881.0',
-    empresa:'Emtelco S.A.', cargo:'Analista de Datos', tiempo:'Hace 2 h', ts:'07:55',
-    monto:3000000, plazo:12, tipo:'Emergencia médica', destino:'Cirugía familiar',
-    score:756, sp:84, riesgo:'bajo', estado:'aprobado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:756,estado:'Sin novedad',obli:1,endeuda:900000,comp:'Excelente historial · Paga antes del vencimiento'},
-    nom:{bas:3200000,dev:3450000,ded:720000,neto:2730000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:955500, cuota:266100, pct:28.0,
-    hist:'3 créditos previos · Todos pagados a tiempo',
-    rec:'APROBAR', col:'#8B5CF6', ini:'SR',
-    log:[
-      {ts:'07:55',txt:'Solicitud recibida · Tipo: Emergencia médica',dot:'dot-blue'},
-      {ts:'07:56',txt:'KYC completado exitosamente',dot:'dot-green'},
-      {ts:'07:56',txt:'Score 756 · Excelente historial interno',dot:'dot-green'},
-      {ts:'07:57',txt:'Motor IA: <strong>APROBAR</strong>',dot:'dot-gold'},
-      {ts:'08:10',txt:'<strong>Aprobado por analista</strong> · María Rodríguez',dot:'dot-green'},
-      {ts:'08:11',txt:'Pagaré electrónico enviado · Pendiente firma asociada',dot:'dot-blue'},
-    ]
-  },
-  {
-    id:'SOL-2025-0843', nombre:'Rodrigo Alberto Ríos', ced:'98.610.441.5',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Ingeniero de Soporte', tiempo:'Hace 3 h', ts:'06:58',
-    monto:20000000, plazo:48, tipo:'Consumo', destino:'Vehículo',
-    score:501, sp:55, riesgo:'alto', estado:'rechazado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'alerta',uiaf:'ok'},
-    dc:{score:501,estado:'Mora activa',obli:5,endeuda:12000000,comp:'3 reportes negativos activos · No apto'},
-    nom:{bas:4100000,dev:4500000,ded:3100000,neto:1400000,lib:2200000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:0, cuota:575600, pct:100,
-    hist:'Mora activa en centrales de riesgo · No apto',
-    rec:'RECHAZAR', col:'#EF4444', ini:'RR',
-    log:[
-      {ts:'06:58',txt:'Solicitud recibida',dot:'dot-blue'},
-      {ts:'06:59',txt:'Alerta SARLAFT detectada · Revisión adicional activada',dot:'dot-amber'},
-      {ts:'07:00',txt:'Score 501 · 3 obligaciones en mora activa',dot:'dot-red'},
-      {ts:'07:00',txt:'Capacidad de pago: negativa · Neto insuficiente para cuota',dot:'dot-red'},
-      {ts:'07:01',txt:'Motor IA: <strong>RECHAZAR</strong> automático · Riesgo alto',dot:'dot-red'},
-      {ts:'07:05',txt:'<strong>Rechazado por analista</strong> · Mora activa no superable · Recomendado regularizar primero',dot:'dot-red'},
-    ]
-  },
-  {
-    id:'SOL-2025-0842', nombre:'Luz Marina Cardona', ced:'32.540.117.8',
-    empresa:'Emtelco S.A.', cargo:'Coordinadora RRHH', tiempo:'Hace 4 h', ts:'05:50',
-    monto:10000000, plazo:24, tipo:'Vivienda', destino:'Mejoras del hogar',
-    score:693, sp:77, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:693,estado:'Sin novedad',obli:2,endeuda:2200000,comp:'Buen comportamiento de pago'},
-    nom:{bas:4800000,dev:5200000,ded:1600000,neto:3600000,lib:500000,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:760000, cuota:489700, pct:43.3,
-    hist:'1 crédito previo · Al día · Sin novedades',
-    rec:'REVISAR', col:'#06B6D4', ini:'LC',
-    log:[
-      {ts:'05:50',txt:'Solicitud recibida · Tipo: Vivienda',dot:'dot-blue'},
-      {ts:'05:51',txt:'KYC completado · Identidad verificada',dot:'dot-green'},
-      {ts:'05:52',txt:'Score 693 · Dentro del rango aprobable',dot:'dot-green'},
-      {ts:'05:52',txt:'% compromiso: 43.3% · Supera límite estándar del 35%',dot:'dot-amber'},
-      {ts:'05:53',txt:'Motor IA: <strong>REVISAR</strong> · Analista debe evaluar excepciones',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0841', nombre:'Mauricio Estrada', ced:'70.561.228.3',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Director Comercial', tiempo:'Hace 5 h', ts:'04:42',
-    monto:25000000, plazo:48, tipo:'Libranza especial', destino:'Inversión personal',
-    score:878, sp:97, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:878,estado:'Excelente',obli:1,endeuda:3000000,comp:'Siempre paga anticipado · Percentil 97'},
-    nom:{bas:9500000,dev:11200000,ded:2800000,neto:8400000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:2940000, cuota:660100, pct:22.5,
-    hist:'5 créditos previos · Récord impecable',
-    rec:'APROBAR', col:'#D4A843', ini:'ME',
-    log:[
-      {ts:'04:42',txt:'Solicitud recibida · Monto alto: $25.000.000',dot:'dot-blue'},
-      {ts:'04:43',txt:'KYC verificado · Sin anomalías',dot:'dot-green'},
-      {ts:'04:43',txt:'Score 878 · Top 3% de la cartera del fondo',dot:'dot-green'},
-      {ts:'04:44',txt:'Capacidad de pago $2.94M/mes · Amplio margen',dot:'dot-green'},
-      {ts:'04:44',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Perfil VIP',dot:'dot-gold'},
-    ]
-  },
-];
 
 let currentFilter='todas', currentSearch='', selectedId=null;
 let pendingAction=null, pendingSolId=null;
@@ -809,7 +680,9 @@ function updateCounts() {
   document.getElementById('ct-rev').textContent   = count('revision');
   document.getElementById('ct-apro').textContent  = count('aprobado');
   document.getElementById('ct-rech').textContent  = count('rechazado');
+  document.getElementById('sv-total').textContent = DATA.length;
   document.getElementById('sv-pend').textContent  = count('pendiente');
+  document.getElementById('sv-pre').textContent   = DATA.filter(s=>s.rec==='APROBAR').length;
 }
 
 // ── SELECT ────────────────────────────────────────────
@@ -899,13 +772,13 @@ function buildDetail(s) {
       <div class="cell">
         <div class="cl">Cuota estimada</div>
         <div class="cv mono" style="color:var(--gold2)">${fmt(s.cuota)}</div>
-        <div class="cs">Tasa: <strong style="color:var(--blue3)">${getTasaEA(s.tipo,s.plazo).toFixed(2)}% E.A.</strong> · ${((Math.pow(1+getTasaEA(s.tipo,s.plazo)/100,1/12)-1)*100).toFixed(4)}% E.M.</div>
+        <div class="cs">Tasa: <strong style="color:var(--blue3)">${getTasaEA(s.tipo,s.plazo).toFixed(2)}% E.A.</strong> · ${getTasaEM(s.tipo,s.plazo).toFixed(4)}% E.M.</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
       <div class="cell"><div class="cl">Destino declarado</div><div class="cv" style="font-size:12px">${s.destino}</div></div>
       <div class="cell" style="background:rgba(201,150,59,.08);border-color:rgba(201,150,59,.2)">
-        <div class="cl">Tasa vigente Feb 2025 — FONDOUNE</div>
+        <div class="cl">Tasa vigente — FONDOUNE</div>
         <div class="cv mono" style="color:var(--gold2);font-size:15px">${getTasaEA(s.tipo,s.plazo).toFixed(2)}% E.A.</div>
         <div class="cs">Tabla oficial · ${s.tipo} · ${s.plazo} meses</div>
       </div>
@@ -1090,10 +963,12 @@ function confirmDecision(){
     document.getElementById('modal-nota').placeholder='⚠ La nota es obligatoria para continuar';
     return;
   }
+  const action=pendingAction;
+  const solId=pendingSolId;
   closeModal();
-  const s=DATA.find(x=>x.id===pendingSolId);
+  const s=DATA.find(x=>x.id===solId);
   if(!s)return;
-  const d=MDEFS[pendingAction];
+  const d=MDEFS[action];
   s.estado=d.est;
   // Add to log
   const now=new Date();
