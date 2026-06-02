@@ -663,8 +663,7 @@ function setSigned(){
 }
 
 function clearFirma(){
-  const dpr=window.devicePixelRatio||1;
-  ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   hasSig=false;
   canvas.classList.remove('has-sig');
   document.getElementById('canvas-ph').style.opacity='1';
