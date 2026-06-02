@@ -17,6 +17,7 @@
 
 <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"></noscript>
+<link rel="stylesheet" href="fondoune-shared.css">
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
@@ -181,10 +182,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <!-- FondoUne: navegación y sesión compartida -->
 <script src="navigation.js" defer></script>
 <script src="session.js" defer></script>
-<script>FondouneNav.init('firma');</script>
+<script src="fondoune-ui.js" defer></script>
+<script>
+  FondouneNav.init('firma');
+
+  (function() {
+    if (typeof FondouneSession === 'undefined') return;
+    if (!FondouneSession.isLoggedIn()) {
+      window.location.replace('index.html');
+      return;
+    }
+    const u = FondouneSession.getUser();
+    const rol = u?.role || 'asociado';
+    const acceso = FondouneNav.ACCESO_ROL[rol] || [];
+    if (!acceso.includes('firma')) {
+      FondouneSession.queueNotif(
+        'No tienes permiso para acceder al módulo de firma.', 'error'
+      );
+      window.location.replace('index.html');
+    }
+  })();
+</script>
 
 </head>
-<body>
+<body class="fu-module-firma">
 <div class="wrap">
   <div class="header">
     <div class="mark"><i class="ti ti-building-bank"></i></div>
@@ -201,9 +222,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <!-- HERO APROBADO -->
     <div class="approval-hero">
       <div class="hero-badge"><i class="ti ti-circle-check" style="font-size:13px"></i> Solicitud aprobada</div>
-      <div class="hero-title">Tu crédito fue aprobado,<br><em>Carlos</em></div>
+      <div class="hero-title">Tu crédito fue aprobado,<br><em id="hero-nombre">Carlos</em></div>
       <div class="hero-sub">El analista del fondo revisó tu perfil crediticio y ha aprobado tu solicitud. Solo necesitas firmar el pagaré para recibir el desembolso.</div>
-      <div class="hero-ref">Ref: SOL-2025-0847 · Aprobado: 12/05/2025 10:15 a.m. · Analista: M. Rodríguez</div>
+      <div class="hero-ref" id="hero-ref">Ref: SOL-2025-0847 · Aprobado: 12/05/2025 10:15 a.m. · Analista: M. Rodríguez</div>
     </div>
 
     <!-- RESUMEN DEL CRÉDITO -->
@@ -212,13 +233,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="credit-grid">
         <div class="cg-cell">
           <div class="cl">Monto aprobado</div>
-          <div class="cv">$8.000.000</div>
+          <div class="cv" id="credit-monto">$8.000.000</div>
           <div class="cs">COP</div>
         </div>
         <div class="cg-cell">
           <div class="cl">Cuota mensual</div>
-          <div class="cv">$391.800</div>
-          <div class="cs">por 24 meses</div>
+          <div class="cv" id="credit-cuota">$391.800</div>
+          <div class="cs" id="credit-plazo-sub">por 24 meses</div>
         </div>
         <div class="cg-cell">
           <div class="cl">Primer pago</div>
@@ -227,11 +248,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         </div>
       </div>
       <table class="cond-table">
-        <tr><td>Tipo de crédito</td><td>Crédito de consumo</td></tr>
-        <tr><td>Tasa de interés</td><td>1.1% efectivo mensual · 14.03% E.A.</td></tr>
-        <tr><td>Plazo</td><td>24 meses (288 días hábiles)</td></tr>
+        <tr><td>Tipo de crédito</td><td id="cond-tipo">Crédito de consumo</td></tr>
+        <tr><td>Tasa de interés</td><td id="cond-tasa">1.1% efectivo mensual · 14.03% E.A.</td></tr>
+        <tr><td>Plazo</td><td id="cond-plazo">24 meses (288 días hábiles)</td></tr>
         <tr><td>Forma de pago</td><td>Libranza automática de nómina</td></tr>
-        <tr><td>Total a pagar</td><td><strong style="color:var(--navy)">$9.403.200</strong></td></tr>
+        <tr><td>Total a pagar</td><td><strong id="cond-total" style="color:var(--navy)">$9.403.200</strong></td></tr>
         <tr><td>Costo total del crédito</td><td>$1.403.200 (intereses + seguros)</td></tr>
         <tr><td>Desembolso estimado</td><td>Hoy entre 2:00 y 4:00 p.m. · Cuenta Bancolombia</td></tr>
       </table>
@@ -250,10 +271,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <strong>PAGARÉ A LA ORDEN Nro. _______________</strong>
         </div>
 
-        Yo, <strong>Carlos Andrés Gil</strong>, mayor de edad y domiciliado en la ciudad de <strong>Medellín</strong>, identificado como aparece al pie de mi firma, por medio del presente pagaré hago constar que pagaré solidaria, incondicional e indivisiblemente a la orden del <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong>, identificado con NIT <strong>811018807-8</strong>, o a quien represente sus derechos, todos los valores estipulados en este título valor, en las cuentas bancarias dispuestas para ello o en la ciudad de Medellín o lugar que señale y de acuerdo al plan de amortización que más adelante se determina, para lo cual también manifiesto que de ella he recibido a entera satisfacción a título de mutuo solidario, con intereses y de acuerdo a las siguientes cláusulas:
+        Yo, <strong id="pagare-nombre">Carlos Andrés Gil</strong>, mayor de edad y domiciliado en la ciudad de <strong>Medellín</strong>, identificado como aparece al pie de mi firma, por medio del presente pagaré hago constar que pagaré solidaria, incondicional e indivisiblemente a la orden del <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong>, identificado con NIT <strong>811018807-8</strong>, o a quien represente sus derechos, todos los valores estipulados en este título valor, en las cuentas bancarias dispuestas para ello o en la ciudad de Medellín o lugar que señale y de acuerdo al plan de amortización que más adelante se determina, para lo cual también manifiesto que de ella he recibido a entera satisfacción a título de mutuo solidario, con intereses y de acuerdo a las siguientes cláusulas:
 
         <br><br><strong>PRIMERA. Valor.</strong> La suma de:
-        <div class="pagare-highlight">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
+        <div class="pagare-highlight" id="pagare-monto">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
         la cual pagaré solidariamente.
 
         <br><br><strong>SEGUNDA. Amortización.</strong> El deudor se obliga a pagar la suma descrita en <strong>veinticuatro (24) cuotas mensuales</strong> por un valor de <strong>TRESCIENTOS NOVENTA Y UN MIL OCHOCIENTOS PESOS ($391.800,00)</strong> cada una, la primera el día <strong>12 del mes de junio del año 2025</strong> y así sucesivamente y sin interrupción cada mes hasta completar las 24 cuotas. Todo pago que se reciba se aplicará, salvo pacto en contrario, a: impuestos, gastos, costas, seguros, papelería, honorarios, intereses de mora, intereses corrientes y por último a capital. Los pagos parciales extraordinarios, anticipados o en exceso se aplicarán primero a intereses adeudados y, en segundo orden, a capital con destino a la disminución del plazo.
@@ -418,7 +439,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div class="desembolso-card">
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Confirmación del desembolso</div>
-      <div class="dc-row"><span class="dl"><i class="ti ti-coin" style="font-size:14px"></i> Monto a desembolsar</span><span class="dv good">$8.000.000 COP</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-coin" style="font-size:14px"></i> Monto a desembolsar</span><span class="dv good" id="success-monto">$8.000.000 COP</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-building-bank" style="font-size:14px"></i> Cuenta destino</span><span class="dv">Bancolombia *** 4821</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-clock" style="font-size:14px"></i> Tiempo estimado</span><span class="dv">Hoy · 2:00 – 4:00 p.m.</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-calendar" style="font-size:14px"></i> Primera cuota</span><span class="dv">12 de junio, 2025 · $391.800</span></div>
@@ -428,7 +449,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div class="note ok" style="text-align:left">
       <i class="ti ti-mail-check"></i>
-      <span>Te enviamos el pagaré firmado y el resumen del crédito a <strong>carlos.g***@une.net.co</strong>. Guárdalos para tus registros. También puedes descargarlo abajo.</span>
+      <span>Te enviamos el pagaré firmado y el resumen del crédito a <strong id="success-email">carlos.g***@une.net.co</strong>. Guárdalos para tus registros. También puedes descargarlo abajo.</span>
     </div>
 
     <div style="display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
@@ -449,6 +470,133 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <script>
+// ── DATOS DESDE SESIÓN (FondouneSession / legacy fondoune_*) ──
+function fmtCOP(n) {
+  return '$' + Number(n).toLocaleString('es-CO');
+}
+
+function maskEmail(email) {
+  if (!email || !email.includes('@')) return email || '—';
+  const [user, domain] = email.split('@');
+  const shown = user.length <= 2 ? user[0] + '*' : user.slice(0, 2) + '***';
+  return shown + '@' + domain;
+}
+
+function loadLegacyFirmaApp() {
+  try {
+    const asoc = JSON.parse(sessionStorage.getItem('fondoune_asociado') || 'null');
+    const monto = sessionStorage.getItem('fondoune_monto');
+    if (!asoc || !monto) return null;
+    const plazoLabel = sessionStorage.getItem('fondoune_plazo') || '24 meses';
+    const plazo = parseInt(String(plazoLabel).match(/\d+/)?.[0] || '24', 10);
+    const tasaEA = parseFloat(sessionStorage.getItem('fondoune_tasa')) || 14.03;
+    const tasaEM = (Math.pow(1 + tasaEA / 100, 1 / 12) - 1) * 100;
+    return {
+      solicitudId: sessionStorage.getItem('fu_solicitud_id') || 'SOL-2025-0847',
+      monto: Number(monto),
+      plazo,
+      plazoLabel,
+      tipo: sessionStorage.getItem('fondoune_linea') || 'Libre inversión',
+      tasaEA,
+      tasaEM,
+      cuota: null,
+      totalPagar: null,
+      asociado: {
+        nombre: asoc.nombre,
+        correo: asoc.correo,
+        cedula: asoc.cedula,
+        empresa: asoc.empresa,
+        cargo: asoc.cargo,
+      },
+      aprobadoPor: null,
+      aprobadoEn: null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function applyFirmaFromSession(app) {
+  if (!app || !app.monto) return;
+
+  const a = app.asociado || {};
+  const primerNombre = (a.nombre || 'Asociado').split(' ')[0];
+  const fechaAprob = app.aprobadoEn
+    ? new Date(app.aprobadoEn).toLocaleString('es-CO', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+    : '—';
+
+  const heroNombre = document.getElementById('hero-nombre');
+  if (heroNombre) heroNombre.textContent = primerNombre;
+
+  const heroRef = document.getElementById('hero-ref');
+  if (heroRef) {
+    heroRef.textContent =
+      `Ref: ${app.solicitudId || '—'} · Aprobado: ${fechaAprob}` +
+      (app.aprobadoPor ? ` · Analista: ${app.aprobadoPor}` : '');
+  }
+
+  const montoEl = document.getElementById('credit-monto');
+  if (montoEl) montoEl.textContent = fmtCOP(app.monto);
+
+  const cuotaEl = document.getElementById('credit-cuota');
+  if (cuotaEl && app.cuota) cuotaEl.textContent = fmtCOP(app.cuota);
+
+  const plazoSub = document.getElementById('credit-plazo-sub');
+  if (plazoSub) plazoSub.textContent = 'por ' + (app.plazoLabel || app.plazo + ' meses');
+
+  const condTipo = document.getElementById('cond-tipo');
+  if (condTipo) condTipo.textContent = app.tipo || '—';
+
+  const condTasa = document.getElementById('cond-tasa');
+  if (condTasa && app.tasaEA != null) {
+    condTasa.textContent =
+      `${(app.tasaEM || 0).toFixed(2)}% efectivo mensual · ${Number(app.tasaEA).toFixed(2)}% E.A.`;
+  }
+
+  const condPlazo = document.getElementById('cond-plazo');
+  if (condPlazo) {
+    const dias = (app.plazo || 24) * 30;
+    condPlazo.textContent = `${app.plazo || 24} meses (${dias} días hábiles aprox.)`;
+  }
+
+  const total = app.totalPagar || (app.cuota && app.plazo ? app.cuota * app.plazo : null);
+  const condTotal = document.getElementById('cond-total');
+  if (condTotal && total) condTotal.textContent = fmtCOP(total);
+
+  const pagareNombre = document.getElementById('pagare-nombre');
+  if (pagareNombre) pagareNombre.textContent = a.nombre || '—';
+
+  const pagareMonto = document.getElementById('pagare-monto');
+  if (pagareMonto) pagareMonto.textContent = `${fmtCOP(app.monto)} (${Number(app.monto).toLocaleString('es-CO')},00)`;
+
+  const successMonto = document.getElementById('success-monto');
+  if (successMonto) successMonto.textContent = fmtCOP(app.monto) + ' COP';
+
+  const successEmail = document.getElementById('success-email');
+  if (successEmail) successEmail.textContent = maskEmail(a.correo);
+
+  const phRight = document.querySelector('.ph-right');
+  if (phRight && app.solicitudId) {
+    phRight.textContent = 'DOC-PAG-' + app.solicitudId.replace('SOL-', '') + ' · Ley 527/1999';
+  }
+}
+
+function loadFirmaFromSession() {
+  let app = null;
+  if (typeof FondouneSession !== 'undefined') {
+    app = FondouneSession.getCreditApp();
+  }
+  if (!app || !app.monto) {
+    app = loadLegacyFirmaApp();
+  }
+  applyFirmaFromSession(app);
+}
+
+document.addEventListener('DOMContentLoaded', loadFirmaFromSession);
+
 // ── TOGGLE DOCUMENTOS ────────────────────────────────
 let pagareExpanded = false;
 function togglePagare(){
@@ -590,6 +738,29 @@ function intentarFirmar(){
   btn.disabled=true;
 
   setTimeout(()=>{
+    if (typeof FondouneSession !== 'undefined') {
+      const app = FondouneSession.getCreditApp();
+      if (app?.solicitudId) {
+        const firmado = {
+          ...app,
+          estado: 'firmado',
+          firmadoEn: new Date().toISOString(),
+        };
+        FondouneSession.saveCreditApp(firmado);
+        FondouneSession.pushAnalystQueue(firmado);
+        FondouneSession.removeFromAnalystQueue(app.solicitudId);
+        FondouneSession.removeFromGerenciaQueue(app.solicitudId);
+        FondouneSession.saveDecision({
+          solicitudId: app.solicitudId,
+          accion: 'firma_completada',
+          fecha: new Date().toISOString(),
+        });
+        FondouneSession.queueNotif(
+          'Firma completada · ' + (app.asociado?.nombre || app.solicitudId),
+          'success'
+        );
+      }
+    }
     document.getElementById('main-content').style.display='none';
     document.getElementById('success-state').style.display='block';
     document.getElementById('success-state').scrollIntoView({behavior:'smooth'});
@@ -617,7 +788,11 @@ function launchConfetti(){
 }
 
 // ── TOAST ────────────────────────────────────────────
-function showToast(msg,type='ok'){
+function showToast(msg, type = 'ok') {
+  if (typeof FondouneUI !== 'undefined') {
+    FondouneUI.toast(msg, type);
+    return;
+  }
   const t=document.createElement('div');
   t.style.cssText='position:fixed;bottom:60px;right:20px;z-index:999;background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:DM Sans,sans-serif;box-shadow:var(--shadow-lg);animation:tIn .25s ease;color:var(--navy);max-width:300px';
   t.innerHTML=`<i class="ti ti-circle-check" style="color:var(--success);font-size:17px"></i><span>${msg}</span>`;

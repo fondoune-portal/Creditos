@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="fondoune-shared.css">
 <style>
   :root {
     --navy:   #0B2545;
@@ -411,10 +412,31 @@
   const GAS_URL = 'https://script.google.com/macros/s/TU_SCRIPT_ID/exec';
   let asociadoData = null;
   </script>
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script src="fondoune-ui.js"></script>
+  <script src="creditos-config.js"></script>
+  <script src="solicitudes-bridge.js"></script>
+  <script>
+    FondouneNav.init('solicitud');
+    (function () {
+      if (!FondouneSession.isLoggedIn()) {
+        window.location.replace('index.html');
+        return;
+      }
+      const u = FondouneSession.getUser();
+      const rol = u?.role || 'asociado';
+      const acceso = FondouneNav.ACCESO_ROL[rol] || [];
+      if (!acceso.includes('solicitud')) {
+        FondouneSession.queueNotif('No tienes permiso para el portal de solicitud.', 'error');
+        window.location.replace('index.html');
+      }
+    })();
+  </script>
 </head>
-<body>
+<body class="fu-module-portal">
 
-<div class="portal">
+<div class="portal portal-shell">
 
   <!-- LOADING OVERLAY -->
   <div id="gas-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,37,69,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
@@ -1132,7 +1154,8 @@ function getDemoData(cedula){
     neto:3150000, libranzas:0, cuotaMaxima:945000,
     montoMaxAprobable:12000000,
     historialFondo:'2 créditos previos · Sin moras',
-    creditosActivos:0, periodoNomina:'Abril 2025', cedula:cedula
+    creditosActivos:0, periodoNomina:'Abril 2025', cedula:cedula,
+    score:742, scoreDataCredito:742
   };
 }
 
@@ -1426,13 +1449,24 @@ function updateSummary() {
   const plazoStr = document.getElementById('f-plazo').value || '24 meses';
   const plazo = parseInt(plazoStr);
   const L = LINEAS[lineaActiva];
-  const tasaEA = L.getTasa(plazo);
-  const tasaEM = eaToEm(tasaEA);
-  const cuota = calcCuota(monto, tasaEM, plazo);
+  const lineaId = FondouneSolicitudes?.LINEA_PORTAL_TO_CONFIG?.[lineaActiva];
+
+  let tasaEA = L.getTasa(plazo);
+  let tasaEM = eaToEm(tasaEA);
+  let cuota = calcCuota(monto, tasaEM, plazo);
+
+  if (lineaId && typeof FondouneCreditos !== 'undefined') {
+    const eaCfg = FondouneCreditos.getTasaEA(lineaId, plazo);
+    if (eaCfg != null) {
+      tasaEA = eaCfg;
+      tasaEM = FondouneCreditos.eaAMensual(tasaEA);
+      cuota = FondouneCreditos.calcularCuota(monto, plazo, tasaEA);
+    }
+  }
+
   const totalPagar = cuota * plazo;
   const totalInteres = totalPagar - monto;
 
-  // Actualizar UI del resumen
   document.getElementById('sum-monto').textContent = '$' + monto.toLocaleString('es-CO');
   document.getElementById('sum-linea').textContent = L.nombre;
   document.getElementById('sum-plazo').textContent = plazoStr;
@@ -1441,8 +1475,13 @@ function updateSummary() {
   document.getElementById('sum-interes').textContent = '$' + Math.round(totalInteres).toLocaleString('es-CO');
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $' + Math.round(cuota).toLocaleString('es-CO') + '/mes';
 
-  // Guardar para paso 5
-  window._solicitud = { monto, plazo, tasaEA, tasaEM, cuota: Math.round(cuota), linea: L.nombre, totalInteres: Math.round(totalInteres) };
+  window._solicitud = {
+    monto, plazo, tasaEA, tasaEM,
+    cuota: Math.round(cuota),
+    linea: L.nombre,
+    lineaId,
+    totalInteres: Math.round(totalInteres),
+  };
 }
 
 // ── POBLAR PASO 5 CON DATOS REALES ───────────────────────────
@@ -1479,11 +1518,56 @@ function populatePaso5() {
   }
 }
 
-// Sobrescribir goTo para llamar populatePaso5 al llegar a paso 5
+let _solicitudRegistrada = false;
+
+function registrarSolicitudEnBandeja() {
+  if (typeof FondouneSolicitudes === 'undefined') return null;
+  const payload = FondouneSolicitudes.buildFromPortal({
+    solicitud: window._solicitud,
+    asociado: asociadoData,
+    lineaKey: lineaActiva,
+    cedula: document.getElementById('f-cedula')?.value,
+  });
+  FondouneSession.saveCreditApp(payload);
+  FondouneSession.setSolicitudId(payload.solicitudId);
+  FondouneSession.saveKYC(payload.kyc);
+  FondouneSession.saveNomina(payload.nomina);
+  FondouneSession.pushAnalystQueue(payload);
+  return payload;
+}
+
+function irAFirma() {
+  if (!FondouneSession.getCreditApp()) registrarSolicitudEnBandeja();
+  FondouneSession.queueNotif('Abriendo módulo de firma…', 'info');
+  FondouneNav.navigateTo('firma');
+}
+
+function resetPortal() {
+  _solicitudRegistrada = false;
+  window._solicitud = null;
+  asociadoData = null;
+  clearGasStatus();
+  goTo(1);
+}
+
 const _origGoTo = goTo;
 function goTo(n) {
   _origGoTo(n);
-  if (n === 5) setTimeout(populatePaso5, 100);
+  if (n === 5) {
+    setTimeout(() => {
+      populatePaso5();
+      if (!_solicitudRegistrada) {
+        _solicitudRegistrada = true;
+        const p = registrarSolicitudEnBandeja();
+        if (p) {
+          FondouneSession.showNotif(
+            'Solicitud ' + p.solicitudId + ' enviada a la bandeja del analista.',
+            'success'
+          );
+        }
+      }
+    }, 100);
+  }
 }
 
 // ── DESCARGAR RESUMEN ─────────────────────────────────────────

@@ -6,6 +6,7 @@
 <title>FondoUne — Panel Gerencial</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="fondoune-shared.css">
 <style>
 :root{
   --ink:#0D1520;--ink2:#1A2535;--ink3:#243044;--ink4:#2E3D57;
@@ -186,6 +187,14 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .btn-dark:hover{background:var(--ink2)}
 .btn-revert{background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.2);color:var(--crimson2)}
 .btn-revert:hover{background:rgba(192,57,43,.15)}
+.btn-ok{background:rgba(10,107,69,.1);border-color:rgba(10,107,69,.25);color:var(--emerald2)}
+.btn-ok:hover{background:rgba(10,107,69,.18)}
+
+.gerencia-auth-row{border:1px solid var(--paper3);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;background:var(--paper)}
+.gerencia-auth-row:last-child{margin-bottom:0}
+.gerencia-auth-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.gerencia-auth-meta{font-size:11px;color:var(--slate);line-height:1.55;margin-bottom:10px}
+.gerencia-auth-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(13,21,32,.7);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px)}
@@ -207,6 +216,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
+  <script src="fondoune-ui.js"></script>
   <script>
     FondouneNav.init('gerencia');
 
@@ -228,7 +238,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     })();
   </script>
 </head>
-<body>
+<body class="fu-module-gerencia">
 
 <!-- TOPNAV -->
 <div class="topnav">
@@ -240,7 +250,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <div class="modtag">módulo-03 / gerencia</div>
   <div class="nav-r">
     <div class="live-badge"><div class="live-dot"></div> TIEMPO REAL</div>
-    <div class="nav-btn"><i class="ti ti-bell"></i><div class="pip"></div></div>
+    <div class="nav-btn" id="notif-btn" title="Notificaciones"><i class="ti ti-bell"></i><div class="pip notif-pip" id="notif-pip" style="display:none"></div></div>
     <div class="nav-btn"><i class="ti ti-settings"></i></div>
     <div class="av">DM</div>
   </div>
@@ -449,6 +459,18 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
     </div>
 
+    <!-- Autorizaciones escaladas desde analista (Fase B) -->
+    <div class="card" id="gerencia-queue-card" style="display:none;margin-bottom:14px">
+      <div class="card-head">
+        <div class="card-title"><i class="ti ti-crown"></i> Autorizaciones pendientes</div>
+        <span class="badge b-gold" id="gerencia-queue-badge">0</span>
+      </div>
+      <div class="card-body" id="gerencia-queue-list"></div>
+      <div class="card-foot">
+        <span style="font-size:11px;color:var(--slate)">Solicitudes que superan monto ≥ $15M o % compromiso &gt; 35% · decisión ejecutiva</span>
+      </div>
+    </div>
+
     <!-- ROW 3: Tabla solicitudes recientes + Reversiones -->
     <div class="row row-3-2">
 
@@ -492,7 +514,217 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   </div>
 </div>
 
+<script src="creditos-config.js"></script>
+<script src="solicitudes-bridge.js"></script>
 <script>
+function fmtCOPGerencia(n) {
+  if (typeof FondouneSolicitudes !== 'undefined') return FondouneSolicitudes.fmtCOP(n);
+  return '$' + Number(n).toLocaleString('es-CO');
+}
+
+function syncLegacyFirmaKeys(payload) {
+  const a = payload.asociado || {};
+  sessionStorage.setItem('fondoune_asociado', JSON.stringify({
+    nombre: a.nombre,
+    correo: a.correo || (a.cedula ? String(a.cedula).replace(/\D/g, '') + '@une.net.co' : ''),
+    cedula: a.cedula,
+    empresa: a.empresa,
+    cargo: a.cargo,
+    neto: a.neto,
+    cuotaMaxima: a.cuotaMaxima,
+  }));
+  sessionStorage.setItem('fondoune_monto', String(payload.monto));
+  sessionStorage.setItem('fondoune_plazo', payload.plazoLabel || payload.plazo + ' meses');
+  sessionStorage.setItem('fondoune_linea', payload.tipo);
+  if (payload.tasaEA != null) {
+    sessionStorage.setItem('fondoune_tasa', Number(payload.tasaEA).toFixed(2));
+  }
+}
+
+function getGerenciaUserName() {
+  const u = FondouneSession.getUser();
+  return u?.name || 'Gerencia';
+}
+
+function buildGerenciaQueue() {
+  const card = document.getElementById('gerencia-queue-card');
+  const list = document.getElementById('gerencia-queue-list');
+  const badge = document.getElementById('gerencia-queue-badge');
+  if (!card || !list) return;
+
+  const queue = (typeof FondouneSession !== 'undefined'
+    ? FondouneSession.getGerenciaQueue()
+    : []).filter(q => q.estado === 'gerencia');
+
+  if (!queue.length) {
+    card.style.display = 'none';
+    list.innerHTML = '';
+    if (badge) badge.textContent = '0';
+    return;
+  }
+
+  card.style.display = 'block';
+  if (badge) badge.textContent = String(queue.length);
+  list.innerHTML = '';
+
+  queue.forEach(item => {
+    const a = item.asociado || {};
+    const ini = (a.nombre || '??').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const motivo = item.motivoGerencia || item.notaEscalamiento || 'Escalamiento analista';
+    const tasaTxt = item.tasaEA != null
+      ? Number(item.tasaEA).toFixed(2) + '% E.A.'
+      : (item.lineaId && typeof FondouneCreditos !== 'undefined'
+        ? FondouneCreditos.getTasaEA(item.lineaId, item.plazo).toFixed(2) + '% E.A.'
+        : '—');
+
+    const row = document.createElement('div');
+    row.className = 'gerencia-auth-row';
+    row.innerHTML = `
+      <div class="gerencia-auth-head">
+        <span class="av-sm" style="background:rgba(184,135,42,.15);color:var(--gold)">${ini}</span>
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink)">${a.nombre || 'Asociado'}</div>
+          <div class="mono" style="color:var(--slate);font-size:10px;margin-top:2px">${item.solicitudId} · ${a.cedula || ''}</div>
+        </div>
+        <span class="badge b-gold">${fmtCOPGerencia(item.monto)}</span>
+        <span class="badge b-slate">${item.tipo || '—'} · ${item.plazo || '—'}m</span>
+        <span class="badge b-blue">Score ${item.score ?? '—'}</span>
+      </div>
+      <div class="gerencia-auth-meta">
+        <strong>Motivo:</strong> ${motivo}<br>
+        Tasa vigente: <strong>${tasaTxt}</strong>
+        ${item.escaladaPor ? ' · Escalada por ' + item.escaladaPor : ''}
+      </div>
+      <div class="gerencia-auth-actions">
+        <button type="button" class="btn btn-revert" data-ger-action="rechazar" data-ger-id="${item.solicitudId}">
+          <i class="ti ti-x"></i> Rechazar
+        </button>
+        <button type="button" class="btn btn-ok" data-ger-action="aprobar" data-ger-id="${item.solicitudId}">
+          <i class="ti ti-check"></i> Autorizar crédito
+        </button>
+        <button type="button" class="btn" data-ger-action="firma" data-ger-id="${item.solicitudId}">
+          <i class="ti ti-writing-sign"></i> Autorizar e ir a firma
+        </button>
+      </div>`;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('[data-ger-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openGerenciaDecisionModal(btn.dataset.gerAction, btn.dataset.gerId);
+    });
+  });
+}
+
+let gerenciaModalAction = null;
+let gerenciaModalId = null;
+let gerenciaIrAFirma = false;
+
+function openGerenciaDecisionModal(action, solicitudId) {
+  const item = FondouneSession.getGerenciaQueue().find(q => q.solicitudId === solicitudId);
+  if (!item) return;
+
+  gerenciaModalAction = action === 'firma' ? 'aprobar' : action;
+  gerenciaModalId = solicitudId;
+  gerenciaIrAFirma = action === 'firma';
+
+  const a = item.asociado || {};
+  document.getElementById('m-nota').value = '';
+  document.getElementById('m-nota').style.borderColor = '';
+  document.getElementById('m-title').textContent = gerenciaModalAction === 'aprobar'
+    ? 'Autorizar crédito (gerencia)'
+    : 'Rechazar solicitud (gerencia)';
+  document.getElementById('m-body').textContent =
+    (gerenciaModalAction === 'aprobar'
+      ? 'La autorización queda registrada con firma ejecutiva. El analista y el asociado serán notificados.'
+      : 'El rechazo queda registrado. El analista podrá comunicar el motivo al asociado.') +
+    ` Solicitud ${solicitudId} — ${a.nombre || 'Asociado'} · ${fmtCOPGerencia(item.monto)}.`;
+
+  const cb = document.getElementById('m-confirm');
+  cb.className = gerenciaModalAction === 'aprobar' ? 'btn btn-ok' : 'btn btn-revert';
+  cb.innerHTML = gerenciaModalAction === 'aprobar'
+    ? '<i class="ti ti-check"></i> Confirmar autorización'
+    : '<i class="ti ti-x"></i> Confirmar rechazo';
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function confirmGerenciaDecision() {
+  const nota = document.getElementById('m-nota').value.trim();
+  if (!nota) {
+    document.getElementById('m-nota').style.borderColor = 'var(--crimson2)';
+    document.getElementById('m-nota').focus();
+    return;
+  }
+
+  const item = FondouneSession.getGerenciaQueue().find(q => q.solicitudId === gerenciaModalId);
+  if (!item) return;
+
+  const ejecutivo = getGerenciaUserName();
+  const ts = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+  if (gerenciaModalAction === 'aprobar') {
+    const updated = {
+      ...item,
+      estado: 'aprobado',
+      aprobadoGerencia: ejecutivo,
+      aprobadoGerenciaEn: new Date().toISOString(),
+      notaGerencia: nota,
+    };
+    const log = Array.isArray(updated.log) ? [...updated.log] : [];
+    log.push({
+      ts,
+      txt: '<strong>Autorizado por gerencia</strong> · ' + ejecutivo + ' · "' + nota + '"',
+      dot: 'dot-green',
+    });
+    updated.log = log;
+
+    FondouneSession.saveCreditApp(updated);
+    FondouneSession.pushAnalystQueue(updated);
+    FondouneSession.removeFromGerenciaQueue(gerenciaModalId);
+    FondouneSession.setSolicitudId(gerenciaModalId);
+    syncLegacyFirmaKeys(updated);
+    FondouneSession.saveDecision({
+      solicitudId: gerenciaModalId,
+      accion: 'gerencia_aprobado',
+      ejecutivo,
+      nota,
+      fecha: new Date().toISOString(),
+    });
+    FondouneSession.queueNotif(
+      'Gerencia autorizó ' + (item.asociado?.nombre || gerenciaModalId) + ' · ' + fmtCOPGerencia(item.monto),
+      'success'
+    );
+    showToast('Crédito autorizado por gerencia', 't-ok', 'ti-circle-check');
+    if (gerenciaIrAFirma) {
+      setTimeout(() => FondouneNav.navigateTo('firma', { solicitudId: gerenciaModalId }), 900);
+    }
+  } else {
+    const updated = {
+      ...item,
+      estado: 'rechazado',
+      rechazadoGerencia: ejecutivo,
+      notaGerencia: nota,
+    };
+    FondouneSession.pushAnalystQueue(updated);
+    FondouneSession.removeFromGerenciaQueue(gerenciaModalId);
+    FondouneSession.saveDecision({
+      solicitudId: gerenciaModalId,
+      accion: 'gerencia_rechazado',
+      ejecutivo,
+      nota,
+      fecha: new Date().toISOString(),
+    });
+    showToast('Solicitud rechazada por gerencia', 't-warn', 'ti-circle-x');
+  }
+
+  closeModal();
+  gerenciaModalAction = null;
+  gerenciaModalId = null;
+  gerenciaIrAFirma = false;
+  buildGerenciaQueue();
+  buildTable();
+}
+
 // ── BAR CHART ──
 const barData = [
   {d:'Lun',apro:22,rech:6,pend:4},
@@ -604,14 +836,39 @@ const solsData=[
   {id:'SOL-0843',nm:'Rodrigo A. Ríos',ini:'RR',col:'#EF4444',monto:'$20.000.000',tipo:'Consumo',estado:'rechazado',analista:'M. Rodríguez',score:501,rec:'RECHAZAR'},
 ];
 
+function gerenciaQueueToTableRow(q) {
+  const a = q.asociado || {};
+  const nm = a.nombre || 'Asociado';
+  const ini = nm.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  return {
+    id: q.solicitudId,
+    nm,
+    ini,
+    col: '#B8872A',
+    monto: fmtCOPGerencia(q.monto),
+    tipo: q.tipo || '—',
+    estado: 'gerencia',
+    analista: q.escaladaPor || 'Analista',
+    score: q.score ?? '—',
+    rec: q.rec || 'REVISAR',
+    _fromQueue: true,
+  };
+}
+
 function buildTable(){
   const t=document.getElementById('tbl-sols');
-  const eClass={pendiente:'b-amber',revision:'b-amber',aprobado:'b-green',rechazado:'b-red'};
-  const eTxt={pendiente:'Pendiente',revision:'En revisión',aprobado:'Aprobado',rechazado:'Rechazado'};
+  const eClass={pendiente:'b-amber',revision:'b-amber',gerencia:'b-gold',aprobado:'b-green',rechazado:'b-red'};
+  const eTxt={pendiente:'Pendiente',revision:'En revisión',gerencia:'En gerencia',aprobado:'Aprobado',rechazado:'Rechazado'};
   const rClass={APROBAR:'b-green',REVISAR:'b-amber',RECHAZAR:'b-red'};
+  const queueRows = (typeof FondouneSession !== 'undefined'
+    ? FondouneSession.getGerenciaQueue().filter(q => q.estado === 'gerencia')
+    : []).map(gerenciaQueueToTableRow);
+  const queueIds = new Set(queueRows.map(r => r.id));
+  const merged = [...queueRows, ...solsData.filter(s => !queueIds.has(s.id))];
+
   t.innerHTML=`<thead><tr><th>Asociado</th><th>Monto</th><th>Tipo</th><th>Estado</th><th>Score</th><th>IA</th><th>Analista</th></tr></thead><tbody></tbody>`;
   const tbody=t.querySelector('tbody');
-  solsData.forEach(s=>{
+  merged.forEach(s=>{
     const sc=s.score>=700?'var(--emerald2)':s.score>=600?'var(--amber2)':'var(--crimson2)';
     const tr=document.createElement('tr');
     tr.innerHTML=`
@@ -626,6 +883,20 @@ function buildTable(){
   });
 }
 buildTable();
+buildGerenciaQueue();
+
+setTimeout(() => {
+  const q = typeof FondouneSession !== 'undefined'
+    ? FondouneSession.getGerenciaQueue().filter(x => x.estado === 'gerencia')
+    : [];
+  if (!q.length) return;
+  const latest = q[0];
+  showToast(
+    'Autorización pendiente: ' + (latest.asociado?.nombre || 'Asociado') + ' · ' + fmtCOPGerencia(latest.monto),
+    't-warn',
+    'ti-crown'
+  );
+}, 600);
 
 // ── REVERSIONES ──
 const reversiones=[
@@ -674,6 +945,9 @@ function changePeriod(p){
 // ── MODAL ──
 let modalAction=null,modalId=null;
 function openModal(action,id,nm){
+  gerenciaModalAction=null;
+  gerenciaModalId=null;
+  gerenciaIrAFirma=false;
   modalAction=action;modalId=id;
   document.getElementById('m-nota').value='';
   document.getElementById('m-nota').style.borderColor='';
@@ -684,8 +958,17 @@ function openModal(action,id,nm){
   cb.textContent=action==='revertir'?'Confirmar reversión':'Confirmar denegación';
   document.getElementById('overlay').style.display='flex';
 }
-function closeModal(){document.getElementById('overlay').style.display='none';}
+function closeModal(){
+  document.getElementById('overlay').style.display='none';
+  gerenciaModalAction=null;
+  gerenciaModalId=null;
+  gerenciaIrAFirma=false;
+}
 document.getElementById('m-confirm').onclick=function(){
+  if (gerenciaModalId && gerenciaModalAction) {
+    confirmGerenciaDecision();
+    return;
+  }
   const nota=document.getElementById('m-nota').value.trim();
   if(!nota){document.getElementById('m-nota').style.borderColor='var(--crimson2)';document.getElementById('m-nota').focus();return;}
   closeModal();
@@ -697,12 +980,16 @@ document.getElementById('m-confirm').onclick=function(){
 };
 
 // ── TOAST ──
-function showToast(msg,cls,icon){
-  const t=document.createElement('div');
-  t.className=`toast ${cls}`;
-  t.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span><span class="t-close" onclick="this.parentElement.remove()"><i class="ti ti-x" style="font-size:13px"></i></span>`;
+function showToast(msg, cls, icon) {
+  if (typeof FondouneUI !== 'undefined') {
+    FondouneUI.toast(msg, cls);
+    return;
+  }
+  const t = document.createElement('div');
+  t.className = `toast ${cls}`;
+  t.innerHTML = `<i class="ti ${icon}"></i><span>${msg}</span><span class="t-close" onclick="this.parentElement.remove()"><i class="ti ti-x" style="font-size:13px"></i></span>`;
   document.body.appendChild(t);
-  setTimeout(()=>t&&t.remove(),5000);
+  setTimeout(() => t && t.remove(), 5000);
 }
 </script>
 </body>

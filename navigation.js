@@ -113,6 +113,11 @@ const FondouneNav = (() => {
         display: none;
       }
       @media(min-width:640px) { .fu-user-name { display: block; } }
+      @media (max-width: 720px) {
+        .fu-link-label { display: none; }
+        .fu-mod-tag { display: none; }
+        #fu-nav-links { gap: 0; }
+      }
       .fu-avatar {
         width: 26px; height: 26px; border-radius: 50%;
         background: linear-gradient(135deg, #2563EB, #C9963B);

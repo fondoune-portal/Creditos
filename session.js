@@ -5,22 +5,30 @@
  *
  * Uso: incluir en el <head> de cada módulo HTML
  * <script src="session.js"></script>
+ *
+ * Contrato creditApp (saveCreditApp / pushAnalystQueue):
+ *   solicitudId, monto, plazo, tipo, lineaId, tasaEA, cuota, asociado, kyc, nomina, dc, log, …
  */
 
 const FondouneSession = (() => {
 
   // ── Claves de sessionStorage ────────────────────────────────────
   const KEYS = {
-    USER:        'fu_user',
-    CREDIT_APP:  'fu_credit_app',
-    SOLICITUD_ID:'fu_solicitud_id',
-    NOTIF_QUEUE: 'fu_notif_queue',
-    KYC_DATA:    'fu_kyc_data',
-    NOMINA_DATA: 'fu_nomina_data',
-    DECISION:    'fu_decision',
+    USER:         'fu_user',
+    CREDIT_APP:   'fu_credit_app',
+    SOLICITUD_ID: 'fu_solicitud_id',
+    NOTIF_QUEUE:  'fu_notif_queue',
+    NOTIF_LOG:    'fu_notif_log',
+    ANALYST_QUEUE:'fu_analista_cola',
+    GERENCIA_QUEUE:'fu_gerencia_cola',
+    KYC_DATA:     'fu_kyc_data',
+    NOMINA_DATA:  'fu_nomina_data',
+    DECISION:     'fu_decision',
   };
 
   // ── Estilos de notificaciones ───────────────────────────────────
+  const MAX_NOTIF_LOG = 40;
+
   const NOTIF_STYLES = {
     success: { bg:'#EAF5EE', border:'rgba(26,122,74,.25)', color:'#1A7A4A', icon:'ti-circle-check' },
     info:    { bg:'#EFF4FB', border:'rgba(26,107,173,.2)',  color:'#1A5A9A', icon:'ti-info-circle'  },
@@ -110,6 +118,70 @@ const FondouneSession = (() => {
     return sessionStorage.getItem(KEYS.SOLICITUD_ID) || null;
   }
 
+  // ── COLA BANDEJA ANALISTA (portal → módulo 2) ───────────────────
+  function getAnalystQueue() {
+    try {
+      return JSON.parse(sessionStorage.getItem(KEYS.ANALYST_QUEUE)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Añade o actualiza una solicitud en la bandeja del analista.
+   * @param {object} creditAppPayload — ver contrato en cabecera del archivo
+   */
+  function pushAnalystQueue(creditAppPayload) {
+    if (!creditAppPayload?.solicitudId) {
+      console.warn('[FondouneSession] pushAnalystQueue: falta solicitudId');
+      return null;
+    }
+    const entry = {
+      ...creditAppPayload,
+      _queuedAt: new Date().toISOString(),
+    };
+    const queue = getAnalystQueue().filter(
+      q => q.solicitudId !== entry.solicitudId
+    );
+    queue.unshift(entry);
+    sessionStorage.setItem(KEYS.ANALYST_QUEUE, JSON.stringify(queue));
+    return entry;
+  }
+
+  function removeFromAnalystQueue(solicitudId) {
+    const queue = getAnalystQueue().filter(q => q.solicitudId !== solicitudId);
+    sessionStorage.setItem(KEYS.ANALYST_QUEUE, JSON.stringify(queue));
+  }
+
+  // ── COLA AUTORIZACIÓN GERENCIA (módulo 2 → módulo 3) ─────────────
+  function getGerenciaQueue() {
+    try {
+      return JSON.parse(sessionStorage.getItem(KEYS.GERENCIA_QUEUE)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function pushGerenciaQueue(creditAppPayload) {
+    if (!creditAppPayload?.solicitudId) return null;
+    const entry = {
+      ...creditAppPayload,
+      estado: 'gerencia',
+      _escaladaAt: new Date().toISOString(),
+    };
+    const queue = getGerenciaQueue().filter(
+      q => q.solicitudId !== entry.solicitudId
+    );
+    queue.unshift(entry);
+    sessionStorage.setItem(KEYS.GERENCIA_QUEUE, JSON.stringify(queue));
+    return entry;
+  }
+
+  function removeFromGerenciaQueue(solicitudId) {
+    const queue = getGerenciaQueue().filter(q => q.solicitudId !== solicitudId);
+    sessionStorage.setItem(KEYS.GERENCIA_QUEUE, JSON.stringify(queue));
+  }
+
   // ── DATOS KYC ────────────────────────────────────────────────────
   function saveKYC(data) {
     sessionStorage.setItem(KEYS.KYC_DATA, JSON.stringify(data));
@@ -150,8 +222,75 @@ const FondouneSession = (() => {
    * @param {string} type  - 'success' | 'info' | 'warning' | 'error'
    * @param {number} duration - ms antes de desaparecer (0 = manual)
    */
+  function recordNotif(msg, type = 'info', source = 'live') {
+    try {
+      const log = getNotifLog();
+      log.unshift({
+        id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        msg,
+        type,
+        ts: Date.now(),
+        read: false,
+        source,
+      });
+      sessionStorage.setItem(
+        KEYS.NOTIF_LOG,
+        JSON.stringify(log.slice(0, MAX_NOTIF_LOG))
+      );
+    } catch (e) {
+      console.warn('[FondouneSession] recordNotif:', e);
+    }
+  }
+
+  function getNotifLog() {
+    try {
+      return JSON.parse(sessionStorage.getItem(KEYS.NOTIF_LOG)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function markNotifRead(id) {
+    const log = getNotifLog().map(n =>
+      n.id === id ? { ...n, read: true } : n
+    );
+    sessionStorage.setItem(KEYS.NOTIF_LOG, JSON.stringify(log));
+  }
+
+  function markAllNotifsRead() {
+    const log = getNotifLog().map(n => ({ ...n, read: true }));
+    sessionStorage.setItem(KEYS.NOTIF_LOG, JSON.stringify(log));
+  }
+
+  function getUnreadNotifCount() {
+    return getNotifLog().filter(n => !n.read).length;
+  }
+
+  /** Resumen de pendientes en sesión (bandejas). */
+  function getActivitySummary() {
+    const analista = getAnalystQueue();
+    const gerencia = getGerenciaQueue();
+    return {
+      analistaPendientes: analista.filter(q =>
+        ['pendiente', 'revision'].includes(q.estado)
+      ).length,
+      gerenciaPendientes: gerencia.filter(q => q.estado === 'gerencia').length,
+      portalNuevas: analista.filter(q => q.origen === 'portal_asociado' &&
+        ['pendiente', 'revision'].includes(q.estado)
+      ).length,
+    };
+  }
+
+  function escapeNotifHtml(msg) {
+    return String(msg)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
   function showNotif(msg, type = 'info', duration = 4500) {
     injectStyles();
+    recordNotif(msg, type, 'live');
     const st = NOTIF_STYLES[type] || NOTIF_STYLES.info;
 
     const notif = document.createElement('div');
@@ -159,16 +298,22 @@ const FondouneSession = (() => {
     notif.style.cssText = `background:${st.bg};border-color:${st.border};color:${st.color}`;
     notif.innerHTML = `
       <i class="ti ${st.icon} fu-notif-icon"></i>
-      <span class="fu-notif-txt">${msg}</span>
+      <span class="fu-notif-txt">${escapeNotifHtml(msg)}</span>
       <i class="ti ti-x fu-notif-close" onclick="this.closest('.fu-notif').remove()"></i>`;
 
-    // Apilar verticalmente si hay otras notificaciones
-    const existing = document.querySelectorAll('.fu-notif');
-    let topOffset = 20;
-    existing.forEach(n => { topOffset += n.offsetHeight + 8; });
+    const nav = document.getElementById('fu-navbar');
+    let topOffset = nav ? nav.offsetHeight + 12 : 20;
+    document.querySelectorAll('.fu-notif').forEach(n => {
+      topOffset += n.offsetHeight + 8;
+    });
     notif.style.top = topOffset + 'px';
+    notif.style.right = '20px';
 
     document.body.appendChild(notif);
+
+    if (typeof FondouneUI !== 'undefined') {
+      FondouneUI.refreshNotifPip();
+    }
 
     if (duration > 0) {
       setTimeout(() => {
@@ -198,7 +343,9 @@ const FondouneSession = (() => {
       sessionStorage.removeItem(KEYS.NOTIF_QUEUE);
       // Mostrar con pequeño delay para que la página cargue
       queue.forEach((n, i) => {
-        setTimeout(() => showNotif(n.msg, n.type), 300 + i * 600);
+        setTimeout(() => {
+          showNotif(n.msg, n.type);
+        }, 300 + i * 600);
       });
     } catch (e) {
       console.warn('[FondouneSession] flushNotifQueue error:', e);
@@ -237,6 +384,12 @@ const FondouneSession = (() => {
     getCreditApp,
     setSolicitudId,
     getSolicitudId,
+    getAnalystQueue,
+    pushAnalystQueue,
+    removeFromAnalystQueue,
+    getGerenciaQueue,
+    pushGerenciaQueue,
+    removeFromGerenciaQueue,
     // KYC y nómina
     saveKYC, getKYC,
     saveNomina, getNomina,
@@ -246,6 +399,13 @@ const FondouneSession = (() => {
     showNotif,
     queueNotif,
     flushNotifQueue,
+    showPendingNotifs: flushNotifQueue,
+    getNotifLog,
+    markNotifRead,
+    markAllNotifsRead,
+    getUnreadNotifCount,
+    getActivitySummary,
+    recordNotif,
     // Sesión
     clear,
     logout,
