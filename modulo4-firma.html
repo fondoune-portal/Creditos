@@ -15,9 +15,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"></noscript>
 
-<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"></noscript>
-<link rel="stylesheet" href="fondoune-shared.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
@@ -408,7 +407,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="consent-check" id="cb2"><i class="ti ti-check"></i></div>
         <div class="consent-txt">
           <div class="ct-title">Autorizo el desembolso a mi cuenta bancaria registrada</div>
-          <div class="ct-body">Confirmo que la cuenta Bancolombia No. *** *** 4821 registrada es la correcta para recibir el desembolso de $8.000.000 COP hoy.</div>
+          <div class="ct-body">Confirmo que la cuenta Bancolombia No. *** *** 4821 registrada es la correcta para recibir el desembolso de $8.000.000 COP.</div>
         </div>
       </div>
       <div class="consent-item" id="c3" onclick="toggleConsent('c3','cb3')">
@@ -454,7 +453,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div style="display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
       <button class="btn" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir</button>
-      <button class="btn gold" onclick="showToast('Descargando pagaré PDF…','ok')"><i class="ti ti-download"></i> Descargar pagaré</button>
+      <button class="btn gold" onclick="descargarPagarePDF()">
+        <i class="ti ti-download"></i>
+        Descargar pagar PDF
+      </button>
       <button class="btn success-btn" onclick="showToast('Redirigiendo al inicio…','ok')"><i class="ti ti-home"></i> Ir al inicio</button>
     </div>
   </div>
@@ -798,6 +800,21 @@ function showToast(msg, type = 'ok') {
   document.body.appendChild(t);
 
   setTimeout(()=>t.remove(),4000);
+
+function descargarPagarePDF() {
+  const element = document.getElementById('main-content');
+
+  const opt = {
+    margin: [10, 10, 12, 10],
+    filename: 'Pagare_FondoUne_SOL-2025-0847_Carlos-Andres-Gil.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  showToast('Generando PDF profesional...', 'ok');
+  html2pdf().set(opt).from(element).save();
 }
 </script>
 </body>
