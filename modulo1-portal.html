@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="fondoune-shared.css">
 <style>
   :root {
     --navy:   #0B2545;
@@ -366,20 +365,6 @@
   .status-bar .sb-dot.warn { background: var(--gold2); }
   .status-bar .sb-dot.idle { background: var(--muted); }
 
-  /* ── SELECTOR LÍNEA DE CRÉDITO ── */
-  .linea-card {
-    border: 1.5px solid var(--border); border-radius: var(--r-sm);
-    padding: 14px 10px; text-align: center; cursor: pointer;
-    background: var(--cream); transition: all 0.2s;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  .linea-card:hover { border-color: var(--blue); background: var(--white); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(11,37,69,.08); }
-  .linea-card.active { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,37,69,.08); }
-  .lc-name { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
-  .lc-tasa { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .linea-card.active .lc-name { color: var(--blue); }
-  .linea-card.active .lc-tasa { color: var(--navy2); }
-
   /* ── SELECTOR BANCO ── */
   .bank-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 1rem 0; }
   .bank-btn {
@@ -404,60 +389,21 @@
     .bank-grid { grid-template-columns: repeat(2,1fr); }
   }
 </style>
-  <!-- FondoUne: configuración Google Apps Script -->
-  <script>
-  // ╔══════════════════════════════════════════════════════════╗
-  // ║  CONFIGURACIÓN — reemplaza con tu URL de Apps Script     ║
-  // ╚══════════════════════════════════════════════════════════╝
-  const GAS_URL = 'https://script.google.com/macros/s/TU_SCRIPT_ID/exec';
-  let asociadoData = null;
-  </script>
+  <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
   <script src="session.js"></script>
-  <script src="fondoune-ui.js"></script>
-  <script src="creditos-config.js"></script>
-  <script src="solicitudes-bridge.js"></script>
-  <script>
-    FondouneNav.init('solicitud');
-    (function () {
-      if (!FondouneSession.isLoggedIn()) {
-        window.location.replace('index.html');
-        return;
-      }
-      const u = FondouneSession.getUser();
-      const rol = u?.role || 'asociado';
-      const acceso = FondouneNav.ACCESO_ROL[rol] || [];
-      if (!acceso.includes('solicitud')) {
-        FondouneSession.queueNotif('No tienes permiso para el portal de solicitud.', 'error');
-        window.location.replace('index.html');
-      }
-    })();
-  </script>
+  <script>FondouneNav.init('solicitud');</script>
 </head>
-<body class="fu-module-portal">
+<body>
 
-<div class="portal portal-shell">
-
-  <!-- LOADING OVERLAY -->
-  <div id="gas-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,37,69,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-    <div style="width:52px;height:52px;border:3px solid rgba(255,255,255,.2);border-top-color:#F0C060;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-    <div style="color:#fff;font-size:14px;font-weight:500;" id="gas-overlay-msg">Consultando datos del asociado…</div>
-    <div style="color:rgba(255,255,255,.5);font-size:11px;">Leyendo Google Sheets vía Apps Script</div>
-  </div>
+<div class="portal">
 
   <!-- HEADER -->
   <div class="header">
-    <a href="index.html" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--white);margin-right:4px;transition:all .2s;" onmouseover="this.style.borderColor='var(--navy)'" onmouseout="this.style.borderColor='var(--border)'">
-      <i class="ti ti-chevron-left" style="font-size:14px;"></i> Inicio
-    </a>
     <div class="logo-block"><i class="ti ti-building-bank"></i></div>
     <div class="logo-text">
       <h1>FondoUne</h1>
-      <p>Portal de Solicitud — Módulo 1</p>
+      <p>Portal de Crédito Inteligente — Prototipo v1.0</p>
     </div>
     <div class="header-right">
       <div class="secure-badge"><i class="ti ti-shield-check" style="font-size:13px;"></i> Sesión segura</div>
@@ -478,50 +424,37 @@
     <div class="card">
       <div class="card-eyebrow">Paso 1 de 5</div>
       <div class="card-title">Acceso al portal</div>
-      <div class="card-sub">Ingresa tu número de cédula. El sistema consultará automáticamente tu información desde la base de datos del fondo.</div>
+      <div class="card-sub">Ingresa con tu número de cédula y correo corporativo para verificar que eres un asociado activo.</div>
 
       <div class="form-grid">
         <div class="field">
           <label>Número de cédula <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="f-cedula" placeholder="Ej. 1045678901" oninput="clearGasStatus()">
+          <input type="text" id="f-cedula" placeholder="Ej. 1045678901" value="1045678901">
         </div>
         <div class="field">
           <label>Correo corporativo <span style="color:var(--danger)">*</span></label>
-          <input type="email" id="f-email" placeholder="nombre@une.net.co" readonly style="background:var(--cream);color:var(--muted);">
-          <span class="hint">Se completará automáticamente desde la base de datos</span>
+          <input type="email" id="f-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co">
         </div>
       </div>
       <div class="form-grid">
         <div class="field">
           <label>Celular registrado</label>
-          <input type="tel" id="f-cel" placeholder="Se carga desde el fondo" readonly style="background:var(--cream);color:var(--muted);">
+          <input type="tel" id="f-cel" placeholder="+57 300 000 0000" value="+57 314 802 4500">
         </div>
         <div class="field">
           <label>Código de empleado</label>
-          <input type="text" id="f-codigo" placeholder="Se carga desde el fondo" readonly style="background:var(--cream);color:var(--muted);">
+          <input type="text" placeholder="Ej. UNE-04321" value="UNE-04321">
         </div>
       </div>
 
-      <!-- GAS STATUS CARD (hidden until fetch) -->
-      <div id="gas-status-card" style="display:none;border-radius:var(--r-sm);padding:14px 16px;margin:12px 0;font-size:13px;line-height:1.6;display:none;align-items:flex-start;gap:10px;"></div>
-
-      <!-- Datos cargados del asociado -->
-      <div id="asociado-preview" class="hidden">
-        <hr class="divider">
-        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-database" style="color:var(--blue)"></i> Datos cargados desde Google Sheets
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="asociado-grid"></div>
-      </div>
-
-      <div class="sec-layers" style="margin-top:1rem;">
+      <div class="sec-layers">
         <div class="sec-item">
-          <div class="sec-icon" style="background:#EFF4FB;"><i class="ti ti-table" style="color:var(--blue);"></i></div>
-          <div><div class="sec-title">Google Sheets — Base del fondo</div><div class="sec-sub">Validamos que la cédula pertenece a un asociado activo con cupo disponible</div></div>
+          <div class="sec-icon" style="background:#EFF4FB;"><i class="ti ti-users" style="color:var(--blue);"></i></div>
+          <div><div class="sec-title">Base interna</div><div class="sec-sub">Validamos que la cédula pertenece a un asociado activo del fondo</div></div>
         </div>
         <div class="sec-item">
           <div class="sec-icon" style="background:#EAF5EE;"><i class="ti ti-mail-check" style="color:var(--success);"></i></div>
-          <div><div class="sec-title">Verificación de estado</div><div class="sec-sub">Se confirma que el asociado está activo y no tiene obligaciones vencidas</div></div>
+          <div><div class="sec-title">Correo corporativo</div><div class="sec-sub">Confirma que sigues siendo empleado activo en la empresa</div></div>
         </div>
       </div>
 
@@ -531,9 +464,7 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn primary" onclick="verificarAsociado()">
-          <i class="ti ti-database"></i> Verificar y continuar
-        </button>
+        <button class="btn primary" onclick="goTo(2)">Continuar <i class="ti ti-arrow-right"></i></button>
       </div>
     </div>
   </div>
@@ -640,80 +571,13 @@
     <div class="card">
       <div class="card-eyebrow">Paso 3 de 5 — Solicitud de Crédito</div>
       <div class="card-title">Configura tu crédito</div>
-      <div class="card-sub">Selecciona la línea y el sistema ajustará automáticamente la tasa vigente, los plazos disponibles y la cuota estimada.</div>
-
-      <!-- SELECTOR DE LÍNEA DE CRÉDITO -->
-      <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Línea de crédito <span style="color:var(--danger)">*</span></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin-bottom:1.25rem;" id="lineas-grid">
-
-        <div class="linea-card active" data-linea="libre" onclick="selectLinea(this)">
-          <i class="ti ti-wallet" style="font-size:20px;margin-bottom:6px;color:var(--blue)"></i>
-          <div class="lc-name">Libre inversión</div>
-          <div class="lc-tasa">Desde 14.03% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="crediexpress" onclick="selectLinea(this)">
-          <i class="ti ti-bolt" style="font-size:20px;margin-bottom:6px;color:var(--gold)"></i>
-          <div class="lc-name">CrediExpress</div>
-          <div class="lc-tasa">Hasta 5 SMMLV · 24 m</div>
-        </div>
-        <div class="linea-card" data-linea="educativo" onclick="selectLinea(this)">
-          <i class="ti ti-school" style="font-size:20px;margin-bottom:6px;color:var(--blue)"></i>
-          <div class="lc-name">Educativo</div>
-          <div class="lc-tasa">Desde 13.73% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="vivienda" onclick="selectLinea(this)">
-          <i class="ti ti-home" style="font-size:20px;margin-bottom:6px;color:var(--navy2)"></i>
-          <div class="lc-name">Vivienda</div>
-          <div class="lc-tasa">Desde 13.26% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="salud" onclick="selectLinea(this)">
-          <i class="ti ti-heart-rate-monitor" style="font-size:20px;margin-bottom:6px;color:#E74C3C"></i>
-          <div class="lc-name">Salud</div>
-          <div class="lc-tasa">Desde 12.56% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="vehiculo" onclick="selectLinea(this)">
-          <i class="ti ti-car" style="font-size:20px;margin-bottom:6px;color:var(--navy2)"></i>
-          <div class="lc-name">Vehículos</div>
-          <div class="lc-tasa">Desde 16.11% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="vacacional" onclick="selectLinea(this)">
-          <i class="ti ti-beach" style="font-size:20px;margin-bottom:6px;color:var(--gold)"></i>
-          <div class="lc-name">Vacacional</div>
-          <div class="lc-tasa">Desde 14.03% E.A.</div>
-        </div>
-        <div class="linea-card" data-linea="creditributo" onclick="selectLinea(this)">
-          <i class="ti ti-receipt-tax" style="font-size:20px;margin-bottom:6px;color:var(--muted)"></i>
-          <div class="lc-name">Creditributo</div>
-          <div class="lc-tasa">Hasta 20 SMMLV</div>
-        </div>
-        <div class="linea-card" data-linea="solidario" onclick="selectLinea(this)">
-          <i class="ti ti-heart-handshake" style="font-size:20px;margin-bottom:6px;color:var(--success)"></i>
-          <div class="lc-name">Solidario</div>
-          <div class="lc-tasa">Calamidad · Exequias</div>
-        </div>
-        <div class="linea-card" data-linea="especial" onclick="selectLinea(this)">
-          <i class="ti ti-star" style="font-size:20px;margin-bottom:6px;color:var(--gold)"></i>
-          <div class="lc-name">Especial</div>
-          <div class="lc-tasa">Compra cartera · 13.88%</div>
-        </div>
-        <div class="linea-card" data-linea="crediprima" onclick="selectLinea(this)">
-          <i class="ti ti-calendar-stats" style="font-size:20px;margin-bottom:6px;color:var(--blue)"></i>
-          <div class="lc-name">Crediprima</div>
-          <div class="lc-tasa">Pago semestral · 3 años</div>
-        </div>
-
-      </div>
-
-      <!-- INFO DE LÍNEA SELECCIONADA -->
-      <div id="linea-info" style="background:var(--cream);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:1rem;font-size:13px;line-height:1.6;color:var(--navy);">
-        <strong>Libre inversión:</strong> Crédito cuya destinación queda a voluntad del asociado para dar solución a sus necesidades de consumo.
-      </div>
+      <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
 
       <div class="form-grid">
         <div class="field">
           <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
           <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
-          <span class="hint" id="monto-hint">Máximo aprobable según perfil: $12.000.000</span>
+          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
         </div>
         <div class="field">
           <label>Plazo <span style="color:var(--danger)">*</span></label>
@@ -726,17 +590,39 @@
           </select>
         </div>
       </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Tipo de crédito</label>
+          <select>
+            <option selected>Crédito de consumo</option>
+            <option>Educativo</option>
+            <option>Vivienda</option>
+            <option>Emergencia médica</option>
+            <option>Libranza especial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Destino</label>
+          <select>
+            <option>Gastos personales</option>
+            <option>Educación</option>
+            <option>Salud</option>
+            <option>Remodelación hogar</option>
+            <option>Consolidación deudas</option>
+          </select>
+        </div>
+      </div>
 
       <!-- Validación capacidad de pago -->
       <hr class="divider">
       <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">Fuentes de información para el análisis</div>
 
-      <div class="note info"><i class="ti ti-info-circle"></i> Los datos de nómina fueron cargados automáticamente desde la base de datos del fondo. Puedes adjuntar el desprendible para confirmación adicional.</div>
+      <div class="note info"><i class="ti ti-info-circle"></i> Dado que no tenemos acceso directo a la nómina, puedes adjuntar tu desprendible de pago. La IA lo leerá automáticamente — no necesitas llenar ningún formulario adicional.</div>
 
       <div class="upload-zone" id="uz-nomina" onclick="simulateNomina()" style="margin:10px 0;">
         <i class="ti ti-file-invoice" id="uz-nomina-icon"></i>
-        <strong id="uz-nomina-status">Adjuntar desprendible de nómina (PDF) — opcional</strong>
-        <p>La IA lo lee automáticamente · Solo para confirmación adicional</p>
+        <strong id="uz-nomina-status">Adjuntar desprendible de nómina (PDF)</strong>
+        <p>Opcional pero acelera el proceso · La IA extrae los datos automáticamente</p>
       </div>
       <div id="nomina-result" class="hidden">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">
@@ -762,16 +648,11 @@
 
       <hr class="divider">
       <div style="background:var(--cream);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">
-          Resumen preliminar
-          <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span>
-        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Resumen preliminar <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span></div>
         <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
-        <div class="summary-row"><span class="lbl">Línea</span><span class="val" id="sum-linea">Libre inversión</span></div>
-        <div class="summary-row"><span class="lbl">Plazo</span><span class="val" id="sum-plazo">24 meses</span></div>
-        <div class="summary-row"><span class="lbl">Tasa E.A.</span><span class="val" id="sum-tasa">14.03%</span></div>
-        <div class="summary-row"><span class="lbl">Tasa E.M.</span><span class="val" id="sum-tasaem">1.10%</span></div>
-        <div class="summary-row"><span class="lbl">Interés total</span><span class="val" id="sum-interes">—</span></div>
+        <div class="summary-row"><span class="lbl">Plazo</span><span class="val">24 meses</span></div>
+        <div class="summary-row"><span class="lbl">Tasa</span><span class="val">1,1% E.M.</span></div>
+        <div class="summary-row"><span class="lbl">Tipo</span><span class="val">Crédito de consumo</span></div>
       </div>
 
       <div class="btn-row">
@@ -897,13 +778,13 @@
 
       <div class="note ok">
         <i class="ti ti-mail-check"></i>
-        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong id="result-email">—</strong>. Tienes 48 horas para firmarlo.</span>
+        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong>carlos.g***@une.net.co</strong>. Tienes 48 horas para firmarlo.</span>
       </div>
 
       <div class="btn-row">
         <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
-        <button class="btn gold" onclick="irAFirma()"><i class="ti ti-writing-sign"></i> Firmar pagaré electrónico</button>
-        <button class="btn primary" onclick="descargarResumen()"><i class="ti ti-download"></i> Descargar resumen</button>
+        <button class="btn gold"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
+        <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
       </div>
     </div>
   </div>
@@ -919,39 +800,6 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-//  GOOGLE APPS SCRIPT — INTEGRACIÓN
-//  El GAS debe estar publicado como "Cualquiera, incluso anónimos"
-//  y retornar JSON con Content-Type application/json.
-//
-//  Estructura esperada de respuesta exitosa:
-//  {
-//    "success": true,
-//    "data": {
-//      "nombre":           "Carlos Andrés Gil",
-//      "correo":           "carlos.gil@une.net.co",
-//      "celular":          "+57 314 802 4500",
-//      "codigoEmpleado":   "UNE-04321",
-//      "empresa":          "Tigo-UNE S.A.S.",
-//      "cargo":            "Técnico de Redes",
-//      "antiguedad":       "5 años",
-//      "estadoAsociado":   "ACTIVO",
-//      "salarioBasico":    3800000,
-//      "devengado":        4250000,
-//      "deducciones":      1100000,
-//      "neto":             3150000,
-//      "libranzas":        0,
-//      "cuotaMaxima":      945000,
-//      "montoMaxAprobable":12000000,
-//      "historialFondo":   "2 créditos previos - Sin moras",
-//      "creditosActivos":  0,
-//      "periodoNomina":    "Abril 2025"
-//    }
-//  }
-//
-//  Error: { "success": false, "error": "Asociado no encontrado" }
-// ═══════════════════════════════════════════════════════════════
-
 // ── NAVIGATION ──
 let currentStep = 1;
 const steps = [1,2,3,4,5];
@@ -974,195 +822,6 @@ function goTo(n) {
   if (n === 4) startValidation();
 }
 
-// ── GOOGLE APPS SCRIPT — FETCH ASOCIADO ──────────────────────
-function showOverlay(msg){
-  const ov = document.getElementById('gas-overlay');
-  document.getElementById('gas-overlay-msg').textContent = msg;
-  ov.style.display='flex';
-}
-function hideOverlay(){ document.getElementById('gas-overlay').style.display='none'; }
-
-function clearGasStatus(){
-  const sc = document.getElementById('gas-status-card');
-  sc.style.display='none';
-  document.getElementById('asociado-preview').classList.add('hidden');
-  // reset readonly fields
-  ['f-email','f-cel','f-codigo'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  asociadoData=null;
-}
-
-function fmt(n){ return '$'+Number(n).toLocaleString('es-CO'); }
-
-async function verificarAsociado(){
-  const cedula = (document.getElementById('f-cedula').value||'').trim();
-  if(!cedula){ showGasStatus('error','Ingresa tu número de cédula para continuar.'); return; }
-  if(!document.getElementById('c1').checked){ showGasStatus('error','Debes aceptar la autorización de datos para continuar.'); return; }
-
-  showOverlay('Consultando base de datos del fondo…');
-
-  try {
-    // ── Llamada al GAS ──────────────────────────────────────────
-    // CORS: el GAS debe responder con los headers apropiados
-    // o usar el patrón JSONP si hay problemas de CORS:
-    // const url = GAS_URL + '?cedula=' + encodeURIComponent(cedula) + '&callback=gasCallback';
-    const url = GAS_URL + '?action=getAsociado&cedula=' + encodeURIComponent(cedula);
-    const resp = await fetch(url, { method:'GET', redirect:'follow' });
-
-    if(!resp.ok) throw new Error('Error de red: ' + resp.status);
-    const json = await resp.json();
-
-    hideOverlay();
-
-    if(!json.success){
-      showGasStatus('error', json.error || 'Asociado no encontrado en la base de datos del fondo.');
-      return;
-    }
-
-    // ── Poblar datos ─────────────────────────────────────────────
-    asociadoData = json.data;
-    populateFromGAS(asociadoData);
-    showGasStatus('ok', '✓ Asociado verificado: <strong>' + asociadoData.nombre + '</strong> · Estado: <strong>' + asociadoData.estadoAsociado + '</strong>');
-
-    // Avanzar automáticamente después de 1 s
-    setTimeout(() => goTo(2), 1000);
-
-  } catch(err) {
-    hideOverlay();
-    // ── FALLBACK DEMO — activa cuando GAS_URL no está configurada ──
-    if(GAS_URL.includes('TU_SCRIPT_ID')){
-      asociadoData = getDemoData(cedula);
-      populateFromGAS(asociadoData);
-      showGasStatus('warn', '⚠ Modo demo — GAS_URL no configurada. Datos de prueba cargados para cédula <strong>' + cedula + '</strong>.');
-      setTimeout(() => goTo(2), 1200);
-    } else {
-      showGasStatus('error', 'No se pudo conectar con Google Apps Script. Verifica que la URL esté publicada y con acceso público.<br><small style="opacity:.7">' + err.message + '</small>');
-    }
-  }
-}
-
-function showGasStatus(type, html){
-  const sc = document.getElementById('gas-status-card');
-  const styles = {
-    ok:   'background:#EAF5EE;border:1px solid rgba(26,122,74,.2);color:#1A7A4A;',
-    error:'background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#C0392B;',
-    warn: 'background:#FEF6E6;border:1px solid rgba(201,150,59,.25);color:#7A5000;'
-  };
-  const icons = { ok:'ti-circle-check', error:'ti-alert-circle', warn:'ti-alert-triangle' };
-  sc.style.cssText = 'display:flex;' + styles[type];
-  sc.innerHTML = '<i class="ti ' + icons[type] + '" style="font-size:18px;flex-shrink:0;margin-top:1px"></i><span>' + html + '</span>';
-}
-
-function populateFromGAS(d){
-  // Campos readonly del paso 1
-  setVal('f-email', d.correo);
-  setVal('f-cel', d.celular);
-  setVal('f-codigo', d.codigoEmpleado);
-
-  // Preview de datos del asociado
-  const grid = document.getElementById('asociado-grid');
-  const items = [
-    ['NOMBRE',       d.nombre],
-    ['EMPRESA',      d.empresa],
-    ['CARGO',        d.cargo],
-    ['ANTIGÜEDAD',   d.antiguedad],
-    ['BÁSICO',       fmt(d.salarioBasico)],
-    ['DEVENGADO',    fmt(d.devengado)],
-    ['DEDUCCIONES',  fmt(d.deducciones)],
-    ['NETO',         fmt(d.neto)],
-    ['CUOTA MÁX.',   fmt(d.cuotaMaxima)],
-  ];
-  grid.innerHTML = items.map(([l,v])=>`
-    <div style="background:var(--cream);border-radius:8px;padding:10px;">
-      <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">${l}</div>
-      <div style="font-size:12.5px;font-weight:600;font-family:'DM Mono',monospace;">${v}</div>
-    </div>`).join('');
-  document.getElementById('asociado-preview').classList.remove('hidden');
-
-  // Actualizar la vista KYC-OCR con el nombre real
-  updateKycView(d);
-
-  // Actualizar nómina en paso 3
-  updateNominaView(d);
-
-  // Actualizar monto máximo
-  const hint = document.querySelector('#f-monto + .hint, .field .hint');
-  if(hint) hint.textContent = 'Máximo aprobable según perfil: ' + fmt(d.montoMaxAprobable);
-
-  // Actualizar validaciones con datos reales
-  updateValidations(d);
-}
-
-function setVal(id, val){
-  const el = document.getElementById(id);
-  if(el && val) el.value = val;
-}
-
-function updateKycView(d){
-  // Actualizar el bloque OCR del paso 2
-  const ocr = document.getElementById('ocr-result');
-  if(!ocr) return;
-  const divs = ocr.querySelectorAll('[style*="font-size:13px"]');
-  if(divs[0]) divs[0].textContent = d.nombre;
-  if(divs[1]) divs[1].textContent = d.cedula || document.getElementById('f-cedula').value;
-  // Actualizar 2FA mensaje
-  const s2fa = document.getElementById('kyc-2fa-card');
-  if(s2fa && d.celular && d.correo){
-    const sub = s2fa.querySelector('.card-sub');
-    const cel = d.celular.replace(/(\d{3})(\d{3})(\d{4})/,'$1 *** $3');
-    const mail = d.correo.replace(/^(.{2}).+(@.+)$/,'$1***$2');
-    if(sub) sub.innerHTML = 'Enviamos un código de 6 dígitos a <strong>' + d.celular + '</strong> y un enlace a <strong>' + d.correo + '</strong>. Ingresa el código para continuar.';
-  }
-}
-
-function updateNominaView(d){
-  const nr = document.getElementById('nomina-result');
-  if(!nr) return;
-  const vals = nr.querySelectorAll('[style*="DM Mono"]');
-  const fK = n => '$'+Math.round(n/1000)+'K';
-  if(vals[0]) vals[0].textContent = fK(d.salarioBasico);
-  if(vals[1]) vals[1].textContent = fK(d.devengado);
-  if(vals[2]) vals[2].textContent = fK(d.deducciones);
-  if(vals[3]) vals[3].textContent = fK(d.neto);
-  const note = nr.querySelector('.note');
-  if(note && d.empresa) note.innerHTML = '<i class="ti ti-check"></i> Nómina leída por IA · Empresa: <strong>' + d.empresa + '</strong> · Periodo: ' + (d.periodoNomina||'Última disponible') + ' · Libranzas previas: ' + fmt(d.libranzas||0);
-  // Simular nomina done
-  const uz = document.getElementById('uz-nomina');
-  const uzs = document.getElementById('uz-nomina-status');
-  const uzi = document.getElementById('uz-nomina-icon');
-  if(uz && !uz.classList.contains('done')){
-    uz.classList.add('done');
-    if(uzi) uzi.className='ti ti-circle-check';
-    if(uzs) uzs.textContent='✓ Datos cargados desde Google Sheets — '+d.empresa;
-    nr.classList.remove('hidden');
-  }
-}
-
-function updateValidations(d){
-  // Sobreescribir resultados de validación con datos reales
-  validations[3].result = 'Cap. ' + fmt(d.cuotaMaxima).replace('$','$') + '/mes';
-  validations[3].detail = Math.round((391800/(d.neto||3150000))*100) + '% compromiso';
-  validations[2].result = d.historialFondo || '0 moras · Buen historial';
-  validations[2].detail = 'Historial limpio';
-}
-
-// ── DATOS DEMO (cuando GAS_URL no está configurada) ──────────
-function getDemoData(cedula){
-  return {
-    nombre:'Carlos Andrés Gil', correo:'carlos.gil@une.net.co',
-    celular:'+57 314 802 4500', codigoEmpleado:'UNE-04321',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes',
-    antiguedad:'5 años 3 meses', estadoAsociado:'ACTIVO',
-    salarioBasico:3800000, devengado:4250000, deducciones:1100000,
-    neto:3150000, libranzas:0, cuotaMaxima:945000,
-    montoMaxAprobable:12000000,
-    historialFondo:'2 créditos previos · Sin moras',
-    creditosActivos:0, periodoNomina:'Abril 2025', cedula:cedula,
-    score:742, scoreDataCredito:742
-  };
-}
-
 // ── UPLOAD SIMULATION ──
 let uploadDone = { front: false, back: false };
 
@@ -1182,13 +841,6 @@ function simulateUpload(zoneId, statusId) {
     status.textContent = zoneId.includes('front') ? '✓ Frente cargado' : '✓ Reverso cargado';
     if (uploadDone.front && uploadDone.back) {
       setTimeout(() => {
-        // Rellenar OCR con nombre real del asociado
-        const nombre = asociadoData ? asociadoData.nombre : 'Nombre Apellido';
-        const ced = document.getElementById('f-cedula').value;
-        const ocr = document.getElementById('ocr-result');
-        const divs = ocr ? ocr.querySelectorAll('[style*="font-size:13px"]') : [];
-        if(divs[0]) divs[0].textContent = nombre;
-        if(divs[1]) divs[1].textContent = ced;
         document.getElementById('ocr-result').classList.remove('hidden');
         document.getElementById('kyc-next-btn').classList.remove('hidden');
       }, 600);
@@ -1198,19 +850,16 @@ function simulateUpload(zoneId, statusId) {
 
 function simulateNomina() {
   const zone = document.getElementById('uz-nomina');
-  if (zone.classList.contains('done')) return;
   const status = document.getElementById('uz-nomina-status');
   const icon = document.getElementById('uz-nomina-icon');
-  status.textContent = 'Leyendo nómina con IA…';
+  if (zone.classList.contains('done')) return;
+  status.textContent = 'Leyendo nómina con IA...';
   icon.className = 'ti ti-loader spin';
   setTimeout(() => {
     zone.classList.add('done');
     icon.className = 'ti ti-circle-check';
-    const emp = asociadoData ? asociadoData.empresa : 'Tigo-UNE S.A.S.';
-    const per = asociadoData ? asociadoData.periodoNomina : 'Abril 2025';
-    status.textContent = '✓ Nómina procesada — ' + emp + ' · ' + per;
+    status.textContent = '✓ Nómina procesada — Tigo-UNE Abril 2025';
     document.getElementById('nomina-result').classList.remove('hidden');
-    if(asociadoData) updateNominaView(asociadoData);
   }, 1800);
 }
 
@@ -1238,12 +887,16 @@ function showLiveness() {
       return;
     }
     const s = sequences[i];
-    instr.textContent = s.instr; action.textContent = s.action;
+    instr.textContent = s.instr;
+    action.textContent = s.action;
     const item = document.getElementById(s.step);
     const vi = item.querySelector('.val-icon');
     const vs = item.querySelector('.val-status');
-    item.classList.add('running'); vi.className = 'val-icon running';
-    vi.innerHTML = '<i class="ti ti-loader spin"></i>'; vs.textContent = 'Procesando...'; vs.className = 'val-status running';
+    item.classList.add('running');
+    vi.className = 'val-icon running';
+    vi.innerHTML = '<i class="ti ti-loader spin"></i>';
+    vs.textContent = 'Procesando...';
+    vs.className = 'val-status running';
     setTimeout(() => {
       item.classList.remove('running'); item.classList.add('ok');
       vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
@@ -1257,12 +910,15 @@ function showLiveness() {
 function show2FA() {
   document.getElementById('kyc-liveness-card').classList.add('hidden');
   document.getElementById('kyc-2fa-card').classList.remove('hidden');
+  // OTP timer
   let t = 298;
   const timer = document.getElementById('otp-timer');
   const iv = setInterval(() => {
-    t--; const m=Math.floor(t/60); const s=t%60;
-    timer.textContent=m+':'+(s<10?'0':'')+s;
-    if(t<=0) clearInterval(iv);
+    t--;
+    const m = Math.floor(t/60);
+    const s = t%60;
+    timer.textContent = m+':'+(s<10?'0':'')+s;
+    if (t<=0) clearInterval(iv);
   }, 1000);
 }
 
@@ -1273,352 +929,74 @@ function otpMove(el, prevId, nextId) {
 // ── VALIDATION ENGINE ──
 const validations = [
   { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
-  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes',  detail:'UIAF/OFAC/ONU' },
-  { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users',         time:700,  result:'Historial OK',  detail:'Sin moras' },
-  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice',  time:1200, result:'Cap. $945K/mes',detail:'30.4% compromiso' },
-  { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain',         time:1000, result:'Rec: APROBAR', detail:'Riesgo BAJO' },
+  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
+  { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
+  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:'Cap. $945K/mes', detail:'30.4% compromiso' },
+  { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
 ];
 
 function startValidation() {
   let delay = 200;
-  validations.forEach((v, idx) => { setTimeout(() => runValidation(v, idx), delay); delay += v.time + 200; });
-  setTimeout(() => { document.getElementById('v-done').classList.remove('hidden'); }, delay + 200);
+  validations.forEach((v, idx) => {
+    setTimeout(() => runValidation(v, idx), delay);
+    delay += v.time + 200;
+  });
+  const total = delay + 200;
+  setTimeout(() => {
+    document.getElementById('v-done').classList.remove('hidden');
+  }, total);
 }
 
 function runValidation(v, idx) {
-  const item=document.getElementById(v.id), vi=document.getElementById(v.vi);
-  const vs=document.getElementById(v.vs), pb=document.getElementById(v.pb);
-  item.classList.add('running'); vi.className='val-icon running';
-  vi.innerHTML='<i class="ti ti-loader spin"></i>';
-  vs.textContent='Consultando...'; vs.className='val-status running';
-  let w=0;
-  const iv=setInterval(()=>{ w=Math.min(w+(100/(v.time/50)),100); pb.style.width=w+'%'; if(w>=100) clearInterval(iv); },50);
-  setTimeout(()=>{
+  const item = document.getElementById(v.id);
+  const vi = document.getElementById(v.vi);
+  const vs = document.getElementById(v.vs);
+  const pb = document.getElementById(v.pb);
+  item.classList.add('running');
+  vi.className = 'val-icon running';
+  vi.innerHTML = '<i class="ti ti-loader spin"></i>';
+  vs.textContent = 'Consultando...'; vs.className = 'val-status running';
+
+  let w = 0;
+  const iv = setInterval(() => {
+    w = Math.min(w + (100 / (v.time / 50)), 100);
+    pb.style.width = w + '%';
+    if (w >= 100) clearInterval(iv);
+  }, 50);
+
+  setTimeout(() => {
     item.classList.remove('running'); item.classList.add('ok');
-    vi.className='val-icon ok'; vi.innerHTML='<i class="ti ti-check"></i>';
-    vs.textContent=v.result; vs.className='val-status ok';
-    const nameEl=item.querySelector('.val-name');
-    if(nameEl) nameEl.innerHTML+=' <span class="tag tag-green" style="margin-left:6px;">'+v.detail+'</span>';
+    vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
+    vs.textContent = v.result; vs.className = 'val-status ok';
+    const nameEl = item.querySelector('.val-name');
+    if (nameEl) nameEl.innerHTML += ' <span class="tag tag-green" style="margin-left:6px;">'+v.detail+'</span>';
   }, v.time);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  CATÁLOGO DE LÍNEAS — tasas, plazos y descripciones oficiales
-// ═══════════════════════════════════════════════════════════════
-const LINEAS = {
-  libre: {
-    nombre: 'Libre inversión',
-    desc: 'Crédito cuya destinación queda a voluntad del asociado para dar solución a sus necesidades de consumo.',
-    getTasa: () => 14.03,
-    plazos: [6,12,18,24,36,48],
-    maxSMMLV: 20,
-    nota: ''
-  },
-  crediexpress: {
-    nombre: 'CrediExpress',
-    desc: 'Cupo fijo con tope límite de 5 SMMLV. Libre destinación, sin codeudor, sin legalización. Posibilidad de pago en cualquier momento.',
-    getTasa: () => 14.03,
-    plazos: [6,12,18,24],
-    maxSMMLV: 5,
-    nota: 'No requiere codeudor · No requiere legalización · Plazo máximo 24 meses'
-  },
-  educativo: {
-    nombre: 'Educativo',
-    desc: 'Destinación exclusiva: matrículas (colegio, pregrado, posgrado), derechos de grado, amortización ICETEX, idiomas, computador.',
-    getTasa: (meses) => meses <= 12 ? 13.73 : meses <= 24 ? 14.91 : 16.11,
-    plazos: [12,24,36],
-    maxSMMLV: 30,
-    nota: 'Tasas: 1 año 13.73% · 2 años 14.91% · 3 años 16.11%'
-  },
-  vivienda: {
-    nombre: 'Vivienda',
-    desc: 'Destinación exclusiva: compra de apartamento/casa (urbana o rural), levantamiento de hipoteca, abono a crédito hipotecario, compra de lote y construcción.',
-    getTasa: (meses) => {
-      if (meses <= 120) return 13.73;
-      return 16.11;
-    },
-    plazos: [12,24,36,48,60,72,84,96,108,120,132,144,156,168,180],
-    maxSMMLV: 100,
-    nota: 'VIS tasa fija 13.26% · NVIS tasa fija 13.26% · 1-10 años 13.73% · 11-15 años 16.11%',
-    visFija: 13.26
-  },
-  salud: {
-    nombre: 'Salud',
-    desc: 'Tratamientos médicos y odontológicos, cirugías, medicamentos, Spa con prescripción médica, tratamientos no cubiertos por el POS, prepagadas y pólizas de vida.',
-    getTasa: (meses) => meses <= 24 ? 12.56 : 13.73,
-    plazos: [6,12,18,24,36],
-    maxSMMLV: 20,
-    nota: 'Tasas: 1-2 años 12.56% · 3 años 13.73%'
-  },
-  vehiculo: {
-    nombre: 'Vehículos',
-    desc: 'Destinación exclusiva a la compra de vehículo. Descuentos exclusivos hasta del 6% en vehículos Mazda y Chevrolet.',
-    getTasa: (meses) => meses <= 36 ? 16.11 : 18.55,
-    plazos: [12,24,36,48,60,72],
-    maxSMMLV: 50,
-    nota: 'Tasas: 1-3 años 16.11% · 4-6 años 18.55% · Descuentos Mazda y Chevrolet'
-  },
-  vacacional: {
-    nombre: 'Vacacional',
-    desc: 'El crédito más utilizado en el fondo. Permite programar viajes para ti y/o tu familia en época de vacaciones.',
-    getTasa: () => 14.03,
-    plazos: [6,12,18,24],
-    maxSMMLV: 10,
-    nota: ''
-  },
-  creditributo: {
-    nombre: 'Creditributo',
-    desc: 'Pago de impuestos de renta y patrimonio, impuestos departamentales o de vehículos (incluyendo sanciones y recargos), gravámenes, multas, libreta militar, cuotas de administración.',
-    getTasa: () => 13.73,
-    plazos: [6,12,18,24],
-    maxSMMLV: 20,
-    nota: 'Monto: hasta 100% de los impuestos · Máximo 20 SMMLV'
-  },
-  solidario: {
-    nombre: 'Solidario',
-    desc: 'Necesidad económica imprevista por calamidad, pago de póliza exequial y momentos de calamidad pública decretada por el gobierno para ayudar a los asociados.',
-    getTasa: () => 12.56,
-    plazos: [1,2,3,6,12],
-    maxSMMLV: 5,
-    nota: 'Línea de emergencia · Aprobación prioritaria'
-  },
-  especial: {
-    nombre: 'Especial',
-    desc: 'Compras en eventos especiales del fondo, compra de cartera de entidades financieras (tarjetas de crédito, créditos rotativos), pólizas de vehículo y hogar.',
-    getTasa: (meses) => meses <= 36 ? 13.88 : meses <= 60 ? 16.00 : 17.04,
-    plazos: [12,24,36,48,60,72],
-    maxSMMLV: 30,
-    nota: 'Compra cartera: 1-3 años 13.88% · 4-5 años 16.00% · 6 años 17.04%'
-  },
-  crediprima: {
-    nombre: 'Crediprima',
-    desc: 'Pago programado exclusivamente con primas semestrales. Ideal para quienes prefieren cuotas grandes cada 6 meses en lugar de cuotas mensuales.',
-    getTasa: () => 14.03,
-    plazos: [6,12,18,24,30,36],
-    maxSMMLV: 15,
-    nota: 'Pago cada 6 meses · Aplica hasta 3 años (6 primas)'
-  }
-};
-
-const SMMLV_2025 = 1423500; // SMMLV Colombia 2025
-let lineaActiva = 'libre';
-
-function selectLinea(card) {
-  document.querySelectorAll('.linea-card').forEach(c => c.classList.remove('active'));
-  card.classList.add('active');
-  lineaActiva = card.dataset.linea;
-  const L = LINEAS[lineaActiva];
-
-  // Actualizar descripción
-  document.getElementById('linea-info').innerHTML =
-    '<strong>' + L.nombre + ':</strong> ' + L.desc +
-    (L.nota ? '<br><span style="font-size:11px;color:var(--muted);margin-top:4px;display:block;"><i class="ti ti-info-circle"></i> ' + L.nota + '</span>' : '');
-
-  // Actualizar opciones de plazo
-  const sel = document.getElementById('f-plazo');
-  const currentVal = parseInt(sel.value) || 24;
-  sel.innerHTML = '';
-  L.plazos.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p + ' meses';
-    opt.textContent = p < 12 ? p + ' mes' + (p>1?'es':'') : (p % 12 === 0 ? (p/12) + ' año' + (p/12>1?'s':'') + ' (' + p + ' meses)' : p + ' meses');
-    if (p === currentVal || (!L.plazos.includes(currentVal) && p === L.plazos[Math.floor(L.plazos.length/2)])) opt.selected = true;
-    sel.appendChild(opt);
-  });
-
-  // Actualizar monto máximo
-  const maxMonto = L.maxSMMLV * SMMLV_2025;
-  const maxAsociado = asociadoData ? asociadoData.montoMaxAprobable : 12000000;
-  const maxReal = Math.min(maxMonto, maxAsociado);
-  document.getElementById('monto-hint').textContent =
-    'Máximo línea ' + L.nombre + ': ' + fmt(maxMonto) +
-    (asociadoData ? ' · Máximo perfil: ' + fmt(maxAsociado) : '');
-
-  updateSummary();
-}
-
-// ── CÁLCULO DE CUOTA ──────────────────────────────────────────
-function eaToEm(ea) {
-  // Tasa efectiva anual → tasa efectiva mensual
-  return Math.pow(1 + ea / 100, 1/12) - 1;
-}
-
-function calcCuota(monto, tasaEM, plazoMeses) {
-  if (tasaEM === 0) return monto / plazoMeses;
-  return monto * (tasaEM * Math.pow(1 + tasaEM, plazoMeses)) / (Math.pow(1 + tasaEM, plazoMeses) - 1);
-}
-
+// ── UPDATE SUMMARY ──
 function updateSummary() {
   const monto = parseInt(document.getElementById('f-monto').value) || 0;
-  const plazoStr = document.getElementById('f-plazo').value || '24 meses';
-  const plazo = parseInt(plazoStr);
-  const L = LINEAS[lineaActiva];
-  const lineaId = FondouneSolicitudes?.LINEA_PORTAL_TO_CONFIG?.[lineaActiva];
-
-  let tasaEA = L.getTasa(plazo);
-  let tasaEM = eaToEm(tasaEA);
-  let cuota = calcCuota(monto, tasaEM, plazo);
-
-  if (lineaId && typeof FondouneCreditos !== 'undefined') {
-    const eaCfg = FondouneCreditos.getTasaEA(lineaId, plazo);
-    if (eaCfg != null) {
-      tasaEA = eaCfg;
-      tasaEM = FondouneCreditos.eaAMensual(tasaEA);
-      cuota = FondouneCreditos.calcularCuota(monto, plazo, tasaEA);
-    }
-  }
-
-  const totalPagar = cuota * plazo;
-  const totalInteres = totalPagar - monto;
-
-  document.getElementById('sum-monto').textContent = '$' + monto.toLocaleString('es-CO');
-  document.getElementById('sum-linea').textContent = L.nombre;
-  document.getElementById('sum-plazo').textContent = plazoStr;
-  document.getElementById('sum-tasa').textContent = tasaEA.toFixed(2) + '% E.A.';
-  document.getElementById('sum-tasaem').textContent = (tasaEM * 100).toFixed(4) + '% E.M.';
-  document.getElementById('sum-interes').textContent = '$' + Math.round(totalInteres).toLocaleString('es-CO');
-  document.getElementById('cuota-estimada').textContent = 'Cuota est.: $' + Math.round(cuota).toLocaleString('es-CO') + '/mes';
-
-  window._solicitud = {
-    monto, plazo, tasaEA, tasaEM,
-    cuota: Math.round(cuota),
-    linea: L.nombre,
-    lineaId,
-    totalInteres: Math.round(totalInteres),
-  };
+  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
+  const tasa = 0.011;
+  const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
+  document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
+  document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
-// ── POBLAR PASO 5 CON DATOS REALES ───────────────────────────
-function populatePaso5() {
-  const s = window._solicitud || {};
-  const d = asociadoData || {};
-
-  // Métricas hero
-  const vals = document.querySelectorAll('.m-val');
-  if (vals[0]) vals[0].textContent = '$' + (s.monto||8000000).toLocaleString('es-CO');
-  if (vals[1]) vals[1].textContent = '$' + (s.cuota||391800).toLocaleString('es-CO');
-  if (vals[2]) vals[2].textContent = (s.plazo||24) + ' meses';
-
-  // Email enmascarado
-  const emailEl = document.getElementById('result-email');
-  if (emailEl && d.correo) {
-    const masked = d.correo.replace(/^(.{2}).+(@.+)$/, '$1***$2');
-    emailEl.textContent = masked;
-  }
-
-  // Capacidad de pago
-  const capEl = document.querySelector('#s5 .summary-row:nth-child(4) .val');
-  if (capEl && d.cuotaMaxima) capEl.textContent = fmt(d.cuotaMaxima) + '/mes disponible';
-
-  // Historial
-  const histEl = document.querySelector('#s5 .summary-row:nth-child(3) .val');
-  if (histEl && d.historialFondo) histEl.innerHTML = d.historialFondo + ' <span class="tag tag-green">Pagados a tiempo</span>';
-
-  // Porcentaje compromiso
-  if (s.cuota && d.neto) {
-    const pct = ((s.cuota / d.neto) * 100).toFixed(1);
-    const pctEl = document.querySelector('#s5 .summary-row:nth-child(5) .val');
-    if (pctEl) pctEl.innerHTML = pct + '% <span class="tag tag-blue">Dentro del límite 35%</span>';
-  }
-}
-
-let _solicitudRegistrada = false;
-
-function registrarSolicitudEnBandeja() {
-  if (typeof FondouneSolicitudes === 'undefined') return null;
-  const payload = FondouneSolicitudes.buildFromPortal({
-    solicitud: window._solicitud,
-    asociado: asociadoData,
-    lineaKey: lineaActiva,
-    cedula: document.getElementById('f-cedula')?.value,
-  });
-  FondouneSession.saveCreditApp(payload);
-  FondouneSession.setSolicitudId(payload.solicitudId);
-  FondouneSession.saveKYC(payload.kyc);
-  FondouneSession.saveNomina(payload.nomina);
-  FondouneSession.pushAnalystQueue(payload);
-  return payload;
-}
-
-function irAFirma() {
-  if (!FondouneSession.getCreditApp()) registrarSolicitudEnBandeja();
-  FondouneSession.queueNotif('Abriendo módulo de firma…', 'info');
-  FondouneNav.navigateTo('firma');
-}
-
+// ── RESET ──
 function resetPortal() {
-  _solicitudRegistrada = false;
-  window._solicitud = null;
-  asociadoData = null;
-  clearGasStatus();
-  goTo(1);
+  location.reload();
 }
 
-const _origGoTo = goTo;
-function goTo(n) {
-  _origGoTo(n);
-  if (n === 5) {
-    setTimeout(() => {
-      populatePaso5();
-      if (!_solicitudRegistrada) {
-        _solicitudRegistrada = true;
-        const p = registrarSolicitudEnBandeja();
-        if (p) {
-          FondouneSession.showNotif(
-            'Solicitud ' + p.solicitudId + ' enviada a la bandeja del analista.',
-            'success'
-          );
-        }
-      }
-    }, 100);
-  }
-}
-
-// ── DESCARGAR RESUMEN ─────────────────────────────────────────
-function descargarResumen() {
-  const s = window._solicitud || {};
-  const d = asociadoData || { nombre: 'Asociado', correo: '', cedula: '' };
-  const fecha = new Date().toLocaleDateString('es-CO', {day:'2-digit',month:'long',year:'numeric'});
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-  <title>Resumen Solicitud FONDOUNE</title>
-  <style>
-    body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#0B2545;padding:20px}
-    h1{color:#0B2545;border-bottom:2px solid #C9963B;padding-bottom:8px}
-    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
-    .lbl{color:#8A9BB5} .val{font-weight:600}
-    .footer{margin-top:30px;font-size:11px;color:#8A9BB5;text-align:center}
-  </style></head><body>
-  <h1>FONDOUNE — Resumen de Solicitud</h1>
-  <div class="row"><span class="lbl">Asociado</span><span class="val">${d.nombre}</span></div>
-  <div class="row"><span class="lbl">Cédula</span><span class="val">${d.cedula||document.getElementById('f-cedula').value}</span></div>
-  <div class="row"><span class="lbl">Correo</span><span class="val">${d.correo}</span></div>
-  <div class="row"><span class="lbl">Línea de crédito</span><span class="val">${s.linea||'Libre inversión'}</span></div>
-  <div class="row"><span class="lbl">Monto solicitado</span><span class="val">$${(s.monto||0).toLocaleString('es-CO')}</span></div>
-  <div class="row"><span class="lbl">Plazo</span><span class="val">${s.plazo||24} meses</span></div>
-  <div class="row"><span class="lbl">Tasa E.A.</span><span class="val">${(s.tasaEA||14.03).toFixed(2)}%</span></div>
-  <div class="row"><span class="lbl">Cuota mensual estimada</span><span class="val">$${(s.cuota||0).toLocaleString('es-CO')}</span></div>
-  <div class="row"><span class="lbl">Interés total estimado</span><span class="val">$${(s.totalInteres||0).toLocaleString('es-CO')}</span></div>
-  <div class="row"><span class="lbl">Fecha de solicitud</span><span class="val">${fecha}</span></div>
-  <div class="row"><span class="lbl">Estado</span><span class="val" style="color:#1A7A4A">PRE-APROBADA · Pendiente analista</span></div>
-  <div class="footer">FONDO DE EMPLEADOS UNE — "FONDOUNE" · NIT 811018807-8<br>
-  fondoune@fondoune.com · 302 228 7890<br>
-  Centro Empresarial Ciudad del Río, Ofic. 621-622, Medellín<br>
-  Documento generado el ${fecha}</div>
-  </body></html>`;
-
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'Resumen_Solicitud_FONDOUNE_' + (d.cedula||'') + '.html';
-  a.click();
-}
-
+// Init summary
 updateSummary();
 
-// Auto-demo: cargar lados de cédula
+// Auto-upload both sides after 3s for demo UX
 setTimeout(() => {
-  if(!uploadDone.front) simulateUpload('uz-front','uz-front-status');
-  setTimeout(()=>{ if(!uploadDone.back) simulateUpload('uz-back','uz-back-status'); },800);
+  if (!uploadDone.front) simulateUpload('uz-front','uz-front-status');
+  setTimeout(() => {
+    if (!uploadDone.back) simulateUpload('uz-back','uz-back-status');
+  }, 800);
 }, 500);
 </script>
 </body>

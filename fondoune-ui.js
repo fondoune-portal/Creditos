@@ -1,316 +1,176 @@
 /**
- * FondoUne — fondoune-ui.js (Fase C)
- * Toast unificado, centro de notificaciones y helpers responsive.
- * Requiere: session.js (FondouneSession)
+ * FondoUne — fondoune-ui.js
+ * Toast unificado, panel de notificaciones, helpers de formato.
+ * Requiere: session.js, fondoune-shared.css
  */
+
 const FondouneUI = (() => {
-  const TOAST_TYPE_MAP = {
-    ok: 'success',
-    success: 'success',
-    't-ok': 'success',
-    'toast-ok': 'success',
-    err: 'error',
-    error: 'error',
-    't-err': 'error',
-    'toast-err': 'error',
-    warn: 'warning',
-    warning: 'warning',
-    't-warn': 'warning',
-    'toast-warn': 'warning',
-    info: 'info',
-    blue: 'info',
-    't-info': 'info',
-    'toast-blue': 'info',
-  };
 
-  const NOTIF_ICONS = {
-    success: 'ti-circle-check',
-    info: 'ti-info-circle',
-    warning: 'ti-alert-triangle',
-    error: 'ti-alert-circle',
-  };
-
-  let _drawerReady = false;
-
-  function normalizeType(type) {
-    return TOAST_TYPE_MAP[type] || type || 'info';
-  }
-
-  /**
-   * Toast unificado → FondouneSession.showNotif (registra en historial).
-   */
-  function toast(msg, type = 'info', duration) {
-    const t = normalizeType(type);
+  // ── Toast unificado (debajo de la nav) ──────────────────────────
+  function toast(msg, type = 'info', duration = 4500) {
+    // Registrar en el historial de session.js
     if (typeof FondouneSession !== 'undefined') {
-      FondouneSession.showNotif(msg, t, duration);
-      refreshNotifPip();
-      return;
+      FondouneSession.showNotif(msg, type, 0); // duration=0 → no muestra la notif flotante antigua
     }
-    console.warn('[FondouneUI] FondouneSession no disponible:', msg);
+
+    const iconMap = {
+      success: 'ti-circle-check',
+      info:    'ti-info-circle',
+      warning: 'ti-alert-triangle',
+      error:   'ti-alert-circle',
+    };
+
+    const t = document.createElement('div');
+    t.className = `fu-toast fu-toast-${type}`;
+    t.innerHTML = `
+      <i class="ti ${iconMap[type]||'ti-info-circle'} fu-toast-icon"></i>
+      <span class="fu-toast-txt">${msg}</span>
+      <i class="ti ti-x fu-toast-close" onclick="this.closest('.fu-toast').remove()"></i>`;
+
+    // Apilar toasts existentes
+    const existing = document.querySelectorAll('.fu-toast');
+    let topOffset  = 10;
+    existing.forEach(el => { topOffset += el.offsetHeight + 8; });
+    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fu-nav-h')) || 50;
+    t.style.top = (navH + topOffset) + 'px';
+
+    document.body.appendChild(t);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        t.classList.add('fu-out');
+        setTimeout(() => t.remove(), 220);
+      }, duration);
+    }
+    return t;
   }
 
-  function fmtCOP(n) {
-    if (typeof FondouneSolicitudes !== 'undefined') {
-      return FondouneSolicitudes.fmtCOP(n);
-    }
-    return '$' + Number(n || 0).toLocaleString('es-CO');
-  }
+  // ── Panel de notificaciones (campana) ───────────────────────────
+  let panelOpen = false;
 
-  function fmtTime(ts) {
-    const d = new Date(ts);
-    const now = new Date();
-    const diff = now - d;
-    if (diff < 60000) return 'Hace un momento';
-    if (diff < 3600000) return 'Hace ' + Math.floor(diff / 60000) + ' min';
-    if (d.toDateString() === now.toDateString()) {
-      return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    }
-    return d.toLocaleDateString('es-CO', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  function buildNotifPanel() {
+    if (document.getElementById('fu-notif-panel')) return;
 
-  function ensureNotifDrawer() {
-    if (_drawerReady || document.getElementById('fu-notif-drawer')) {
-      _drawerReady = true;
-      return;
-    }
-
-    const backdrop = document.createElement('div');
-    backdrop.id = 'fu-notif-backdrop';
-    backdrop.className = 'fu-notif-backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-
-    const drawer = document.createElement('aside');
-    drawer.id = 'fu-notif-drawer';
-    drawer.className = 'fu-notif-drawer';
-    drawer.setAttribute('role', 'dialog');
-    drawer.setAttribute('aria-label', 'Notificaciones');
-    drawer.innerHTML = `
-      <div class="fu-notif-drawer-head">
-        <h2><i class="ti ti-bell"></i> Notificaciones</h2>
-        <div class="fu-notif-drawer-actions">
-          <button type="button" id="fu-notif-mark-read">Marcar leídas</button>
-          <button type="button" id="fu-notif-close" aria-label="Cerrar"><i class="ti ti-x"></i></button>
-        </div>
+    const panel = document.createElement('div');
+    panel.id = 'fu-notif-panel';
+    panel.innerHTML = `
+      <div class="fu-np-head">
+        <i class="ti ti-bell" style="font-size:16px;color:#5A6E8C"></i>
+        <span class="fu-np-title">Notificaciones</span>
+        <span class="fu-np-badge" id="fu-np-badge" style="display:none">0</span>
+        <i class="ti ti-x fu-np-close" onclick="FondouneUI.closeNotifPanel()"></i>
       </div>
-      <div class="fu-notif-summary" id="fu-notif-summary"></div>
-      <div class="fu-notif-list" id="fu-notif-list"></div>`;
-
-    document.body.appendChild(backdrop);
-    document.body.appendChild(drawer);
-
-    backdrop.addEventListener('click', closeNotifDrawer);
-    document.getElementById('fu-notif-close')?.addEventListener('click', closeNotifDrawer);
-    document.getElementById('fu-notif-mark-read')?.addEventListener('click', () => {
-      if (typeof FondouneSession !== 'undefined') {
-        FondouneSession.markAllNotifsRead();
-      }
-      renderNotifDrawer();
-      refreshNotifPip();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && drawer.classList.contains('open')) {
-        closeNotifDrawer();
-      }
-    });
-
-    _drawerReady = true;
+      <div class="fu-np-body" id="fu-np-body">
+        <div class="fu-np-empty"><i class="ti ti-bell-off"></i>Sin notificaciones</div>
+      </div>
+      <div class="fu-np-foot">
+        <button class="fu-np-mark-btn" onclick="FondouneUI.markAllRead()">
+          <i class="ti ti-checks" style="font-size:13px"></i> Marcar todas como leídas
+        </button>
+      </div>`;
+    document.body.appendChild(panel);
   }
 
-  function renderNotifSummary() {
-    const el = document.getElementById('fu-notif-summary');
-    if (!el || typeof FondouneSession === 'undefined') return;
-
-    const sum = FondouneSession.getActivitySummary();
-    const chips = [];
-    if (sum.analistaPendientes > 0) {
-      chips.push(
-        '<span class="fu-notif-chip"><strong>' + sum.analistaPendientes +
-        '</strong> en bandeja analista</span>'
-      );
-    }
-    if (sum.gerenciaPendientes > 0) {
-      chips.push(
-        '<span class="fu-notif-chip"><strong>' + sum.gerenciaPendientes +
-        '</strong> autorización gerencia</span>'
-      );
-    }
-    if (sum.portalNuevas > 0) {
-      chips.push(
-        '<span class="fu-notif-chip"><strong>' + sum.portalNuevas +
-        '</strong> desde portal</span>'
-      );
-    }
-    el.innerHTML = chips.length
-      ? chips.join('')
-      : '<span class="fu-notif-chip">Sin pendientes críticos en sesión</span>';
+  function openNotifPanel() {
+    buildNotifPanel();
+    refreshNotifPanel();
+    document.getElementById('fu-notif-panel').classList.add('open');
+    panelOpen = true;
   }
 
-  function renderNotifDrawer() {
-    ensureNotifDrawer();
-    const list = document.getElementById('fu-notif-list');
-    if (!list) return;
+  function closeNotifPanel() {
+    document.getElementById('fu-notif-panel')?.classList.remove('open');
+    panelOpen = false;
+  }
 
-    renderNotifSummary();
+  function toggleNotifPanel() {
+    panelOpen ? closeNotifPanel() : openNotifPanel();
+  }
 
-    const log = typeof FondouneSession !== 'undefined'
-      ? FondouneSession.getNotifLog()
-      : [];
+  function refreshNotifPanel() {
+    const body  = document.getElementById('fu-np-body');
+    if (!body) return;
 
+    const log = (typeof FondouneSession !== 'undefined') ? FondouneSession.getNotifLog() : [];
     if (!log.length) {
-      list.innerHTML =
-        '<div class="fu-notif-empty"><i class="ti ti-bell-off"></i>No hay notificaciones recientes.<br><span style="font-size:11px">Las alertas del flujo aparecerán aquí.</span></div>';
+      body.innerHTML = '<div class="fu-np-empty"><i class="ti ti-bell-off"></i>Sin notificaciones</div>';
       return;
     }
 
-    list.innerHTML = log.map((n) => {
-      const type = normalizeType(n.type);
-      const icon = NOTIF_ICONS[type] || NOTIF_ICONS.info;
-      const unread = n.read ? '' : ' unread';
-      return (
-        '<div class="fu-notif-item' + unread + '" data-notif-id="' + n.id + '">' +
-        '<i class="ti ' + icon + '"></i>' +
-        '<div class="fu-notif-item-body">' +
-        '<div class="fu-notif-item-msg">' + escapeHtml(n.msg) + '</div>' +
-        '<div class="fu-notif-item-time">' + fmtTime(n.ts) + '</div>' +
-        '</div></div>'
-      );
-    }).join('');
+    const iconMap = { success:'ti-circle-check', info:'ti-info-circle', warning:'ti-alert-triangle', error:'ti-alert-circle' };
+    const clsMap  = { success:'fu-ni-success',   info:'fu-ni-info',     warning:'fu-ni-warning',    error:'fu-ni-error'   };
 
-    list.querySelectorAll('.fu-notif-item').forEach((row) => {
-      row.addEventListener('click', () => {
-        const id = row.getAttribute('data-notif-id');
-        if (id && typeof FondouneSession !== 'undefined') {
-          FondouneSession.markNotifRead(id);
-        }
-        row.classList.remove('unread');
-        refreshNotifPip();
-      });
-    });
+    body.innerHTML = log.slice().reverse().map(n => `
+      <div class="fu-notif-item ${n.read?'':'unread'}">
+        <div class="fu-ni-icon ${clsMap[n.type]||'fu-ni-info'}">
+          <i class="ti ${iconMap[n.type]||'ti-info-circle'}"></i>
+        </div>
+        <div class="fu-ni-body">
+          <div class="fu-ni-msg">${n.msg}</div>
+          <div class="fu-ni-time">${formatTs(n.ts)}</div>
+        </div>
+      </div>`).join('');
   }
 
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function openNotifDrawer() {
-    ensureNotifDrawer();
-    renderNotifDrawer();
-    document.getElementById('fu-notif-backdrop')?.classList.add('open');
-    document.getElementById('fu-notif-drawer')?.classList.add('open');
-    document.getElementById('fu-notif-backdrop')?.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeNotifDrawer() {
-    document.getElementById('fu-notif-backdrop')?.classList.remove('open');
-    document.getElementById('fu-notif-drawer')?.classList.remove('open');
-    document.getElementById('fu-notif-backdrop')?.setAttribute('aria-hidden', 'true');
-  }
-
-  function toggleNotifDrawer() {
-    const drawer = document.getElementById('fu-notif-drawer');
-    if (drawer?.classList.contains('open')) closeNotifDrawer();
-    else openNotifDrawer();
-  }
-
-  function refreshNotifPip(pipSelector) {
-    const sel = pipSelector || '#notif-pip, #fu-notif-pip, .fu-notif-pip';
-    const count = typeof FondouneSession !== 'undefined'
-      ? FondouneSession.getUnreadNotifCount()
-      : 0;
-    document.querySelectorAll(sel).forEach((pip) => {
-      pip.style.display = count > 0 ? 'block' : 'none';
-    });
-  }
-
-  /**
-   * @param {object} opts - { btn, pip }
-   */
-  function initNotifCenter(opts = {}) {
-    const btnSel = opts.btn || '#notif-btn, #fu-notif-btn';
-    const buttons = document.querySelectorAll(btnSel);
-    if (!buttons.length) return;
-
-    ensureNotifDrawer();
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleNotifDrawer();
-      });
-    });
-
-    refreshNotifPip(opts.pip);
-    renderNotifSummary();
-  }
-
-  function initAnalystMobile() {
-    if (!document.body.classList.contains('fu-module-analista')) return;
-
-    let backBtn = document.getElementById('detail-back');
-    if (!backBtn) {
-      backBtn = document.createElement('button');
-      backBtn.type = 'button';
-      backBtn.id = 'detail-back';
-      backBtn.className = 'icon-btn';
-      backBtn.title = 'Volver a la lista';
-      backBtn.style.display = 'none';
-      backBtn.innerHTML = '<i class="ti ti-arrow-left"></i>';
-      const navR = document.querySelector('.topnav .nav-r');
-      if (navR) navR.insertBefore(backBtn, navR.firstChild);
-    }
-
-    backBtn.addEventListener('click', () => {
-      document.body.classList.remove('fu-detail-open');
-      const empty = document.getElementById('empty-state');
-      const detail = document.getElementById('detail-body');
-      if (empty) empty.style.display = 'flex';
-      if (detail) detail.style.display = 'none';
-    });
-
-    const origSelect = window.selectSol;
-    if (typeof origSelect === 'function' && !origSelect._fuMobile) {
-      const wrapped = function (id) {
-        origSelect(id);
-        if (window.matchMedia('(max-width: 900px)').matches) {
-          document.body.classList.add('fu-detail-open');
-        }
-      };
-      wrapped._fuMobile = true;
-      window.selectSol = wrapped;
+  function refreshNotifPip() {
+    const pip = document.getElementById('notif-pip');
+    if (!pip) return;
+    const unread = (typeof FondouneSession !== 'undefined') ? FondouneSession.getUnreadCount() : 0;
+    pip.style.display = unread > 0 ? 'block' : 'none';
+    const badge = document.getElementById('fu-np-badge');
+    if (badge) {
+      badge.textContent = unread;
+      badge.style.display = unread > 0 ? 'inline' : 'none';
     }
   }
 
-  function boot() {
-    initNotifCenter();
-    initAnalystMobile();
+  function markAllRead() {
+    if (typeof FondouneSession !== 'undefined') FondouneSession.markNotifsRead();
+    refreshNotifPanel();
     refreshNotifPip();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    setTimeout(boot, 50);
+  // ── Modo móvil analista (lista ↔ detalle) ────────────────────────
+  function initAnalystMobile() {
+    document.querySelectorAll('.rcard').forEach(card => {
+      card.addEventListener('click', () => {
+        if (window.innerWidth <= 900) {
+          const dp = document.querySelector('.detail-panel');
+          if (dp) dp.classList.add('mobile-open');
+        }
+      });
+    });
   }
 
+  // ── Helpers de formato ───────────────────────────────────────────
+  function fmtCOP(n) {
+    if (!n && n !== 0) return '—';
+    return '$' + Number(n).toLocaleString('es-CO');
+  }
+
+  function formatTs(ts) {
+    if (!ts) return '';
+    const d   = new Date(ts);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff <    60) return 'Hace un momento';
+    if (diff <  3600) return `Hace ${Math.floor(diff/60)} min`;
+    if (diff < 86400) return `Hace ${Math.floor(diff/3600)} h`;
+    return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+
+  // ── API pública ───────────────────────────────────────────────────
   return {
     toast,
-    fmtCOP,
-    fmtTime,
-    initNotifCenter,
-    initAnalystMobile,
-    openNotifDrawer,
-    closeNotifDrawer,
+    openNotifPanel,
+    closeNotifPanel,
+    toggleNotifPanel,
+    refreshNotifPanel,
     refreshNotifPip,
-    renderNotifDrawer,
+    markAllRead,
+    initAnalystMobile,
+    fmtCOP,
+    formatTs,
   };
+
 })();

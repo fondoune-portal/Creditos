@@ -3,142 +3,286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FondoUne — Portal de Crédito</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<title>FondoUne — Acceso al Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="fondoune-shared.css">
 <script src="navigation.js"></script>
 <script src="session.js"></script>
-<script src="fondoune-ui.js"></script>
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
   --gold:#C9963B;--gold2:#F0C060;--cream:#F7F4EE;--white:#fff;
   --muted:#8A9BB5;--border:rgba(11,37,69,.1);
-  --success:#1A7A4A;--sucbg:#EAF5EE;--sucborder:rgba(26,122,74,.2);
+  --success:#1A7A4A;--sucbg:#EAF5EE;
+  --danger:#C0392B;--danbg:#FDECEA;
+  --r:12px;--shadow:0 4px 32px rgba(11,37,69,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 5% 10%,rgba(26,107,173,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 95% 85%,rgba(201,150,59,.06) 0%,transparent 60%);pointer-events:none;z-index:0}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 10% 15%,rgba(26,107,173,.07) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 90% 85%,rgba(201,150,59,.06) 0%,transparent 60%);
+}
 
-.wrap{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:3rem 1.25rem}
+.wrap{position:relative;z-index:1;width:100%;max-width:400px;padding:1.5rem 1.25rem 4rem;}
 
-.header{text-align:center;margin-bottom:3rem}
-.mark{width:56px;height:56px;border-radius:16px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 4px 12px rgba(11,37,69,.25)}
-.mark i{font-size:28px;color:var(--gold2)}
-.header h1{font-family:'DM Serif Display',serif;font-size:32px;color:var(--navy);margin-bottom:.5rem}
-.header p{font-size:16px;color:var(--muted);line-height:1.6}
+/* ── Logo ── */
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem;justify-content:center}
+.logo-mark{width:44px;height:44px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,37,69,.25)}
+.logo-mark i{font-size:22px;color:var(--gold2)}
+.logo-text h1{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy)}
+.logo-text p{font-size:12px;color:var(--muted);margin-top:2px}
 
-.btn{padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:var(--navy);color:#fff;display:inline-flex;align-items:center;gap:8px;transition:all .3s}
-.btn:hover{background:var(--navy2);transform:translateY(-2px)}
+/* ── Card base ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;box-shadow:var(--shadow)}
+.card-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:5px}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin:2rem 0}
-.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center;box-shadow:0 4px 32px rgba(11,37,69,.10);transition:all .3s}
-.card:hover{transform:translateY(-4px);box-shadow:0 8px 48px rgba(11,37,69,.15)}
-.card i{font-size:32px;color:var(--blue);margin-bottom:1rem}
-.card h3{font-size:16px;font-weight:600;color:var(--navy);margin-bottom:.5rem}
-.card p{font-size:13px;color:var(--muted);line-height:1.6}
+/* ── Formulario ── */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:500;color:var(--navy)}
+.field input,.field select{
+  padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;
+  border:1.5px solid var(--border);border-radius:8px;
+  background:var(--cream);color:var(--navy);outline:none;transition:all .2s
+}
+.field input:focus,.field select:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(26,107,173,.1)}
 
-.btn-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+/* ── Botón principal ── */
+.btn-primary{
+  width:100%;padding:11px;border-radius:8px;background:var(--navy);color:#fff;
+  border:none;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:background .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px
+}
+.btn-primary:hover{background:var(--navy2)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
 
-.info-box{background:var(--sucbg);border:1px solid rgba(26,122,74,.2);border-radius:10px;padding:1.5rem;margin:1.5rem 0;color:var(--success)}
-.info-box i{margin-right:8px}
+/* ── Divider ── */
+.divider{display:flex;align-items:center;gap:10px;margin:1.25rem 0;color:var(--muted);font-size:11px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Bloques de acceso por rol ── */
+.role-blocks{display:flex;flex-direction:column;gap:8px}
+
+.role-block{
+  border-radius:var(--r);padding:1rem 1.25rem;
+  border:1.5px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:all .18s;background:var(--cream);
+}
+.role-block:hover{border-color:currentColor;background:var(--white);box-shadow:0 2px 12px rgba(11,37,69,.08)}
+
+/* Asociado */
+.rb-asociado{--rc:#1A6BAD;--rbg:#EFF4FB;color:var(--rc)}
+.rb-asociado:hover{border-color:var(--rc)}
+.rb-asociado .rb-icon{background:rgba(26,107,173,.12);color:var(--rc)}
+
+/* Analista */
+.rb-analista{--rc:#5B3FC8;--rbg:#F0EDFF;color:var(--rc)}
+.rb-analista:hover{border-color:var(--rc)}
+.rb-analista .rb-icon{background:rgba(91,63,200,.12);color:var(--rc)}
+
+/* Gerencia */
+.rb-gerencia{--rc:#A06000;--rbg:#FEF6E6;color:var(--rc)}
+.rb-gerencia:hover{border-color:var(--rc)}
+.rb-gerencia .rb-icon{background:rgba(160,96,0,.12);color:var(--rc)}
+
+.rb-icon{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.rb-info{flex:1}
+.rb-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.rb-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.rb-arrow{font-size:16px;opacity:.4;flex-shrink:0}
+
+/* ── Alerta ── */
+.alert{
+  border-radius:8px;padding:10px 13px;font-size:12px;
+  display:none;align-items:flex-start;gap:8px;margin-bottom:12px;line-height:1.5
+}
+.alert.show{display:flex}
+.alert.err{background:var(--danbg);color:var(--danger);border:1px solid rgba(192,57,43,.2)}
+.alert.ok{background:var(--sucbg);color:var(--success);border:1px solid rgba(26,122,74,.2)}
+.alert i{font-size:15px;flex-shrink:0;margin-top:1px}
+
+/* ── Loading overlay ── */
+.loading{
+  position:fixed;inset:0;background:rgba(247,244,238,.9);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;z-index:100;
+}
+.loading.show{display:flex}
+.spin{animation:spin 1s linear infinite;font-size:30px;color:var(--blue)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:13px;color:var(--navy)}
+
+/* ── Footer ── */
+.footer{text-align:center;font-size:10px;color:var(--muted);margin-top:1.5rem;line-height:1.7}
 </style>
 </head>
 <body>
+
+<div class="loading" id="loading">
+  <i class="ti ti-loader spin"></i>
+  <p id="loading-msg">Verificando acceso…</p>
+</div>
+
 <div class="wrap">
-  <div class="header">
-    <div class="mark"><i class="ti ti-building-bank"></i></div>
-    <h1>FondoUne</h1>
-    <p>Portal inteligente de crédito para empleados</p>
+  <div class="logo-row">
+    <div class="logo-mark"><i class="ti ti-building-bank"></i></div>
+    <div class="logo-text">
+      <h1>FondoUne</h1>
+      <p>Portal de Crédito Inteligente</p>
+    </div>
   </div>
 
-  <div class="info-box">
-    <i class="ti ti-info-circle"></i>
-    <strong>Bienvenido.</strong> Aquí puedes solicitar tu crédito de forma rápida y segura.
+  <div class="card">
+    <div class="card-title">Iniciar sesión</div>
+    <div class="card-sub">Ingresa con tu correo corporativo para acceder.</div>
+
+    <div class="alert err" id="alert-err"><i class="ti ti-alert-circle"></i><span id="err-txt"></span></div>
+
+    <div class="field">
+      <label>Correo corporativo</label>
+      <input type="email" id="inp-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="••••••••" value="Demo1234!"
+        autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="btn-primary" id="btn-login" onclick="doLogin()">
+      <i class="ti ti-login"></i> Entrar al portal
+    </button>
+
+    <!-- ── Separador ── -->
+    <div class="divider">Accesos rápidos de demostración</div>
+
+    <!-- ── Botones de rol diferenciados ── -->
+    <div class="role-blocks">
+
+      <div class="role-block rb-asociado" onclick="quickAccess('asociado')" title="Acceder como asociado">
+        <div class="rb-icon"><i class="ti ti-user-circle"></i></div>
+        <div class="rb-info">
+          <div class="rb-title">Asociado</div>
+          <div class="rb-desc">Solicitar crédito · Seguimiento · Firma digital</div>
+        </div>
+        <i class="ti ti-arrow-right rb-arrow"></i>
+      </div>
+
+      <div class="role-block rb-analista" onclick="quickAccess('analista')" title="Acceder como analista">
+        <div class="rb-icon"><i class="ti ti-user-check"></i></div>
+        <div class="rb-info">
+          <div class="rb-title">Analista de Crédito</div>
+          <div class="rb-desc">Revisar solicitudes · Aprobar · Gestionar cartera</div>
+        </div>
+        <i class="ti ti-arrow-right rb-arrow"></i>
+      </div>
+
+      <div class="role-block rb-gerencia" onclick="quickAccess('gerencia')" title="Acceder como gerencia">
+        <div class="rb-icon"><i class="ti ti-crown"></i></div>
+        <div class="rb-info">
+          <div class="rb-title">Gerencia / Jefe de Crédito</div>
+          <div class="rb-desc">Panel ejecutivo · KPIs · Reversiones · Config. IA</div>
+        </div>
+        <i class="ti ti-arrow-right rb-arrow"></i>
+      </div>
+
+    </div>
   </div>
 
-  <div class="btn-group">
-    <button class="btn" onclick="iniciarComoAsociado()">
-      <i class="ti ti-user"></i> Iniciar como Asociado
-    </button>
-    <button class="btn" onclick="iniciarComoAnalista()">
-      <i class="ti ti-chart-bar"></i> Iniciar como Analista
-    </button>
-    <button class="btn" onclick="iniciarComoGerente()">
-      <i class="ti ti-crown"></i> Iniciar como Gerente
-    </button>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <i class="ti ti-file-text"></i>
-      <h3>Solicitud</h3>
-      <p>Inicia tu solicitud de crédito en pasos simples</p>
-    </div>
-    <div class="card">
-      <i class="ti ti-check-circle"></i>
-      <h3>Aprobación</h3>
-      <p>Recibe la respuesta en tiempo real</p>
-    </div>
-    <div class="card">
-      <i class="ti ti-writing-sign"></i>
-      <h3>Firma</h3>
-      <p>Firma digitalmente tu pagaré</p>
-    </div>
-    <div class="card">
-      <i class="ti ti-coin"></i>
-      <h3>Desembolso</h3>
-      <p>Recibe el dinero en tu cuenta</p>
-    </div>
+  <div class="footer">
+    FondoUne © 2025 — Versión 1.0<br>
+    Conexión cifrada TLS 1.3 · Protección de datos Ley 1581/2012
   </div>
 </div>
 
-<script>
-function iniciarComoAsociado() {
-  FondouneSession.initUser({
-    id: '9869309',
-    name: 'Carlos Andrés Gil',
-    email: 'carlos.gil@une.net.co',
-    role: 'asociado',
-    initials: 'CA',
-    empresa: 'FondoUne'
-  });
-  FondouneSession.showNotif('¡Bienvenido Carlos! 👋', 'success');
-  setTimeout(() => FondouneNav.navigateTo('solicitud'), 800);
-}
+<script type="module">
+  // ── Destinos por rol ──────────────────────────────────────────────
+  const DESTINOS = {
+    asociado: 'modulo1-portal.html',
+    analista: 'modulo2-analista.html',
+    gerencia: 'modulo3-gerencia.html',
+    jefe_credito: 'modulo3-gerencia.html',
+  };
 
-function iniciarComoAnalista() {
-  FondouneSession.initUser({
-    id: '5432100',
-    name: 'María López Ruiz',
-    email: 'maria.lopez@une.net.co',
-    role: 'analista',
-    initials: 'ML',
-    empresa: 'FondoUne'
-  });
-  FondouneSession.showNotif('¡Bienvenida María! 👋', 'success');
-  setTimeout(() => FondouneNav.navigateTo('analista'), 800);
-}
+  // ── Usuarios demo ─────────────────────────────────────────────────
+  const USUARIOS_DEMO = {
+    asociado: { id:'1045678901', name:'Carlos Andrés Gil',   email:'carlos.gil@une.net.co',      role:'asociado', empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes',  initials:'CG' },
+    analista: { id:'31598742',   name:'María Rodríguez',     email:'analista.maria@une.net.co',   role:'analista', empresa:'FondoUne',          cargo:'Analista de crédito', initials:'MR' },
+    gerencia: { id:'71234891',   name:'Diego Montoya',       email:'gerencia.diego@une.net.co',   role:'gerencia', empresa:'FondoUne',          cargo:'Jefe de Crédito',   initials:'DM' },
+  };
 
-function iniciarComoGerente() {
-  FondouneSession.initUser({
-    id: '7654321',
-    name: 'Juan Fernando Díaz',
-    email: 'juan.diaz@une.net.co',
-    role: 'gerencia',
-    initials: 'JF',
-    empresa: 'FondoUne'
+  // ── Verificar si ya hay sesión activa ─────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const user = FondouneSession.getUser();
+    if (user?.role && DESTINOS[user.role]) {
+      // Sesión activa → redirigir directamente
+      setLoading('Retomando sesión…');
+      setTimeout(() => window.location.href = DESTINOS[user.role], 500);
+    }
   });
-  FondouneSession.showNotif('¡Bienvenido Juan! 👋', 'success');
-  setTimeout(() => FondouneNav.navigateTo('gerencia'), 800);
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  FondouneNav.init('home');
-  FondouneSession.showPendingNotifs();
-});
+  // ── Login por formulario ──────────────────────────────────────────
+  async function doLogin() {
+    const email = document.getElementById('inp-email').value.trim();
+    const pass  = document.getElementById('inp-pass').value;
+    if (!email) return showErr('Ingresa tu correo corporativo.');
+    if (!pass)  return showErr('Ingresa tu contraseña.');
+
+    setLoading('Verificando credenciales…');
+    await sleep(1000);
+
+    // Detectar rol por email demo
+    let rol = 'asociado';
+    if (email.includes('analista')) rol = 'analista';
+    if (email.includes('gerencia') || email.includes('jefe')) rol = 'gerencia';
+
+    const userData = USUARIOS_DEMO[rol] || USUARIOS_DEMO.asociado;
+    FondouneSession.initUser({ ...userData, email });
+
+    setLoading('Cargando tu portal…');
+    await sleep(600);
+    window.location.href = DESTINOS[rol];
+  }
+
+  // ── Acceso rápido por rol ─────────────────────────────────────────
+  async function quickAccess(rol) {
+    const nombres = { asociado:'Accediendo como Asociado…', analista:'Accediendo como Analista…', gerencia:'Accediendo como Gerencia…' };
+    setLoading(nombres[rol] || 'Cargando…');
+
+    const userData = USUARIOS_DEMO[rol];
+    FondouneSession.initUser(userData);
+    await sleep(700);
+    window.location.href = DESTINOS[rol];
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────
+  function setLoading(msg) {
+    document.getElementById('loading-msg').textContent = msg;
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('btn-login').disabled = true;
+  }
+  function showErr(msg) {
+    const el = document.getElementById('alert-err');
+    document.getElementById('err-txt').textContent = msg;
+    el.classList.add('show');
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('btn-login').disabled = false;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  window.doLogin     = doLogin;
+  window.quickAccess = quickAccess;
 </script>
 </body>
 </html>

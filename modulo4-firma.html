@@ -4,17 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FondoUne — Firma y Desembolso</title>
-<!-- Paso 2: preconnect para reducir latencia de red -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<!-- Fuentes críticas (DM Serif Display + DM Sans) -->
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-
-<!-- DM Mono: carga no bloqueante (solo se usa en textos legales) -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"></noscript>
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 :root{
@@ -159,52 +149,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* CONFETTI */
 .confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;top:-10px;animation:fall linear forwards}
 @keyframes fall{to{top:110vh;transform:rotate(720deg)}}
-/* Animaciones globales */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
-}
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-@keyframes tIn {
-  from { transform: translateY(14px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
 </style>
-
-<!-- FondoUne: navegación y sesión compartida -->
-<script src="navigation.js" defer></script>
-<script src="session.js" defer></script>
-<script src="fondoune-ui.js" defer></script>
-<script>
-  FondouneNav.init('firma');
-
-  (function() {
-    if (typeof FondouneSession === 'undefined') return;
-    if (!FondouneSession.isLoggedIn()) {
-      window.location.replace('index.html');
-      return;
-    }
-    const u = FondouneSession.getUser();
-    const rol = u?.role || 'asociado';
-    const acceso = FondouneNav.ACCESO_ROL[rol] || [];
-    if (!acceso.includes('firma')) {
-      FondouneSession.queueNotif(
-        'No tienes permiso para acceder al módulo de firma.', 'error'
-      );
-      window.location.replace('index.html');
-    }
-  })();
-</script>
-
+  <!-- FondoUne: navegacion y sesion compartida -->
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script>FondouneNav.init('firma');</script>
 </head>
-<body class="fu-module-firma">
+<body>
 <div class="wrap">
+
+  <!-- HEADER -->
   <div class="header">
     <div class="mark"><i class="ti ti-building-bank"></i></div>
     <div class="htxt">
@@ -220,9 +174,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <!-- HERO APROBADO -->
     <div class="approval-hero">
       <div class="hero-badge"><i class="ti ti-circle-check" style="font-size:13px"></i> Solicitud aprobada</div>
-      <div class="hero-title">Tu crédito fue aprobado,<br><em id="hero-nombre">Carlos</em></div>
+      <div class="hero-title">Tu crédito fue aprobado,<br><em>Carlos</em></div>
       <div class="hero-sub">El analista del fondo revisó tu perfil crediticio y ha aprobado tu solicitud. Solo necesitas firmar el pagaré para recibir el desembolso.</div>
-      <div class="hero-ref" id="hero-ref">Ref: SOL-2025-0847 · Aprobado: 12/05/2025 10:15 a.m. · Analista: M. Rodríguez</div>
+      <div class="hero-ref">Ref: SOL-2025-0847 · Aprobado: 12/05/2025 10:15 a.m. · Analista: M. Rodríguez</div>
     </div>
 
     <!-- RESUMEN DEL CRÉDITO -->
@@ -231,13 +185,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="credit-grid">
         <div class="cg-cell">
           <div class="cl">Monto aprobado</div>
-          <div class="cv" id="credit-monto">$8.000.000</div>
+          <div class="cv">$8.000.000</div>
           <div class="cs">COP</div>
         </div>
         <div class="cg-cell">
           <div class="cl">Cuota mensual</div>
-          <div class="cv" id="credit-cuota">$391.800</div>
-          <div class="cs" id="credit-plazo-sub">por 24 meses</div>
+          <div class="cv">$391.800</div>
+          <div class="cs">por 24 meses</div>
         </div>
         <div class="cg-cell">
           <div class="cl">Primer pago</div>
@@ -246,11 +200,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         </div>
       </div>
       <table class="cond-table">
-        <tr><td>Tipo de crédito</td><td id="cond-tipo">Crédito de consumo</td></tr>
-        <tr><td>Tasa de interés</td><td id="cond-tasa">1.1% efectivo mensual · 14.03% E.A.</td></tr>
-        <tr><td>Plazo</td><td id="cond-plazo">24 meses (288 días hábiles)</td></tr>
+        <tr><td>Tipo de crédito</td><td>Crédito de consumo</td></tr>
+        <tr><td>Tasa de interés</td><td>1.1% efectivo mensual · 14.03% E.A.</td></tr>
+        <tr><td>Plazo</td><td>24 meses (288 días hábiles)</td></tr>
         <tr><td>Forma de pago</td><td>Libranza automática de nómina</td></tr>
-        <tr><td>Total a pagar</td><td><strong id="cond-total" style="color:var(--navy)">$9.403.200</strong></td></tr>
+        <tr><td>Total a pagar</td><td><strong style="color:var(--navy)">$9.403.200</strong></td></tr>
         <tr><td>Costo total del crédito</td><td>$1.403.200 (intereses + seguros)</td></tr>
         <tr><td>Desembolso estimado</td><td>Hoy entre 2:00 y 4:00 p.m. · Cuenta Bancolombia</td></tr>
       </table>
@@ -260,97 +214,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="pagare-card">
       <div class="pagare-header">
         <i class="ti ti-file-certificate"></i>
-        <h2>Pagaré a la Orden — FONDOUNE</h2>
+        <h2>Pagaré Electrónico en Blanco</h2>
         <div class="ph-right">DOC-PAG-2025-0847 · Ley 527/1999</div>
       </div>
-      <div class="pagare-body" id="pagare-body">
-        <div style="text-align:center;margin-bottom:14px">
-          <strong>FONDO DE EMPLEADOS UNE — "FONDOUNE"</strong><br>
-          <strong>PAGARÉ A LA ORDEN Nro. _______________</strong>
-        </div>
-
-        Yo, <strong id="pagare-nombre">Carlos Andrés Gil</strong>, mayor de edad y domiciliado en la ciudad de <strong>Medellín</strong>, identificado como aparece al pie de mi firma, por medio del presente pagaré hago constar que pagaré solidaria, incondicional e indivisiblemente a la orden del <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong>, identificado con NIT <strong>811018807-8</strong>, o a quien represente sus derechos, todos los valores estipulados en este título valor, en las cuentas bancarias dispuestas para ello o en la ciudad de Medellín o lugar que señale y de acuerdo al plan de amortización que más adelante se determina, para lo cual también manifiesto que de ella he recibido a entera satisfacción a título de mutuo solidario, con intereses y de acuerdo a las siguientes cláusulas:
-
-        <br><br><strong>PRIMERA. Valor.</strong> La suma de:
-        <div class="pagare-highlight" id="pagare-monto">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
-        la cual pagaré solidariamente.
-
-        <br><br><strong>SEGUNDA. Amortización.</strong> El deudor se obliga a pagar la suma descrita en <strong>veinticuatro (24) cuotas mensuales</strong> por un valor de <strong>TRESCIENTOS NOVENTA Y UN MIL OCHOCIENTOS PESOS ($391.800,00)</strong> cada una, la primera el día <strong>12 del mes de junio del año 2025</strong> y así sucesivamente y sin interrupción cada mes hasta completar las 24 cuotas. Todo pago que se reciba se aplicará, salvo pacto en contrario, a: impuestos, gastos, costas, seguros, papelería, honorarios, intereses de mora, intereses corrientes y por último a capital. Los pagos parciales extraordinarios, anticipados o en exceso se aplicarán primero a intereses adeudados y, en segundo orden, a capital con destino a la disminución del plazo.
-
-        <br><br><strong>TERCERA. Interés de Plazo.</strong> Pagaré interés mensual corriente a la tasa del <strong>14.03% efectivo anual (E.A.)</strong>, equivalente a la tasa <strong>13.15% nominal anual (N.A.)</strong>, los cuales serán cubiertos mes vencido.
-
-        <br><br><strong>CUARTA. Interés de Mora.</strong> En caso de mora pagaré una tasa equivalente a la tasa máxima legal permitida por la entidad competente y que rija al momento de verificarse la mora.
-
-        <br><br><strong>QUINTA. Vencimiento Anticipado.</strong> Autorizo al <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong> o cualquier otro tenedor legítimo del presente título valor para extinguir el plazo y exigir extrajudicialmente o judicialmente el pago de la totalidad del saldo insoluto, más los intereses y gastos de cobranza, incluyendo honorarios del abogado, si ocurriere cualquiera de los siguientes eventos: <strong>A)</strong> Si hubiere mora en una o más cuotas de capital o de intereses; <strong>B)</strong> Por la pérdida de la calidad de asociado del deudor en FONDOUNE; <strong>C)</strong> Por las causales previstas en el Reglamento de Crédito o en los Estatutos del FONDO; <strong>D)</strong> En caso de que el deudor sea demandado o le sean embargados bienes por persona distinta al FONDO; <strong>E)</strong> En caso de desmejorar las garantías constituidas; <strong>F)</strong> En caso de no pagar las pólizas de seguro todo riesgo de las garantías; <strong>G)</strong> En caso de no destinar los desembolsos de crédito para los fines solicitados.
-
-        <br><br><strong>SEXTA. Autorización de descuentos.</strong> El obligado en el presente título autorizo irrevocablemente al pagador de la empresa en la cual laboro o llegara a laborar, para que descuente del salario mensual la cuota establecida en la cláusula segunda de este pagaré. En caso de extinción del plazo, igualmente autorizo irrevocablemente el descuento de mi salario, prestaciones sociales, bonificaciones, comisiones, honorarios, vacaciones, liquidación y cualquier otro concepto pagadero con ocasión de la prestación de mis servicios, para que sean entregadas al FONDO o su tenedor legítimo y abonadas al presente pagaré.
-
-        <br><br><strong>SÉPTIMA. Costos.</strong> Los gastos que se ocasionen por el otorgamiento de este pagaré, así como las costas y gastos de cobranza en caso de cobro judicial o extrajudicial, serán a cargo del deudor. Los honorarios de abogado corresponderán al <strong>30% del saldo insoluto</strong> de la presente obligación, exigibles a partir de la fecha de vencimiento del pagaré y ocasionarán intereses de mora a la tasa máxima legal permitida.
-
-        <br><br><strong>OCTAVA.</strong> En el caso de presentarse causales de extinción del plazo y exigirse la totalidad de la suma adeudada, el recibo de abonos parciales no implica novación. Además, entre los distintos suscriptores se confiere poder recíprocamente en caso de que se acuerde una refinanciación, prórroga del plazo, reestructuración de la deuda, o modificación de las condiciones pactadas, para lo cual cualquiera de nosotros podrá suscribir nuevos acuerdos en nombre y representación de los demás.
-
-        <br><br><strong>NOVENA.</strong> El presente pagaré respalda y garantiza obligaciones pasadas, presentes y futuras constituidas con el <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong>.
-
-        <br><br><em>En constancia se firma en la ciudad de Medellín a los 12 días del mes de mayo del año 2025.</em>
-      </div>
-      <!-- expand/collapse -->
-      <div style="padding:8px 1.5rem;text-align:right;border-bottom:1px solid var(--border)">
-        <button class="btn" style="font-size:11px;padding:5px 12px" onclick="togglePagare()">
-          <i class="ti ti-arrows-vertical" id="pagare-expand-icon"></i>
-          <span id="pagare-expand-lbl">Ver texto completo</span>
-        </button>
+      <div class="pagare-body">
+        <strong>PAGARÉ EN BLANCO CON CARTA DE INSTRUCCIONES</strong><br><br>
+        Yo, <strong>Carlos Andrés Gil</strong>, identificado con cédula de ciudadanía No. <strong>1.045.678.901</strong> expedida en Medellín, Antioquia, me comprometo a pagar incondicionalmente y a la orden de <strong>FONDOUNE – Fondo de Empleados de Tigo-UNE</strong>, NIT 900.XXX.XXX-X, la suma de:
+        <div class="pagare-highlight">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
+        en veinticuatro (24) cuotas mensuales iguales y consecutivas de <strong>TRESCIENTOS NOVENTA Y UN MIL OCHOCIENTOS PESOS ($391.800,00)</strong> cada una, la primera con vencimiento el <strong>12 de junio de 2025</strong> y las siguientes el mismo día de cada mes subsiguiente.<br><br>
+        La tasa de interés corriente pactada es del <strong>1.1% efectivo mensual (14.03% E.A.)</strong>. En caso de mora se causarán intereses a la tasa máxima legal permitida por la Superintendencia Financiera de Colombia.<br><br>
+        El suscriptor autoriza al FONDO a llenar los espacios en blanco de este pagaré conforme a la carta de instrucciones suscrita en la misma fecha y a realizar el cobro mediante libranza de nómina sobre la empresa empleadora.<br><br>
+        El presente pagaré se suscribe en formato electrónico con plena validez jurídica conforme a la Ley 527 de 1999, el Decreto 2364 de 2012 y sus normas complementarias.
       </div>
       <div class="pagare-footer">
         <i class="ti ti-shield-lock"></i>
-        <span>Documento generado con cifrado AES-256 · Hash SHA-256: <span style="font-family:'DM Mono',monospace">a3f8c2d1…e9b7</span> · Timestamp: 12/05/2025 10:15:33 UTC-5</span>
-      </div>
-    </div>
-
-    <!-- CARTA DE INSTRUCCIONES -->
-    <div class="pagare-card" style="margin-bottom:1.25rem">
-      <div class="pagare-header" style="background:var(--navy2)">
-        <i class="ti ti-file-text"></i>
-        <h2>Carta de Instrucciones para Diligenciar Pagaré</h2>
-        <div class="ph-right">Art. 622 C. Comercio</div>
-      </div>
-      <div class="pagare-body" id="carta-body" style="max-height:120px">
-        <div style="text-align:center;margin-bottom:14px">
-          <strong>FONDO DE EMPLEADOS UNE — "FONDOUNE"</strong><br>
-          <strong>CARTA DE INSTRUCCIONES PARA DILIGENCIAR PAGARÉ No. _______________</strong>
-        </div>
-        Yo, <strong>Carlos Andrés Gil</strong>, identificado como aparece al pie de mi firma, obrando en calidad de deudor solidario, autorizo al <strong>FONDO DE EMPLEADOS DE UNE "FONDOUNE"</strong>, identificado con NIT <strong>811018807-8</strong>, o cualquier otro tenedor legítimo del pagaré suscrito, para que haciendo uso de las facultades conferidas en el <strong>Artículo 622 del Código de Comercio</strong>, diligencie los espacios en blanco del respectivo pagaré, para lo cual debe ceñirse a las siguientes instrucciones:
-
-        <br><br><strong>1.</strong> El FONDO o su tenedor legítimo podrá llenar los espacios en blanco del Pagaré cuando se presente una o varias de las circunstancias de exigibilidad contenidas en la Cláusula Quinta del texto del Pagaré.
-
-        <br><br><strong>2.</strong> El número del pagaré será el que determine el FONDO DE EMPLEADOS DE UNE "FONDOUNE".
-
-        <br><br><strong>3.</strong> El espacio correspondiente a nombres del deudor será diligenciado con el nombre del suscribiente.
-
-        <br><br><strong>4.</strong> El espacio de ciudad de domicilio será diligenciado con la ciudad informada en el formulario de afiliación. A falta de información, será la ciudad de Medellín.
-
-        <br><br><strong>5.</strong> En el espacio del valor del pagaré, cláusula primera, se diligenciará el valor desembolsado al deudor por el FONDO o el valor de la refinanciación, si éste fuere mayor a la suma desembolsada inicialmente.
-
-        <br><br><strong>6.</strong> La cláusula segunda será diligenciada con: número de cuotas pactadas; periodicidad (quincenal o mensual); valor de la cuota en letras y números; día, mes y año de pago de la primera cuota; y número total de cuotas.
-
-        <br><br><strong>7.</strong> Los espacios de tasas de interés de la cláusula tercera serán diligenciados conforme a las tasas con las que se haya aprobado el crédito o sus respectivas modificaciones acordadas por las partes.
-
-        <br><br><strong>8.</strong> El espacio de ciudad de otorgamiento del pagaré será diligenciado con la ciudad donde tenga domicilio principal el FONDO DE EMPLEADOS DE UNE "FONDOUNE".
-
-        <br><br><strong>9.</strong> Para llenar el Pagaré, el FONDO no requiere dar aviso a los firmantes del mismo.
-
-        <br><br><strong>10.</strong> Hago expreso reconocimiento de que conservo copia de estas instrucciones y documentos, y conozco plenamente el contenido de los mismos.
-
-        <br><br><em>En constancia de lo anterior se firma esta carta de instrucciones en duplicado a los 12 días del mes de mayo del año 2025.</em>
-      </div>
-      <div style="padding:8px 1.5rem;text-align:right;border-bottom:1px solid var(--border)">
-        <button class="btn" style="font-size:11px;padding:5px 12px" onclick="toggleCarta()">
-          <i class="ti ti-arrows-vertical" id="carta-expand-icon"></i>
-          <span id="carta-expand-lbl">Ver instrucciones completas</span>
-        </button>
-      </div>
-      <div class="pagare-footer">
-        <i class="ti ti-info-circle"></i>
-        <span>Este documento es complementario al pagaré y forma parte integral del título valor conforme al Art. 622 del Código de Comercio colombiano.</span>
+        <span>Documento generado y almacenado con cifrado AES-256 · Hash SHA-256: <span style="font-family:'DM Mono',monospace">a3f8c2d1…e9b7</span> · Timestamp: 12/05/2025 10:15:33 UTC-5</span>
       </div>
     </div>
 
@@ -399,14 +277,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="consent-check" id="cb1"><i class="ti ti-check"></i></div>
         <div class="consent-txt">
           <div class="ct-title">Acepto las condiciones del crédito y el pagaré electrónico</div>
-          <div class="ct-body">He leído y entiendo el pagaré en blanco con carta de instrucciones del FONDO DE EMPLEADOS DE UNE "FONDOUNE" (NIT 811018807-8). Autorizo a FONDOUNE a diligenciar los espacios en blanco conforme a las instrucciones suscritas (Art. 622 C. Comercio) y a realizar el descuento por nómina según la cláusula sexta.</div>
+          <div class="ct-body">He leído y entiendo el pagaré en blanco con carta de instrucciones. Autorizo a FondoUne a llenarlo conforme a las condiciones aprobadas y realizar el descuento por nómina.</div>
         </div>
       </div>
       <div class="consent-item" id="c2" onclick="toggleConsent('c2','cb2')">
         <div class="consent-check" id="cb2"><i class="ti ti-check"></i></div>
         <div class="consent-txt">
           <div class="ct-title">Autorizo el desembolso a mi cuenta bancaria registrada</div>
-          <div class="ct-body">Confirmo que la cuenta Bancolombia No. *** *** 4821 registrada es la correcta para recibir el desembolso de $8.000.000 COP.</div>
+          <div class="ct-body">Confirmo que la cuenta Bancolombia No. *** *** 4821 registrada es la correcta para recibir el desembolso de $8.000.000 COP hoy.</div>
         </div>
       </div>
       <div class="consent-item" id="c3" onclick="toggleConsent('c3','cb3')">
@@ -437,7 +315,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div class="desembolso-card">
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Confirmación del desembolso</div>
-      <div class="dc-row"><span class="dl"><i class="ti ti-coin" style="font-size:14px"></i> Monto a desembolsar</span><span class="dv good" id="success-monto">$8.000.000 COP</span></div>
+      <div class="dc-row"><span class="dl"><i class="ti ti-coin" style="font-size:14px"></i> Monto a desembolsar</span><span class="dv good">$8.000.000 COP</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-building-bank" style="font-size:14px"></i> Cuenta destino</span><span class="dv">Bancolombia *** 4821</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-clock" style="font-size:14px"></i> Tiempo estimado</span><span class="dv">Hoy · 2:00 – 4:00 p.m.</span></div>
       <div class="dc-row"><span class="dl"><i class="ti ti-calendar" style="font-size:14px"></i> Primera cuota</span><span class="dv">12 de junio, 2025 · $391.800</span></div>
@@ -447,15 +325,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div class="note ok" style="text-align:left">
       <i class="ti ti-mail-check"></i>
-      <span>Te enviamos el pagaré firmado y el resumen del crédito a <strong id="success-email">carlos.g***@une.net.co</strong>. Guárdalos para tus registros. También puedes descargarlo abajo.</span>
+      <span>Te enviamos el pagaré firmado y el resumen del crédito a <strong>carlos.g***@une.net.co</strong>. Guárdalos para tus registros. También puedes descargarlo abajo.</span>
     </div>
 
     <div style="display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
       <button class="btn" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir</button>
-      <button class="btn gold" onclick="descargarPagarePDF()">
-        <i class="ti ti-download"></i>
-        Descargar pagar PDF
-      </button>
+      <button class="btn gold" onclick="showToast('Descargando pagaré PDF…','ok')"><i class="ti ti-download"></i> Descargar pagaré</button>
       <button class="btn success-btn" onclick="showToast('Redirigiendo al inicio…','ok')"><i class="ti ti-home"></i> Ir al inicio</button>
     </div>
   </div>
@@ -471,177 +346,28 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <script>
-// ── DATOS DESDE SESIÓN (FondouneSession / legacy fondoune_*) ──
-function fmtCOP(n) {
-  return '$' + Number(n).toLocaleString('es-CO');
-}
-
-function maskEmail(email) {
-  if (!email || !email.includes('@')) return email || '—';
-  const [user, domain] = email.split('@');
-  const shown = user.length <= 2 ? user[0] + '*' : user.slice(0, 2) + '***';
-  return shown + '@' + domain;
-}
-
-function loadLegacyFirmaApp() {
-  try {
-    const asoc = JSON.parse(sessionStorage.getItem('fondoune_asociado') || 'null');
-    const monto = sessionStorage.getItem('fondoune_monto');
-    if (!asoc || !monto) return null;
-    const plazoLabel = sessionStorage.getItem('fondoune_plazo') || '24 meses';
-    const plazo = parseInt(String(plazoLabel).match(/\d+/)?.[0] || '24', 10);
-    const tasaEA = parseFloat(sessionStorage.getItem('fondoune_tasa')) || 14.03;
-    const tasaEM = (Math.pow(1 + tasaEA / 100, 1 / 12) - 1) * 100;
-    return {
-      solicitudId: sessionStorage.getItem('fu_solicitud_id') || 'SOL-2025-0847',
-      monto: Number(monto),
-      plazo,
-      plazoLabel,
-      tipo: sessionStorage.getItem('fondoune_linea') || 'Libre inversión',
-      tasaEA,
-      tasaEM,
-      cuota: null,
-      totalPagar: null,
-      asociado: {
-        nombre: asoc.nombre,
-        correo: asoc.correo,
-        cedula: asoc.cedula,
-        empresa: asoc.empresa,
-        cargo: asoc.cargo,
-      },
-      aprobadoPor: null,
-      aprobadoEn: null,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function applyFirmaFromSession(app) {
-  if (!app || !app.monto) return;
-
-  const a = app.asociado || {};
-  const primerNombre = (a.nombre || 'Asociado').split(' ')[0];
-  const fechaAprob = app.aprobadoEn
-    ? new Date(app.aprobadoEn).toLocaleString('es-CO', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      })
-    : '—';
-
-  const heroNombre = document.getElementById('hero-nombre');
-  if (heroNombre) heroNombre.textContent = primerNombre;
-
-  const heroRef = document.getElementById('hero-ref');
-  if (heroRef) {
-    heroRef.textContent =
-      `Ref: ${app.solicitudId || '—'} · Aprobado: ${fechaAprob}` +
-      (app.aprobadoPor ? ` · Analista: ${app.aprobadoPor}` : '');
-  }
-
-  const montoEl = document.getElementById('credit-monto');
-  if (montoEl) montoEl.textContent = fmtCOP(app.monto);
-
-  const cuotaEl = document.getElementById('credit-cuota');
-  if (cuotaEl && app.cuota) cuotaEl.textContent = fmtCOP(app.cuota);
-
-  const plazoSub = document.getElementById('credit-plazo-sub');
-  if (plazoSub) plazoSub.textContent = 'por ' + (app.plazoLabel || app.plazo + ' meses');
-
-  const condTipo = document.getElementById('cond-tipo');
-  if (condTipo) condTipo.textContent = app.tipo || '—';
-
-  const condTasa = document.getElementById('cond-tasa');
-  if (condTasa && app.tasaEA != null) {
-    condTasa.textContent =
-      `${(app.tasaEM || 0).toFixed(2)}% efectivo mensual · ${Number(app.tasaEA).toFixed(2)}% E.A.`;
-  }
-
-  const condPlazo = document.getElementById('cond-plazo');
-  if (condPlazo) {
-    const dias = (app.plazo || 24) * 30;
-    condPlazo.textContent = `${app.plazo || 24} meses (${dias} días hábiles aprox.)`;
-  }
-
-  const total = app.totalPagar || (app.cuota && app.plazo ? app.cuota * app.plazo : null);
-  const condTotal = document.getElementById('cond-total');
-  if (condTotal && total) condTotal.textContent = fmtCOP(total);
-
-  const pagareNombre = document.getElementById('pagare-nombre');
-  if (pagareNombre) pagareNombre.textContent = a.nombre || '—';
-
-  const pagareMonto = document.getElementById('pagare-monto');
-  if (pagareMonto) pagareMonto.textContent = `${fmtCOP(app.monto)} (${Number(app.monto).toLocaleString('es-CO')},00)`;
-
-  const successMonto = document.getElementById('success-monto');
-  if (successMonto) successMonto.textContent = fmtCOP(app.monto) + ' COP';
-
-  const successEmail = document.getElementById('success-email');
-  if (successEmail) successEmail.textContent = maskEmail(a.correo);
-
-  const phRight = document.querySelector('.ph-right');
-  if (phRight && app.solicitudId) {
-    phRight.textContent = 'DOC-PAG-' + app.solicitudId.replace('SOL-', '') + ' · Ley 527/1999';
-  }
-}
-
-function loadFirmaFromSession() {
-  let app = null;
-  if (typeof FondouneSession !== 'undefined') {
-    app = FondouneSession.getCreditApp();
-  }
-  if (!app || !app.monto) {
-    app = loadLegacyFirmaApp();
-  }
-  applyFirmaFromSession(app);
-}
-
-document.addEventListener('DOMContentLoaded', loadFirmaFromSession);
-
-// ── TOGGLE DOCUMENTOS ────────────────────────────────
-let pagareExpanded = false;
-function togglePagare(){
-  pagareExpanded = !pagareExpanded;
-  const body = document.getElementById('pagare-body');
-  const lbl = document.getElementById('pagare-expand-lbl');
-  body.style.maxHeight = pagareExpanded ? 'none' : '180px';
-  lbl.textContent = pagareExpanded ? 'Colapsar texto' : 'Ver texto completo';
-}
-
-let cartaExpanded = false;
-function toggleCarta(){
-  cartaExpanded = !cartaExpanded;
-  const body = document.getElementById('carta-body');
-  const lbl = document.getElementById('carta-expand-lbl');
-  body.style.maxHeight = cartaExpanded ? 'none' : '120px';
-  lbl.textContent = cartaExpanded ? 'Colapsar instrucciones' : 'Ver instrucciones completas';
-}
-
 // ── CANVAS FIRMA ──────────────────────────────────────
 const canvas = document.getElementById('firma-canvas');
 const ctx = canvas.getContext('2d');
 let drawing = false, hasSig = false;
 
-// Variable global para cachear el rect del canvas
-let canvasRect = null;
-
 function resizeCanvas(){
-  const dpr = window.devicePixelRatio || 1;
-  const width = canvas.parentElement.clientWidth - 40; // clientWidth no fuerza reflow
-  canvas.width = width * dpr;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = (rect.width - 40) * dpr;
   canvas.height = 140 * dpr;
-  canvas.style.width = width + 'px';
+  canvas.style.width = (rect.width - 40) + 'px';
   canvas.style.height = '140px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // setTransform evita acumulación de scale
+  ctx.scale(dpr,dpr);
   ctx.strokeStyle = '#0B2545';
   ctx.lineWidth = 2.5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  canvasRect = canvas.getBoundingClientRect(); // se cachea una sola vez al redimensionar
 }
+resizeCanvas();
 
 function getPos(e){
-  const rect = canvasRect || canvas.getBoundingClientRect(); // usa el rect cacheado
+  const rect = canvas.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
   return {x: src.clientX - rect.left, y: src.clientY - rect.top};
 }
@@ -664,7 +390,8 @@ function setSigned(){
 }
 
 function clearFirma(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const dpr=window.devicePixelRatio||1;
+  ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
   hasSig=false;
   canvas.classList.remove('has-sig');
   document.getElementById('canvas-ph').style.opacity='1';
@@ -736,31 +463,10 @@ function intentarFirmar(){
   const btn=document.getElementById('btn-firmar');
   btn.innerHTML='<i class="ti ti-loader" style="animation:spin .8s linear infinite"></i> Procesando firma…';
   btn.disabled=true;
-
+  const style=document.createElement('style');
+  style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
   setTimeout(()=>{
-    if (typeof FondouneSession !== 'undefined') {
-      const app = FondouneSession.getCreditApp();
-      if (app?.solicitudId) {
-        const firmado = {
-          ...app,
-          estado: 'firmado',
-          firmadoEn: new Date().toISOString(),
-        };
-        FondouneSession.saveCreditApp(firmado);
-        FondouneSession.pushAnalystQueue(firmado);
-        FondouneSession.removeFromAnalystQueue(app.solicitudId);
-        FondouneSession.removeFromGerenciaQueue(app.solicitudId);
-        FondouneSession.saveDecision({
-          solicitudId: app.solicitudId,
-          accion: 'firma_completada',
-          fecha: new Date().toISOString(),
-        });
-        FondouneSession.queueNotif(
-          'Firma completada · ' + (app.asociado?.nombre || app.solicitudId),
-          'success'
-        );
-      }
-    }
     document.getElementById('main-content').style.display='none';
     document.getElementById('success-state').style.display='block';
     document.getElementById('success-state').scrollIntoView({behavior:'smooth'});
@@ -788,40 +494,15 @@ function launchConfetti(){
 }
 
 // ── TOAST ────────────────────────────────────────────
-function showToast(msg, type = 'ok') {
-  if (typeof FondouneUI !== 'undefined') {
-    FondouneUI.toast(msg, type);
-    return;
-  }
+function showToast(msg,type='ok'){
   const t=document.createElement('div');
   t.style.cssText='position:fixed;bottom:60px;right:20px;z-index:999;background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:DM Sans,sans-serif;box-shadow:var(--shadow-lg);animation:tIn .25s ease;color:var(--navy);max-width:300px';
   t.innerHTML=`<i class="ti ti-circle-check" style="color:var(--success);font-size:17px"></i><span>${msg}</span>`;
   document.body.appendChild(t);
-
+  const s=document.createElement('style');
+  s.textContent='@keyframes tIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}';
+  document.head.appendChild(s);
   setTimeout(()=>t.remove(),4000);
-
-  function descargarPagarePDF() {
-  showToast('Generando PDF profesional...', 'ok');
-
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-
-  script.onload = function() {
-    const element = document.getElementById('main-content');
-
-    const opt = {
-      margin: [10, 10, 12, 10],
-      filename: 'Pagare_FondoUne_SOL-2025-0847_Carlos-Andres-Gil.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'] }
-    };
-
-    html2pdf().set(opt).from(element).save();
-  };
-
-  document.head.appendChild(script);
 }
 </script>
 </body>
