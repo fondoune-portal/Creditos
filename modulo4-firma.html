@@ -800,20 +800,28 @@ function showToast(msg, type = 'ok') {
 
   setTimeout(()=>t.remove(),4000);
 
-function descargarPagarePDF() {
-  const element = document.getElementById('main-content');
+  function descargarPagarePDF() {
+  showToast('Generando PDF profesional...', 'ok');
 
-  const opt = {
-    margin: [10, 10, 12, 10],
-    filename: 'Pagare_FondoUne_SOL-2025-0847_Carlos-Andres-Gil.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+
+  script.onload = function() {
+    const element = document.getElementById('main-content');
+
+    const opt = {
+      margin: [10, 10, 12, 10],
+      filename: 'Pagare_FondoUne_SOL-2025-0847_Carlos-Andres-Gil.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(element).save();
   };
 
-  showToast('Generando PDF profesional...', 'ok');
-  html2pdf().set(opt).from(element).save();
+  document.head.appendChild(script);
 }
 </script>
 </body>
