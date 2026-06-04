@@ -392,6 +392,7 @@
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
+  <script src="sheets-connector.js"></script>
   <script>FondouneNav.init('solicitud');</script>
 </head>
 <body>
@@ -460,7 +461,7 @@
 
       <div class="consent-box">
         <input type="checkbox" id="c1" checked>
-        <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion), a consultar listas de cumplimiento SARLAFT/UIAF y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
+        <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion) y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
       </div>
 
       <div class="btn-row">
@@ -675,11 +676,13 @@
           <div style="flex:1;"><div class="val-name">DataCrédito Experian — Score crediticio</div><div class="progress-bar"><div class="pb-fill" id="pb1"></div></div></div>
           <div class="val-status" id="vs1">En espera</div>
         </div>
+        <!-- v2 SARLAFT deshabilitado temporalmente — sin presupuesto para lista SARLAFT
         <div class="val-item" id="v2">
           <div class="val-icon idle" id="vi2"><i class="ti ti-alert-octagon"></i></div>
           <div style="flex:1;"><div class="val-name">UIAF / OFAC / Listas SARLAFT</div><div class="progress-bar"><div class="pb-fill" id="pb2"></div></div></div>
           <div class="val-status" id="vs2">En espera</div>
         </div>
+        -->
         <div class="val-item" id="v3">
           <div class="val-icon idle" id="vi3"><i class="ti ti-users"></i></div>
           <div style="flex:1;"><div class="val-name">Historial interno FondoUne</div><div class="progress-bar"><div class="pb-fill" id="pb3"></div></div></div>
@@ -739,10 +742,12 @@
         <span class="lbl"><i class="ti ti-chart-bar" style="font-size:15px;"></i> Score DataCrédito</span>
         <span class="val good">742 / 900 <span class="tag tag-green">Sin novedad</span></span>
       </div>
+      <!-- Listas SARLAFT deshabilitadas temporalmente
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-alert-octagon" style="font-size:15px;"></i> Listas UIAF / OFAC</span>
         <span class="val good"><span class="tag tag-green">Sin reportes</span></span>
       </div>
+      -->
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-history" style="font-size:15px;"></i> Historial FondoUne</span>
         <span class="val good">2 créditos previos <span class="tag tag-green">Pagados a tiempo</span></span>
@@ -764,7 +769,9 @@
       <div class="sources-block">
         <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> DataCrédito Experian — API REST</div>
+        <!-- SARLAFT deshabilitado temporalmente
         <div class="src-row src-ok"><i class="ti ti-check"></i> UIAF / OFAC / Listas SARLAFT</div>
+        -->
         <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Historial de créditos</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
@@ -929,7 +936,7 @@ function otpMove(el, prevId, nextId) {
 // ── VALIDATION ENGINE ──
 const validations = [
   { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
-  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
+  // v2 SARLAFT — deshabilitado temporalmente (pendiente integración de proveedor)
   { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
   { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:'Cap. $945K/mes', detail:'30.4% compromiso' },
   { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },

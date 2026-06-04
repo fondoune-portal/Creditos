@@ -760,13 +760,13 @@ function buildDetail(s) {
     </div>
 
     <div>
-      <div class="sec-title"><i class="ti ti-shield-check"></i>Verificación KYC · 6 controles</div>
+      <div class="sec-title"><i class="ti ti-shield-check"></i>Verificación KYC · 5 controles</div>
       <div class="kyc-list">
         ${kycR('Cédula — OCR & validación','cedula')}
         ${kycR('RNEC — Registraduría Nacional','rnec')}
         ${kycR('Liveness activo biométrico','liveness','99.3% match')}
         ${kycR('Match facial vs documento','biometria')}
-        ${kycR('Listas SARLAFT Colombia','sarlaft')}
+        ${/* SARLAFT deshabilitado temporalmente — pendiente presupuesto */''}
         ${kycR('UIAF / OFAC / ONU','uiaf')}
       </div>
     </div>
