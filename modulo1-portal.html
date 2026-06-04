@@ -1028,15 +1028,40 @@ async function buscarAsociadoPorCedula(cedula) {
   if (!cedula || cedula.length < 5) return;
   if (typeof SheetsConnector === 'undefined') return;
 
+  // Garantizar sesión activa antes de consultar
+  // (en prototipo puede no existir sesión desde el login)
+  if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
+    FondouneSession.initUser({ id: cedula, role: 'asociado' });
+  }
+
   const datos = await SheetsConnector.cargarDatosEnPortal(cedula);
 
-  // Si encontró al asociado, actualizar también el nombre visible en el header si existe
+  // Actualizar navbar con el nombre real del asociado
   if (datos && typeof FondouneSession !== 'undefined') {
-    const user = FondouneSession.getUser();
-    const nameEl = document.getElementById('nav-user-name');
-    if (nameEl && user.name) nameEl.textContent = user.name;
+    FondouneSession.initUser({
+      ...FondouneSession.getUser(),
+      id:   cedula,
+      name: datos.nombre || FondouneSession.getUser().name,
+    });
+    if (typeof FondouneNav !== 'undefined') FondouneNav.updateUserInfo();
   }
 }
+
+// ── INICIALIZACIÓN DEMO ──
+// Si no hay sesión (acceso directo al prototipo sin pasar por login),
+// crear una sesión base para que la navegación no redirija a index.html
+(function initPortalDemo() {
+  if (typeof FondouneSession === 'undefined') return;
+  if (!FondouneSession.isLoggedIn()) {
+    const cedulaInicial = (document.getElementById('f-cedula')?.value || '').replace(/[.\s]/g, '');
+    FondouneSession.initUser({
+      id:       cedulaInicial || 'demo',
+      name:     'Asociado FondoUne',
+      role:     'asociado',
+      initials: 'AF',
+    });
+  }
+})();
 
 // Init summary
 updateSummary();
