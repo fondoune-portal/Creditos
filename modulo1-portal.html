@@ -434,49 +434,85 @@
       <div class="card-title">Acceso al portal</div>
       <div class="card-sub">Ingresa con tu número de cédula y correo corporativo para verificar que eres un asociado activo.</div>
 
-      <div class="form-grid">
-        <div class="field">
+      <!-- Fila cédula + botón verificar -->
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:0;">
+        <div class="field" style="flex:1;margin-bottom:0;">
           <label>Número de cédula <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="f-cedula" placeholder="Ej. 1045678901" value="1045678901"
-                 onblur="buscarAsociadoPorCedula(this.value)">
+          <input type="text" id="f-cedula" placeholder="Ej. 1045678901"
+                 oninput="onCedulaInput(this.value)"
+                 style="margin-bottom:0;">
         </div>
-        <div class="field">
-          <label>Correo corporativo <span style="color:var(--danger)">*</span></label>
-          <input type="email" id="f-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co">
+        <button class="btn" id="btn-verificar" onclick="verificarAsociado()"
+                disabled
+                style="height:42px;padding:0 18px;white-space:nowrap;flex-shrink:0;opacity:.4;transition:opacity .2s;">
+          <i class="ti ti-search" id="btn-verificar-icon"></i>
+          <span id="btn-verificar-txt">Verificar</span>
+        </button>
+      </div>
+
+      <!-- Indicador de estado -->
+      <div id="sheets-status" style="font-size:12px;padding:0;margin-top:0;border-radius:7px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s,margin .3s;"></div>
+
+      <!-- Tarjeta de datos encontrados (oculta hasta verificar) -->
+      <div id="asociado-card" style="display:none;background:#F7F9FC;border:1px solid rgba(26,107,173,.15);border-radius:10px;padding:14px 16px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;" id="asoc-initials">--</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);" id="asoc-nombre">—</div>
+            <div style="font-size:11px;color:#5A6E8C;" id="asoc-empresa">—</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EAF5EE;color:#1A7A4A;border:1px solid rgba(26,122,74,.2);" id="asoc-estado-badge">Activo</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Teléfono</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-tel">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Ciudad</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ciudad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Salario base</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-salario">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Vinculado desde</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ingreso">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Capacidad de pago</div>
+            <div style="color:#1A7A4A;font-weight:600;" id="asoc-capacidad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Agencia</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-agencia">—</div>
+          </div>
         </div>
       </div>
-      <div class="form-grid">
+
+      <div class="form-grid" id="extra-fields" style="display:none;">
+        <div class="field">
+          <label>Correo corporativo</label>
+          <input type="email" id="f-email" placeholder="nombre@empresa.com">
+        </div>
         <div class="field">
           <label>Celular registrado</label>
-          <input type="tel" id="f-cel" placeholder="+57 300 000 0000" value="+57 314 802 4500">
-        </div>
-        <div class="field">
-          <label>Código de empleado</label>
-          <input type="text" placeholder="Ej. UNE-04321" value="UNE-04321">
+          <input type="tel" id="f-cel" placeholder="+57 300 000 0000">
         </div>
       </div>
 
-      <!-- Indicador de estado de consulta al Sheets -->
-      <div id="sheets-status" style="display:none;font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:8px;"></div>
-
-      <div class="sec-layers">
-        <div class="sec-item">
-          <div class="sec-icon" style="background:#EFF4FB;"><i class="ti ti-users" style="color:var(--blue);"></i></div>
-          <div><div class="sec-title">Base interna</div><div class="sec-sub">Validamos que la cédula pertenece a un asociado activo del fondo</div></div>
-        </div>
-        <div class="sec-item">
-          <div class="sec-icon" style="background:#EAF5EE;"><i class="ti ti-mail-check" style="color:var(--success);"></i></div>
-          <div><div class="sec-title">Correo corporativo</div><div class="sec-sub">Confirma que sigues siendo empleado activo en la empresa</div></div>
-        </div>
-      </div>
-
-      <div class="consent-box">
+      <div class="consent-box" id="consent-box" style="display:none;">
         <input type="checkbox" id="c1" checked>
         <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion) y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
       </div>
 
       <div class="btn-row">
-        <button class="btn primary" onclick="goTo(2)">Continuar <i class="ti ti-arrow-right"></i></button>
+        <button class="btn primary" id="btn-continuar" onclick="goTo(2)" style="display:none;">
+          Continuar <i class="ti ti-arrow-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -1022,44 +1058,146 @@ function irAFirma() {
   FondouneNav.navigateTo('firma');
 }
 
-// ── BÚSQUEDA EN SHEETS POR CÉDULA ──
-async function buscarAsociadoPorCedula(cedula) {
-  cedula = (cedula || '').trim().replace(/[.\s]/g, '');
-  if (!cedula || cedula.length < 5) return;
-  if (typeof SheetsConnector === 'undefined') return;
+// ── CEDULA INPUT — habilita el botón cuando hay suficientes dígitos ──
+function onCedulaInput(val) {
+  const cedula = val.replace(/[.\s]/g, '');
+  const btn    = document.getElementById('btn-verificar');
+  if (!btn) return;
+  const listo  = cedula.length >= 5;
+  btn.disabled = !listo;
+  btn.style.opacity = listo ? '1' : '.4';
+  // Si borraron la cédula, ocultar la tarjeta y el botón continuar
+  if (!listo) resetAsociadoCard();
+}
 
-  // Garantizar sesión activa antes de consultar
-  // (en prototipo puede no existir sesión desde el login)
+// ── VERIFICAR ASOCIADO — llamada al Sheets ──
+async function verificarAsociado() {
+  const cedula = (document.getElementById('f-cedula')?.value || '').replace(/[.\s]/g, '');
+  if (!cedula || cedula.length < 5) return;
+
+  // Estado: cargando
+  const btn     = document.getElementById('btn-verificar');
+  const btnIcon = document.getElementById('btn-verificar-icon');
+  const btnTxt  = document.getElementById('btn-verificar-txt');
+  const statusEl = document.getElementById('sheets-status');
+
+  btn.disabled   = true;
+  btnIcon.className = 'ti ti-loader spin';
+  btnTxt.textContent = 'Buscando…';
+  statusEl.className = 'sheets-loading';
+  statusEl.textContent = 'Consultando base de datos FondoUne…';
+  statusEl.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+
+  // Garantizar sesión para que navigation.js no redirija
   if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
-    FondouneSession.initUser({ id: cedula, role: 'asociado' });
+    FondouneSession.initUser({ id: cedula, role: 'asociado', name: 'Asociado', initials: 'A' });
   }
 
-  const datos = await SheetsConnector.cargarDatosEnPortal(cedula);
+  if (typeof SheetsConnector === 'undefined') {
+    mostrarErrorVerificacion('El conector con la base de datos no está disponible.');
+    resetBotonVerificar();
+    return;
+  }
 
-  // Actualizar navbar con el nombre real del asociado
-  if (datos && typeof FondouneSession !== 'undefined') {
+  const datos = await SheetsConnector.obtenerAsociado(cedula);
+
+  // Restaurar botón
+  btn.disabled = false;
+  btnIcon.className = 'ti ti-search';
+  btnTxt.textContent = 'Verificar';
+
+  if (!datos) {
+    mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
+    resetAsociadoCard();
+    return;
+  }
+
+  if (!datos.activo) {
+    mostrarErrorVerificacion('El asociado figura como inactivo en el sistema.');
+    resetAsociadoCard();
+    return;
+  }
+
+  // ── Éxito: mostrar tarjeta con datos reales ──
+  statusEl.className = 'sheets-ok';
+  statusEl.textContent = '✓ Asociado verificado en la base de datos FondoUne';
+
+  // Poblar tarjeta
+  const fmt = n => typeof n === 'number' ? '$' + n.toLocaleString('es-CO') : (n || '—');
+  const ini = datos.nombre.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('asoc-initials').textContent  = ini;
+  document.getElementById('asoc-nombre').textContent    = datos.nombre;
+  document.getElementById('asoc-empresa').textContent   = datos.empresa + ' · ' + datos.ciudad;
+  document.getElementById('asoc-tel').textContent       = datos.telefono || '—';
+  document.getElementById('asoc-ciudad').textContent    = datos.ciudad   || '—';
+  document.getElementById('asoc-salario').textContent   = fmt(datos.salarioBasico);
+  document.getElementById('asoc-capacidad').textContent = fmt(datos.capacidadPago);
+  document.getElementById('asoc-agencia').textContent   = datos.agencia  || '—';
+  document.getElementById('asoc-ingreso').textContent   = datos.fechaIngreso || '—';
+
+  document.getElementById('asociado-card').style.display = 'block';
+  document.getElementById('extra-fields').style.display  = 'grid';
+  document.getElementById('consent-box').style.display   = 'flex';
+  document.getElementById('btn-continuar').style.display = 'inline-flex';
+
+  // Pre-llenar campos extra
+  document.getElementById('f-cel').value = datos.telefono || '';
+
+  // Persistir en sesión
+  if (typeof FondouneSession !== 'undefined') {
     FondouneSession.initUser({
-      ...FondouneSession.getUser(),
-      id:   cedula,
-      name: datos.nombre || FondouneSession.getUser().name,
+      id:       cedula,
+      name:     datos.nombre,
+      empresa:  datos.empresa,
+      ciudad:   datos.ciudad,
+      role:     'asociado',
+      initials: ini,
+    });
+    FondouneSession.saveNomina({
+      basico:      datos.salarioBasico,
+      devengado:   datos.totalDevengado,
+      deducciones: datos.totalDeducciones,
+      neto:        datos.netoPagado,
+      libranzas:   datos.libranzasActivas || 0,
+      aportes:     datos.aportes,
+      empresa:     datos.empresa,
+      periodo:     datos.periodoNomina,
+      fuente:      'Google Sheets FondoUne',
     });
     if (typeof FondouneNav !== 'undefined') FondouneNav.updateUserInfo();
   }
 }
 
+function mostrarErrorVerificacion(msg) {
+  const el = document.getElementById('sheets-status');
+  el.className = 'sheets-warn';
+  el.textContent = '⚠ ' + msg;
+  el.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+}
+
+function resetBotonVerificar() {
+  const btn = document.getElementById('btn-verificar');
+  if (btn) { btn.disabled = false; }
+  const icon = document.getElementById('btn-verificar-icon');
+  if (icon) icon.className = 'ti ti-search';
+  const txt = document.getElementById('btn-verificar-txt');
+  if (txt) txt.textContent = 'Verificar';
+}
+
+function resetAsociadoCard() {
+  document.getElementById('asociado-card').style.display  = 'none';
+  document.getElementById('extra-fields').style.display   = 'none';
+  document.getElementById('consent-box').style.display    = 'none';
+  document.getElementById('btn-continuar').style.display  = 'none';
+}
+
 // ── INICIALIZACIÓN DEMO ──
-// Si no hay sesión (acceso directo al prototipo sin pasar por login),
-// crear una sesión base para que la navegación no redirija a index.html
+// Sesión base para que navigation.js no redirija al login
 (function initPortalDemo() {
   if (typeof FondouneSession === 'undefined') return;
   if (!FondouneSession.isLoggedIn()) {
-    const cedulaInicial = (document.getElementById('f-cedula')?.value || '').replace(/[.\s]/g, '');
-    FondouneSession.initUser({
-      id:       cedulaInicial || 'demo',
-      name:     'Asociado FondoUne',
-      role:     'asociado',
-      initials: 'AF',
-    });
+    FondouneSession.initUser({ id: 'demo', name: 'Asociado', role: 'asociado', initials: 'A' });
   }
 })();
 
