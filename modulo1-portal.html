@@ -542,11 +542,11 @@
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
-            <div style="font-size:13px;font-weight:500;">Carlos A. Gil</div>
+            <div style="font-size:13px;font-weight:500;" id="ocr-nombre">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
-            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';">1.045.678.901</div>
+            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';" id="ocr-cedula">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
@@ -595,7 +595,7 @@
     <div id="kyc-2fa-card" class="card hidden">
       <div class="card-eyebrow">Paso 2 de 5 — KYC · Doble factor de autenticación</div>
       <div class="card-title">Confirma tu identidad</div>
-      <div class="card-sub">Enviamos un código de 6 dígitos a <strong>+57 314 *** 4500</strong> y un enlace a <strong>carlos.g***@une.net.co</strong>. Ingresa el código para continuar.</div>
+      <div class="card-sub">Enviamos un código de 6 dígitos a <strong id="2fa-tel">+57 *** ****</strong> y un enlace a <strong id="2fa-email">tu correo registrado</strong>. Ingresa el código para continuar.</div>
 
       <div class="otp-row">
         <input class="otp-box" maxlength="1" value="7" id="otp1" oninput="otpMove(this,null,'otp2')">
@@ -676,22 +676,22 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">BÁSICO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$3.800K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-basico">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEVENGADO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$4.250K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-devengado">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEDUCCIONES</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);">$1.100K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);" id="nom-deducciones">—</div>
           </div>
           <div style="background:#EAF5EE;border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NETO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);">$3.150K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);" id="nom-neto">—</div>
           </div>
         </div>
-        <div class="note ok" style="margin-top:8px;"><i class="ti ti-check"></i> Nómina leída por IA · Empresa: Tigo-UNE S.A.S. · Periodo: Abril 2025 · Libranzas previas: $0</div>
+        <div class="note ok" style="margin-top:8px;" id="nom-footer"><i class="ti ti-check"></i> Datos cargados desde la base de datos FondoUne</div>
       </div>
 
       <hr class="divider">
@@ -788,11 +788,11 @@
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago</span>
-        <span class="val good">$945.000/mes disponible</span>
+        <span class="val good" id="res-capacidad">—</span>
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-percentage" style="font-size:15px;"></i> % compromiso ingreso</span>
-        <span class="val">30.4% <span class="tag tag-blue">Dentro del límite 35%</span></span>
+        <span class="val" id="res-porcentaje">—</span>
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-face-id" style="font-size:15px;"></i> Verificación biométrica</span>
@@ -816,7 +816,7 @@
 
       <div class="note ok">
         <i class="ti ti-mail-check"></i>
-        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong>carlos.g***@une.net.co</strong>. Tienes 48 horas para firmarlo.</span>
+        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong id="res-email-mask">tu correo registrado</strong>. Tienes 48 horas para firmarlo.</span>
       </div>
 
       <div class="btn-row">
@@ -857,7 +857,88 @@ function goTo(n) {
   const el = document.getElementById('s'+n);
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
+  poblarDatosAsociado(n);
   if (n === 4) startValidation();
+}
+
+// ── POBLAR DATOS DEL ASOCIADO EN TODOS LOS PASOS ──
+function poblarDatosAsociado(paso) {
+  if (typeof FondouneSession === 'undefined') return;
+  const user   = FondouneSession.getUser();
+  const nomina = FondouneSession.getNomina();
+  const fmt    = n => (typeof n === 'number' && n > 0) ? '$' + n.toLocaleString('es-CO') : '—';
+
+  // Helpers
+  const set  = (id, val) => { const e = document.getElementById(id); if (e && val) e.textContent = val; };
+  const maskEmail = em => {
+    if (!em || !em.includes('@')) return 'tu correo registrado';
+    const [u, d] = em.split('@');
+    return u.slice(0,3) + '***@' + d;
+  };
+  const maskTel = t => {
+    if (!t) return '+57 *** ****';
+    const d = t.replace(/\D/g,'');
+    return d.length >= 7 ? d.slice(0,3) + ' *** ' + d.slice(-4) : t;
+  };
+
+  const nombre  = user.name  || '—';
+  const cedula  = user.id    || '—';
+  const email   = document.getElementById('f-email')?.value || '';
+  const tel     = user.tel   || document.getElementById('f-cel')?.value || '';
+
+  // Paso 2 — OCR y 2FA
+  if (paso === 2) {
+    // Nombre abreviado: "Julián E. Márquez C."
+    const partes = nombre.split(' ');
+    const nombreCorto = partes.length >= 3
+      ? partes[0] + ' ' + partes[1][0] + '. ' + partes[2] + (partes[3] ? ' ' + partes[3][0] + '.' : '')
+      : nombre;
+    set('ocr-nombre', nombreCorto);
+    const cedFmt = cedula.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    set('ocr-cedula', cedFmt);
+    set('2fa-tel',   maskTel(tel));
+    set('2fa-email', maskEmail(email));
+  }
+
+  // Paso 3 — Nómina desde sesión
+  if (paso === 3 && nomina) {
+    set('nom-basico',      fmt(nomina.basico));
+    set('nom-devengado',   fmt(nomina.devengado || nomina.basico));
+    set('nom-deducciones', fmt(nomina.deducciones || nomina.cuotaAporte));
+    set('nom-neto',        fmt(nomina.neto));
+    const footer = document.getElementById('nom-footer');
+    if (footer && nomina.empresa) {
+      footer.innerHTML = '<i class="ti ti-check"></i> Datos cargados desde FondoUne · Empresa: '
+        + nomina.empresa + ' · Periodo: ' + (nomina.periodo || '—') + ' · Libranzas: '
+        + fmt(nomina.libranzas || 0);
+    }
+    // También actualizar el resumen preliminar con capacidad real
+    const cap = nomina.neto ? Math.round(nomina.neto * 0.35) : 0;
+    const hint = document.querySelector('#f-monto ~ .hint');
+    if (hint && cap > 0) {
+      const maxMonto = cap * 36; // estimado 36 cuotas máximo
+      hint.textContent = 'Máximo aprobable según perfil: ' + fmt(maxMonto);
+    }
+  }
+
+  // Paso 5 — Resultado con datos reales
+  if (paso === 5 && nomina) {
+    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+    const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
+    const plazo  = parseInt(plazoS.replace(' meses',''));
+    const tasa   = 0.011;
+    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+    const neto   = nomina.neto || 0;
+    const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
+    const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
+    const dentro = pct <= 35;
+
+    set('res-capacidad',  fmt(cap) + '/mes disponible');
+    const resEl = document.getElementById('res-porcentaje');
+    if (resEl) resEl.innerHTML = pct + '% <span class="tag ' + (dentro?'tag-blue':'tag-red') + '">'
+      + (dentro ? 'Dentro del límite 35%' : 'Supera el límite 35%') + '</span>';
+    set('res-email-mask', maskEmail(email));
+  }
 }
 
 // ── UPLOAD SIMULATION ──
@@ -964,12 +1045,21 @@ function otpMove(el, prevId, nextId) {
   if (el.value && nextId) document.getElementById(nextId).focus();
 }
 
+// ── HELPER PARA ANIMACIÓN DE VALIDACIÓN ──
+function getCapacidadLabel() {
+  if (typeof FondouneSession === 'undefined') return 'Cap. calculada';
+  const nomina = FondouneSession.getNomina();
+  if (!nomina || !nomina.neto) return 'Cap. calculada';
+  const cap = Math.round(nomina.neto * 0.35 - (nomina.libranzas || 0));
+  return 'Cap. $' + Math.round(cap/1000) + 'K/mes';
+}
+
 // ── VALIDATION ENGINE ──
 const validations = [
   { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
   { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
   { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
-  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:'Cap. $945K/mes', detail:'30.4% compromiso' },
+  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:getCapacidadLabel(), detail:'Análisis completado' },
   { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
 ];
 
@@ -1151,6 +1241,7 @@ async function verificarAsociado() {
       name:     datos.nombre,
       empresa:  datos.empresa,
       ciudad:   datos.ciudad,
+      tel:      datos.telefono || '',
       role:     'asociado',
       initials: ini,
     });
