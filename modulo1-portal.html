@@ -783,7 +783,7 @@
 
       <div class="btn-row">
         <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
-        <button class="btn gold"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
+        <button class="btn gold" onclick="irAFirma()"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
         <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
       </div>
     </div>
@@ -986,6 +986,38 @@ function updateSummary() {
 // ── RESET ──
 function resetPortal() {
   location.reload();
+}
+
+// ── IR A FIRMA (Módulo 4) ──
+function irAFirma() {
+  // Persistir los datos de la solicitud aprobada en sesión
+  // para que el Módulo 4 los pueda leer con FondouneSession.getCreditApp()
+  if (typeof FondouneSession !== 'undefined') {
+    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+    const plazoEl = document.getElementById('f-plazo');
+    const plazo  = parseInt((plazoEl?.value || '24 meses').replace(' meses',''));
+    const tasa   = 0.011;
+    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+
+    FondouneSession.saveCreditApp({
+      monto,
+      plazo,
+      cuota,
+      tasa:         '1.1% E.M.',
+      estado:       'pre-aprobado',
+      solicitudId:  'SOL-2025-0847',
+      score:        742,
+      riesgo:       'BAJO',
+      aprobadoEn:   new Date().toISOString(),
+    });
+
+    FondouneSession.queueNotif(
+      'Solicitud pre-aprobada. Por favor revisa y firma el pagaré electrónico.',
+      'success'
+    );
+  }
+
+  FondouneNav.navigateTo('firma');
 }
 
 // Init summary
