@@ -381,6 +381,12 @@
   }
   .bank-btn .bk-name { font-size: 11px; color: var(--muted); }
 
+  /* Sheets status indicator */
+  #sheets-status { display: none; }
+  #sheets-status.sheets-loading { display:block; background:#EFF4FB; color:#1A5A9A; border:1px solid rgba(26,90,154,.2); }
+  #sheets-status.sheets-ok      { display:block; background:#EAF5EE; color:#1A7A4A; border:1px solid rgba(26,122,74,.2); }
+  #sheets-status.sheets-warn    { display:block; background:#FEF6E6; color:#A06000; border:1px solid rgba(160,96,0,.2); }
+
   /* Responsive */
   @media (max-width: 540px) {
     .form-grid { grid-template-columns: 1fr; }
@@ -392,6 +398,7 @@
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
+  <script src="fondoune-ui.js"></script>
   <script src="sheets-connector.js"></script>
   <script>FondouneNav.init('solicitud');</script>
 </head>
@@ -427,45 +434,85 @@
       <div class="card-title">Acceso al portal</div>
       <div class="card-sub">Ingresa con tu número de cédula y correo corporativo para verificar que eres un asociado activo.</div>
 
-      <div class="form-grid">
-        <div class="field">
+      <!-- Fila cédula + botón verificar -->
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:0;">
+        <div class="field" style="flex:1;margin-bottom:0;">
           <label>Número de cédula <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="f-cedula" placeholder="Ej. 1045678901" value="1045678901">
+          <input type="text" id="f-cedula" placeholder="Ej. 1045678901"
+                 oninput="onCedulaInput(this.value)"
+                 style="margin-bottom:0;">
         </div>
-        <div class="field">
-          <label>Correo corporativo <span style="color:var(--danger)">*</span></label>
-          <input type="email" id="f-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co">
+        <button class="btn" id="btn-verificar" onclick="verificarAsociado()"
+                disabled
+                style="height:42px;padding:0 18px;white-space:nowrap;flex-shrink:0;opacity:.4;transition:opacity .2s;">
+          <i class="ti ti-search" id="btn-verificar-icon"></i>
+          <span id="btn-verificar-txt">Verificar</span>
+        </button>
+      </div>
+
+      <!-- Indicador de estado -->
+      <div id="sheets-status" style="font-size:12px;padding:0;margin-top:0;border-radius:7px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s,margin .3s;"></div>
+
+      <!-- Tarjeta de datos encontrados (oculta hasta verificar) -->
+      <div id="asociado-card" style="display:none;background:#F7F9FC;border:1px solid rgba(26,107,173,.15);border-radius:10px;padding:14px 16px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;" id="asoc-initials">--</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);" id="asoc-nombre">—</div>
+            <div style="font-size:11px;color:#5A6E8C;" id="asoc-empresa">—</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EAF5EE;color:#1A7A4A;border:1px solid rgba(26,122,74,.2);" id="asoc-estado-badge">Activo</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Teléfono</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-tel">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Ciudad</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ciudad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Salario base</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-salario">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Vinculado desde</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ingreso">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Capacidad de pago</div>
+            <div style="color:#1A7A4A;font-weight:600;" id="asoc-capacidad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Agencia</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-agencia">—</div>
+          </div>
         </div>
       </div>
-      <div class="form-grid">
+
+      <div class="form-grid" id="extra-fields" style="display:none;">
+        <div class="field">
+          <label>Correo corporativo</label>
+          <input type="email" id="f-email" placeholder="nombre@empresa.com">
+        </div>
         <div class="field">
           <label>Celular registrado</label>
-          <input type="tel" id="f-cel" placeholder="+57 300 000 0000" value="+57 314 802 4500">
-        </div>
-        <div class="field">
-          <label>Código de empleado</label>
-          <input type="text" placeholder="Ej. UNE-04321" value="UNE-04321">
+          <input type="tel" id="f-cel" placeholder="+57 300 000 0000">
         </div>
       </div>
 
-      <div class="sec-layers">
-        <div class="sec-item">
-          <div class="sec-icon" style="background:#EFF4FB;"><i class="ti ti-users" style="color:var(--blue);"></i></div>
-          <div><div class="sec-title">Base interna</div><div class="sec-sub">Validamos que la cédula pertenece a un asociado activo del fondo</div></div>
-        </div>
-        <div class="sec-item">
-          <div class="sec-icon" style="background:#EAF5EE;"><i class="ti ti-mail-check" style="color:var(--success);"></i></div>
-          <div><div class="sec-title">Correo corporativo</div><div class="sec-sub">Confirma que sigues siendo empleado activo en la empresa</div></div>
-        </div>
-      </div>
-
-      <div class="consent-box">
+      <div class="consent-box" id="consent-box" style="display:none;">
         <input type="checkbox" id="c1" checked>
         <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion) y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
       </div>
 
       <div class="btn-row">
-        <button class="btn primary" onclick="goTo(2)">Continuar <i class="ti ti-arrow-right"></i></button>
+        <button class="btn primary" id="btn-continuar" onclick="goTo(2)" style="display:none;">
+          Continuar <i class="ti ti-arrow-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -495,11 +542,11 @@
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
-            <div style="font-size:13px;font-weight:500;">Carlos A. Gil</div>
+            <div style="font-size:13px;font-weight:500;" id="ocr-nombre">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
-            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';">1.045.678.901</div>
+            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';" id="ocr-cedula">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
@@ -548,7 +595,7 @@
     <div id="kyc-2fa-card" class="card hidden">
       <div class="card-eyebrow">Paso 2 de 5 — KYC · Doble factor de autenticación</div>
       <div class="card-title">Confirma tu identidad</div>
-      <div class="card-sub">Enviamos un código de 6 dígitos a <strong>+57 314 *** 4500</strong> y un enlace a <strong>carlos.g***@une.net.co</strong>. Ingresa el código para continuar.</div>
+      <div class="card-sub">Enviamos un código de 6 dígitos a <strong id="2fa-tel">+57 *** ****</strong> y un enlace a <strong id="2fa-email">tu correo registrado</strong>. Ingresa el código para continuar.</div>
 
       <div class="otp-row">
         <input class="otp-box" maxlength="1" value="7" id="otp1" oninput="otpMove(this,null,'otp2')">
@@ -629,22 +676,22 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">BÁSICO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$3.800K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-basico">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEVENGADO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';">$4.250K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-devengado">—</div>
           </div>
           <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEDUCCIONES</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);">$1.100K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);" id="nom-deducciones">—</div>
           </div>
           <div style="background:#EAF5EE;border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NETO</div>
-            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);">$3.150K</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);" id="nom-neto">—</div>
           </div>
         </div>
-        <div class="note ok" style="margin-top:8px;"><i class="ti ti-check"></i> Nómina leída por IA · Empresa: Tigo-UNE S.A.S. · Periodo: Abril 2025 · Libranzas previas: $0</div>
+        <div class="note ok" style="margin-top:8px;" id="nom-footer"><i class="ti ti-check"></i> Datos cargados desde la base de datos FondoUne</div>
       </div>
 
       <hr class="divider">
@@ -676,13 +723,6 @@
           <div style="flex:1;"><div class="val-name">DataCrédito Experian — Score crediticio</div><div class="progress-bar"><div class="pb-fill" id="pb1"></div></div></div>
           <div class="val-status" id="vs1">En espera</div>
         </div>
-        <!-- v2 SARLAFT deshabilitado temporalmente — sin presupuesto para lista SARLAFT
-        <div class="val-item" id="v2">
-          <div class="val-icon idle" id="vi2"><i class="ti ti-alert-octagon"></i></div>
-          <div style="flex:1;"><div class="val-name">UIAF / OFAC / Listas SARLAFT</div><div class="progress-bar"><div class="pb-fill" id="pb2"></div></div></div>
-          <div class="val-status" id="vs2">En espera</div>
-        </div>
-        -->
         <div class="val-item" id="v3">
           <div class="val-icon idle" id="vi3"><i class="ti ti-users"></i></div>
           <div style="flex:1;"><div class="val-name">Historial interno FondoUne</div><div class="progress-bar"><div class="pb-fill" id="pb3"></div></div></div>
@@ -742,23 +782,17 @@
         <span class="lbl"><i class="ti ti-chart-bar" style="font-size:15px;"></i> Score DataCrédito</span>
         <span class="val good">742 / 900 <span class="tag tag-green">Sin novedad</span></span>
       </div>
-      <!-- Listas SARLAFT deshabilitadas temporalmente
-      <div class="summary-row">
-        <span class="lbl"><i class="ti ti-alert-octagon" style="font-size:15px;"></i> Listas UIAF / OFAC</span>
-        <span class="val good"><span class="tag tag-green">Sin reportes</span></span>
-      </div>
-      -->
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-history" style="font-size:15px;"></i> Historial FondoUne</span>
         <span class="val good">2 créditos previos <span class="tag tag-green">Pagados a tiempo</span></span>
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago</span>
-        <span class="val good">$945.000/mes disponible</span>
+        <span class="val good" id="res-capacidad">—</span>
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-percentage" style="font-size:15px;"></i> % compromiso ingreso</span>
-        <span class="val">30.4% <span class="tag tag-blue">Dentro del límite 35%</span></span>
+        <span class="val" id="res-porcentaje">—</span>
       </div>
       <div class="summary-row">
         <span class="lbl"><i class="ti ti-face-id" style="font-size:15px;"></i> Verificación biométrica</span>
@@ -769,9 +803,6 @@
       <div class="sources-block">
         <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> DataCrédito Experian — API REST</div>
-        <!-- SARLAFT deshabilitado temporalmente
-        <div class="src-row src-ok"><i class="ti ti-check"></i> UIAF / OFAC / Listas SARLAFT</div>
-        -->
         <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Historial de créditos</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
@@ -785,7 +816,7 @@
 
       <div class="note ok">
         <i class="ti ti-mail-check"></i>
-        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong>carlos.g***@une.net.co</strong>. Tienes 48 horas para firmarlo.</span>
+        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong id="res-email-mask">tu correo registrado</strong>. Tienes 48 horas para firmarlo.</span>
       </div>
 
       <div class="btn-row">
@@ -826,7 +857,88 @@ function goTo(n) {
   const el = document.getElementById('s'+n);
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
+  poblarDatosAsociado(n);
   if (n === 4) startValidation();
+}
+
+// ── POBLAR DATOS DEL ASOCIADO EN TODOS LOS PASOS ──
+function poblarDatosAsociado(paso) {
+  if (typeof FondouneSession === 'undefined') return;
+  const user   = FondouneSession.getUser();
+  const nomina = FondouneSession.getNomina();
+  const fmt    = n => (typeof n === 'number' && n > 0) ? '$' + n.toLocaleString('es-CO') : '—';
+
+  // Helpers
+  const set  = (id, val) => { const e = document.getElementById(id); if (e && val) e.textContent = val; };
+  const maskEmail = em => {
+    if (!em || !em.includes('@')) return 'tu correo registrado';
+    const [u, d] = em.split('@');
+    return u.slice(0,3) + '***@' + d;
+  };
+  const maskTel = t => {
+    if (!t) return '+57 *** ****';
+    const d = t.replace(/\D/g,'');
+    return d.length >= 7 ? d.slice(0,3) + ' *** ' + d.slice(-4) : t;
+  };
+
+  const nombre  = user.name  || '—';
+  const cedula  = user.id    || '—';
+  const email   = document.getElementById('f-email')?.value || '';
+  const tel     = user.tel   || document.getElementById('f-cel')?.value || '';
+
+  // Paso 2 — OCR y 2FA
+  if (paso === 2) {
+    // Nombre abreviado: "Julián E. Márquez C."
+    const partes = nombre.split(' ');
+    const nombreCorto = partes.length >= 3
+      ? partes[0] + ' ' + partes[1][0] + '. ' + partes[2] + (partes[3] ? ' ' + partes[3][0] + '.' : '')
+      : nombre;
+    set('ocr-nombre', nombreCorto);
+    const cedFmt = cedula.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    set('ocr-cedula', cedFmt);
+    set('2fa-tel',   maskTel(tel));
+    set('2fa-email', maskEmail(email));
+  }
+
+  // Paso 3 — Nómina desde sesión
+  if (paso === 3 && nomina) {
+    set('nom-basico',      fmt(nomina.basico));
+    set('nom-devengado',   fmt(nomina.devengado || nomina.basico));
+    set('nom-deducciones', fmt(nomina.deducciones || nomina.cuotaAporte));
+    set('nom-neto',        fmt(nomina.neto));
+    const footer = document.getElementById('nom-footer');
+    if (footer && nomina.empresa) {
+      footer.innerHTML = '<i class="ti ti-check"></i> Datos cargados desde FondoUne · Empresa: '
+        + nomina.empresa + ' · Periodo: ' + (nomina.periodo || '—') + ' · Libranzas: '
+        + fmt(nomina.libranzas || 0);
+    }
+    // También actualizar el resumen preliminar con capacidad real
+    const cap = nomina.neto ? Math.round(nomina.neto * 0.35) : 0;
+    const hint = document.querySelector('#f-monto ~ .hint');
+    if (hint && cap > 0) {
+      const maxMonto = cap * 36; // estimado 36 cuotas máximo
+      hint.textContent = 'Máximo aprobable según perfil: ' + fmt(maxMonto);
+    }
+  }
+
+  // Paso 5 — Resultado con datos reales
+  if (paso === 5 && nomina) {
+    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+    const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
+    const plazo  = parseInt(plazoS.replace(' meses',''));
+    const tasa   = 0.011;
+    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+    const neto   = nomina.neto || 0;
+    const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
+    const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
+    const dentro = pct <= 35;
+
+    set('res-capacidad',  fmt(cap) + '/mes disponible');
+    const resEl = document.getElementById('res-porcentaje');
+    if (resEl) resEl.innerHTML = pct + '% <span class="tag ' + (dentro?'tag-blue':'tag-red') + '">'
+      + (dentro ? 'Dentro del límite 35%' : 'Supera el límite 35%') + '</span>';
+    set('res-email-mask', maskEmail(email));
+  }
 }
 
 // ── UPLOAD SIMULATION ──
@@ -933,12 +1045,21 @@ function otpMove(el, prevId, nextId) {
   if (el.value && nextId) document.getElementById(nextId).focus();
 }
 
+// ── HELPER PARA ANIMACIÓN DE VALIDACIÓN ──
+function getCapacidadLabel() {
+  if (typeof FondouneSession === 'undefined') return 'Cap. calculada';
+  const nomina = FondouneSession.getNomina();
+  if (!nomina || !nomina.neto) return 'Cap. calculada';
+  const cap = Math.round(nomina.neto * 0.35 - (nomina.libranzas || 0));
+  return 'Cap. $' + Math.round(cap/1000) + 'K/mes';
+}
+
 // ── VALIDATION ENGINE ──
 const validations = [
   { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
-  // v2 SARLAFT — deshabilitado temporalmente (pendiente integración de proveedor)
+  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
   { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
-  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:'Cap. $945K/mes', detail:'30.4% compromiso' },
+  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:getCapacidadLabel(), detail:'Análisis completado' },
   { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
 ];
 
@@ -1026,6 +1147,150 @@ function irAFirma() {
 
   FondouneNav.navigateTo('firma');
 }
+
+// ── CEDULA INPUT — habilita el botón cuando hay suficientes dígitos ──
+function onCedulaInput(val) {
+  const cedula = val.replace(/[.\s]/g, '');
+  const btn    = document.getElementById('btn-verificar');
+  if (!btn) return;
+  const listo  = cedula.length >= 5;
+  btn.disabled = !listo;
+  btn.style.opacity = listo ? '1' : '.4';
+  // Si borraron la cédula, ocultar la tarjeta y el botón continuar
+  if (!listo) resetAsociadoCard();
+}
+
+// ── VERIFICAR ASOCIADO — llamada al Sheets ──
+async function verificarAsociado() {
+  const cedula = (document.getElementById('f-cedula')?.value || '').replace(/[.\s]/g, '');
+  if (!cedula || cedula.length < 5) return;
+
+  // Estado: cargando
+  const btn     = document.getElementById('btn-verificar');
+  const btnIcon = document.getElementById('btn-verificar-icon');
+  const btnTxt  = document.getElementById('btn-verificar-txt');
+  const statusEl = document.getElementById('sheets-status');
+
+  btn.disabled   = true;
+  btnIcon.className = 'ti ti-loader spin';
+  btnTxt.textContent = 'Buscando…';
+  statusEl.className = 'sheets-loading';
+  statusEl.textContent = 'Consultando base de datos FondoUne…';
+  statusEl.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+
+  // Garantizar sesión para que navigation.js no redirija
+  if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
+    FondouneSession.initUser({ id: cedula, role: 'asociado', name: 'Asociado', initials: 'A' });
+  }
+
+  if (typeof SheetsConnector === 'undefined') {
+    mostrarErrorVerificacion('El conector con la base de datos no está disponible.');
+    resetBotonVerificar();
+    return;
+  }
+
+  const datos = await SheetsConnector.obtenerAsociado(cedula);
+
+  // Restaurar botón
+  btn.disabled = false;
+  btnIcon.className = 'ti ti-search';
+  btnTxt.textContent = 'Verificar';
+
+  if (!datos) {
+    mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
+    resetAsociadoCard();
+    return;
+  }
+
+  if (!datos.activo) {
+    mostrarErrorVerificacion('El asociado figura como inactivo en el sistema.');
+    resetAsociadoCard();
+    return;
+  }
+
+  // ── Éxito: mostrar tarjeta con datos reales ──
+  statusEl.className = 'sheets-ok';
+  statusEl.textContent = '✓ Asociado verificado en la base de datos FondoUne';
+
+  // Poblar tarjeta
+  const fmt = n => typeof n === 'number' ? '$' + n.toLocaleString('es-CO') : (n || '—');
+  const ini = datos.nombre.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('asoc-initials').textContent  = ini;
+  document.getElementById('asoc-nombre').textContent    = datos.nombre;
+  document.getElementById('asoc-empresa').textContent   = datos.empresa + ' · ' + datos.ciudad;
+  document.getElementById('asoc-tel').textContent       = datos.telefono || '—';
+  document.getElementById('asoc-ciudad').textContent    = datos.ciudad   || '—';
+  document.getElementById('asoc-salario').textContent   = fmt(datos.salarioBasico);
+  document.getElementById('asoc-capacidad').textContent = fmt(datos.capacidadPago);
+  document.getElementById('asoc-agencia').textContent   = datos.agencia  || '—';
+  document.getElementById('asoc-ingreso').textContent   = datos.fechaIngreso || '—';
+
+  document.getElementById('asociado-card').style.display = 'block';
+  document.getElementById('extra-fields').style.display  = 'grid';
+  document.getElementById('consent-box').style.display   = 'flex';
+  document.getElementById('btn-continuar').style.display = 'inline-flex';
+
+  // Pre-llenar campos extra
+  document.getElementById('f-cel').value = datos.telefono || '';
+
+  // Persistir en sesión
+  if (typeof FondouneSession !== 'undefined') {
+    FondouneSession.initUser({
+      id:       cedula,
+      name:     datos.nombre,
+      empresa:  datos.empresa,
+      ciudad:   datos.ciudad,
+      tel:      datos.telefono || '',
+      role:     'asociado',
+      initials: ini,
+    });
+    FondouneSession.saveNomina({
+      basico:      datos.salarioBasico,
+      devengado:   datos.totalDevengado,
+      deducciones: datos.totalDeducciones,
+      neto:        datos.netoPagado,
+      libranzas:   datos.libranzasActivas || 0,
+      aportes:     datos.aportes,
+      empresa:     datos.empresa,
+      periodo:     datos.periodoNomina,
+      fuente:      'Google Sheets FondoUne',
+    });
+    if (typeof FondouneNav !== 'undefined') FondouneNav.updateUserInfo();
+  }
+}
+
+function mostrarErrorVerificacion(msg) {
+  const el = document.getElementById('sheets-status');
+  el.className = 'sheets-warn';
+  el.textContent = '⚠ ' + msg;
+  el.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+}
+
+function resetBotonVerificar() {
+  const btn = document.getElementById('btn-verificar');
+  if (btn) { btn.disabled = false; }
+  const icon = document.getElementById('btn-verificar-icon');
+  if (icon) icon.className = 'ti ti-search';
+  const txt = document.getElementById('btn-verificar-txt');
+  if (txt) txt.textContent = 'Verificar';
+}
+
+function resetAsociadoCard() {
+  document.getElementById('asociado-card').style.display  = 'none';
+  document.getElementById('extra-fields').style.display   = 'none';
+  document.getElementById('consent-box').style.display    = 'none';
+  document.getElementById('btn-continuar').style.display  = 'none';
+}
+
+// ── INICIALIZACIÓN DEMO ──
+// Sesión base para que navigation.js no redirija al login
+(function initPortalDemo() {
+  if (typeof FondouneSession === 'undefined') return;
+  if (!FondouneSession.isLoggedIn()) {
+    FondouneSession.initUser({ id: 'demo', name: 'Asociado', role: 'asociado', initials: 'A' });
+  }
+})();
 
 // Init summary
 updateSummary();
