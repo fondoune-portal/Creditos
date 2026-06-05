@@ -153,7 +153,31 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
-  <script>FondouneNav.init('firma');</script>
+  <script src="pagare-template.js"></script>
+  <script>FondouneNav.init('firma');
+  
+    const u = FondouneSession.getUser();
+  
+    const datosAsociado = {
+      nombreCompleto:    u.nombreCompleto || u.nombre || 'ASOCIADO FONDOUNE',
+      ciudad:            u.ciudad || 'Medellín',
+      tipoDoc:           u.tipoDoc || u.tipoIdentificacion || 'CC',
+      numDoc:            u.numDoc || u.numeroDocumento || u.cedula || '—',
+      monto:             Number(u.montoAprobado || u.monto || 8000000),
+      cuotas:            Number(u.cuotas || u.plazo || 24),
+      periodicidad:      u.periodicidad || 'mensuales',
+      valorCuota:        Number(u.valorCuota || u.cuotaMensual || 391800),
+      fechaPrimeraCuota: u.fechaPrimeraCuota || '12 de junio de 2025',
+      tasaEA:            Number(u.tasaEA || 14.03),
+      tasaNA:            Number(u.tasaNA || u.tasaNominal || 13.15),
+      fechaFirma:        null,
+      numPagare:         u.numPagare || null,
+      hashFirma:         u.hashFirma || u.hashTransaccion || null,
+      firmaBase64:       null
+    };
+  
+    renderizarPagare('pagare-contenedor', datosAsociado);
+  </script>
 </head>
 <body>
 <div class="wrap">
@@ -211,26 +235,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
     <!-- PAGARÉ -->
-    <div class="pagare-card">
-      <div class="pagare-header">
-        <i class="ti ti-file-certificate"></i>
-        <h2>Pagaré Electrónico en Blanco</h2>
-        <div class="ph-right">DOC-PAG-2025-0847 · Ley 527/1999</div>
-      </div>
-      <div class="pagare-body">
-        <strong>PAGARÉ EN BLANCO CON CARTA DE INSTRUCCIONES</strong><br><br>
-        Yo, <strong>Carlos Andrés Gil</strong>, identificado con cédula de ciudadanía No. <strong>1.045.678.901</strong> expedida en Medellín, Antioquia, me comprometo a pagar incondicionalmente y a la orden de <strong>FONDOUNE – Fondo de Empleados de Tigo-UNE</strong>, NIT 900.XXX.XXX-X, la suma de:
-        <div class="pagare-highlight">OCHO MILLONES DE PESOS COLOMBIANOS ($8.000.000,00)</div>
-        en veinticuatro (24) cuotas mensuales iguales y consecutivas de <strong>TRESCIENTOS NOVENTA Y UN MIL OCHOCIENTOS PESOS ($391.800,00)</strong> cada una, la primera con vencimiento el <strong>12 de junio de 2025</strong> y las siguientes el mismo día de cada mes subsiguiente.<br><br>
-        La tasa de interés corriente pactada es del <strong>1.1% efectivo mensual (14.03% E.A.)</strong>. En caso de mora se causarán intereses a la tasa máxima legal permitida por la Superintendencia Financiera de Colombia.<br><br>
-        El suscriptor autoriza al FONDO a llenar los espacios en blanco de este pagaré conforme a la carta de instrucciones suscrita en la misma fecha y a realizar el cobro mediante libranza de nómina sobre la empresa empleadora.<br><br>
-        El presente pagaré se suscribe en formato electrónico con plena validez jurídica conforme a la Ley 527 de 1999, el Decreto 2364 de 2012 y sus normas complementarias.
-      </div>
-      <div class="pagare-footer">
-        <i class="ti ti-shield-lock"></i>
-        <span>Documento generado y almacenado con cifrado AES-256 · Hash SHA-256: <span style="font-family:'DM Mono',monospace">a3f8c2d1…e9b7</span> · Timestamp: 12/05/2025 10:15:33 UTC-5</span>
-      </div>
-    </div>
+    <div id="pagare-contenedor"></div>
 
     <div class="note info">
       <i class="ti ti-info-circle"></i>
