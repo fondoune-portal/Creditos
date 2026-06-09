@@ -6,6 +6,8 @@
 <title>FondoUne — Firma y Desembolso</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<!-- jsPDF carga síncrona — disponible antes del primer clic del usuario -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
@@ -360,7 +362,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <div class="note ok" style="text-align:left">
       <i class="ti ti-mail-check"></i>
-      <span>El pagaré firmado y el resumen del crédito han sido registrados en el sistema FondoUne. Puedes descargarlo ahora.</span>
+      <span>El pagaré firmado y el resumen del crédito han sido registrados en el sistema FondoUne. <span id="sc-email-nota"></span>Puedes descargarlo ahora.</span>
     </div>
 
     <div style="display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
@@ -514,7 +516,8 @@ function poblarPagare() {
 
   // Guardar para el success state y el PDF
   window._pagareData = { nombre, cedula, ciudad, monto, plazo, cuota, total, costo,
-    primCuota, txid, hash, tsNow, nroPagare };
+    primCuota, txid, hash, tsNow, nroPagare,
+    email: user.email || '' };
 
   // Poblar hero subtitle con nombre real
   const heroSub = document.querySelector('.hero-sub');
@@ -526,21 +529,49 @@ function poblarSuccess() {
   const d = window._pagareData;
   if (!d) return;
   const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  const maskEmail = em => {
+    if (!em || !em.includes('@')) return '';
+    const [u, dom] = em.split('@');
+    return 'Te enviamos una copia a ' + u.slice(0,3) + '***@' + dom + '. ';
+  };
   set('sc-monto',        fmtCOP(d.monto) + ' COP');
   set('sc-primera-cuota', d.primCuota.getDate() + ' de ' + MESES_CAP[d.primCuota.getMonth()] + ', ' + d.primCuota.getFullYear() + ' · ' + fmtCOP(Math.round(d.cuota)));
   set('sc-nropag',       d.nroPagare);
   set('sc-hash',         d.hash);
+  set('sc-email-nota',   maskEmail(d.email));
 }
 
 // ── GENERAR PDF CON EL PAGARÉ REAL ────────────────────
-function descargarPagarePDF() {
-  if (typeof window.jspdf === 'undefined') {
-    showToast('Librería PDF no cargada aún, intenta en un momento.', 'warn');
+function _getJsPDF() {
+  // jsPDF expone su constructor en distintos lugares según cómo se cargó
+  if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+  if (typeof window.jsPDF !== 'undefined') return window.jsPDF;
+  if (typeof jsPDF !== 'undefined') return jsPDF;
+  return null;
+}
+
+async function descargarPagarePDF() {
+  let JsPDF = _getJsPDF();
+
+  // Si no está cargada aún, intentar cargar dinámicamente como fallback
+  if (!JsPDF) {
+    showToast('Cargando generador de PDF…', 'info');
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload  = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    }).catch(() => null);
+    JsPDF = _getJsPDF();
+  }
+
+  if (!JsPDF) {
+    showToast('No se pudo cargar el generador de PDF. Revisa tu conexión e intenta de nuevo.', 'error');
     return;
   }
-  const { jsPDF } = window.jspdf;
   const d = window._pagareData || {};
-  const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+  const doc = new JsPDF({ unit: 'mm', format: 'letter' });
   const L = 20, R = 195, W = R - L;
   let y = 20;
 
