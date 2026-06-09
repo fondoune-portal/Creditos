@@ -31,6 +31,7 @@
  *  [22] CIUDADEMPR     Ciudad empresa
  *  [23] FECHAINGRE     Fecha de ingreso al fondo
  *  [24] CEDNUMJC       Cédula (duplicado)
+ *  [25] EMAIL          Correo electrónico del asociado (columna nueva agregada)
  *
  * ── CÓMO DESPLEGAR ───────────────────────────────────────────────
  *  1. Abrir script.google.com → proyecto FondoUne
@@ -71,6 +72,7 @@ const COL = {
   SEGUNDONOM:  21,
   CIUDADEMPR:  22,
   FECHAINGRE:  23,
+  EMAIL:       25,  // Columna nueva — agregar al Sheets como columna Z (índice 25)
 };
 
 // ─────────────────────────────────────────────────────────────────
@@ -149,6 +151,7 @@ function getAsociado(cedula) {
       activo:         String(fila[COL.ESTADO] || '').trim().toUpperCase() === 'A',
       direccion:      String(fila[COL.DIRECCION] || '').trim(),
       telefono:       String(fila[COL.TELEFONO]  || '').trim().replace(/\s/g, ''),
+      email:          String(fila[COL.EMAIL]      || '').trim().toLowerCase(),
       fechaNacimiento:formatDate(fila[COL.FECHANACIM]),
       // Empresa
       empresa:        cap(String(fila[COL.EMPRESATRA] || fila[COL.NOMBREEMPR] || '').trim()),
