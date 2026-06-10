@@ -95,6 +95,8 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A;margin-top:12px}
 .stytch-badge::before{content:'🔒';font-size:11px}
 </style>
+  <!-- SDK de Stytch — OBLIGATORIO cargar primero -->
+  <script src="https://cdn.jsdelivr.net/npm/@stytch/vanilla-js@latest/dist/index.umd.js"></script>
 </head>
 <body>
 <div class="login-wrap">
@@ -192,10 +194,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
   </div>
 </div>
 
-<!-- Stytch SDK — versión fija estable (no @latest para evitar breaking changes) -->
-<script src="https://cdn.jsdelivr.net/npm/@stytch/vanilla-js@5.41.1/dist/index.umd.js"
-        onerror="document.getElementById('error-box').style.display='flex';document.getElementById('error-txt').textContent='No se pudo cargar el SDK de autenticación. Revisa tu conexión.'">
-</script>
 <script src="stytch-auth.js"></script>
 <script src="session.js"></script>
 <script>
@@ -203,12 +201,15 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 // ── Verificar si viene de magic link ──────────────────────────────
 window.addEventListener('load', async function() {
-  // Verificar que el SDK cargó correctamente
-  const sdkOk = !!(typeof StytchUIClient !== 'undefined' || typeof StytchClient !== 'undefined');
-  if (!sdkOk) {
-    showError('SDK de Stytch no disponible. Recarga la página o revisa tu conexión.');
+  // Verificar que el SDK de Stytch cargó y el token fue configurado
+  if (typeof Stytch === 'undefined') {
+    showError('El SDK de Stytch no se cargó. Verifica tu conexión a internet.');
+    return;
   }
-
+  if (typeof StytchAuth !== 'undefined' && !StytchAuth.isConfigured()) {
+    showError('⚙️ Portal en configuración: reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');
+    return;
+  }
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('token');
   const type   = params.get('stytch_token_type');
@@ -222,11 +223,10 @@ window.addEventListener('load', async function() {
       showError('El enlace expiró o ya fue usado. Solicita uno nuevo.');
       showStep('email');
     }
-    return;
   }
 
-  // Verificar si ya hay sesión activa en FondouneSession
-  if (typeof FondouneSession !== 'undefined' && FondouneSession.isLoggedIn()) {
+  // Verificar si ya hay sesión activa
+  if (StytchAuth.hasSession()) {
     const role = StytchAuth.getCurrentRole();
     StytchAuth.redirectByRole(role);
   }
