@@ -42,11 +42,25 @@ const StytchAuth = (() => {
   // ── INIT ───────────────────────────────────────────────────────
   function init() {
     if (_stytch) return _stytch;
-    if (typeof Stytch === 'undefined') {
-      console.error('[StytchAuth] SDK no cargado. Verifica que el script de Stytch esté en el <head>.');
+
+    // El UMD de @stytch/vanilla-js expone el constructor en distintos
+    // lugares según la versión. Intentamos todos en orden.
+    const Ctor = (typeof StytchUIClient !== 'undefined' && StytchUIClient)
+              || (typeof window?.stytchJs?.StytchUIClient !== 'undefined' && window.stytchJs.StytchUIClient)
+              || (typeof StytchClient   !== 'undefined' && StytchClient)
+              || null;
+
+    if (!Ctor) {
+      console.error('[StytchAuth] SDK no cargado. Asegúrate de incluir el script de Stytch ANTES de stytch-auth.js.');
       return null;
     }
-    _stytch = Stytch(PUBLIC_TOKEN);
+
+    try {
+      _stytch = new Ctor(PUBLIC_TOKEN);
+    } catch(e) {
+      console.error('[StytchAuth] Error al inicializar:', e);
+      return null;
+    }
     return _stytch;
   }
 
@@ -100,13 +114,16 @@ const StytchAuth = (() => {
 
   // ── SESIÓN ACTIVA ──────────────────────────────────────────────
   function hasSession() {
-    const client = init();
-    if (!client) return false;
-    const session = client.session.getSync();
-    // También verificar FondouneSession como fallback
-    if (session) return true;
-    if (typeof FondouneSession !== 'undefined') return FondouneSession.isLoggedIn();
-    return false;
+    // FondouneSession es la fuente de verdad para el prototipo
+    if (typeof FondouneSession !== 'undefined' && FondouneSession.isLoggedIn()) return true;
+    // Verificar tokens de Stytch si el cliente está disponible
+    try {
+      const client = init();
+      if (!client) return false;
+      // getTokens() está disponible en v5/v6; getSync() fue removido en v6
+      const tokens = client.session?.getTokens?.();
+      return !!(tokens?.session_token || tokens?.session_jwt);
+    } catch(e) { return false; }
   }
 
   function getCurrentRole() {
