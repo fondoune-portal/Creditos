@@ -95,8 +95,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A;margin-top:12px}
 .stytch-badge::before{content:'🔒';font-size:11px}
 </style>
-  <!-- SDK de Stytch — OBLIGATORIO cargar primero -->
-  <script src="https://cdn.jsdelivr.net/npm/@stytch/vanilla-js@latest/dist/index.umd.js"></script>
 </head>
 <body>
 <div class="login-wrap">
@@ -201,11 +199,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 // ── Verificar si viene de magic link ──────────────────────────────
 window.addEventListener('load', async function() {
-  // Verificar que el SDK de Stytch cargó y el token fue configurado
-  if (typeof Stytch === 'undefined') {
-    showError('El SDK de Stytch no se cargó. Verifica tu conexión a internet.');
-    return;
-  }
   if (typeof StytchAuth !== 'undefined' && !StytchAuth.isConfigured()) {
     showError('⚙️ Portal en configuración: reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');
     return;
