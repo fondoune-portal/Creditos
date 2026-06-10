@@ -92,6 +92,8 @@ const SheetsConnector = (() => {
         name:     datos.nombre         || userActual.name,
         empresa:  datos.empresa        || userActual.empresa,
         ciudad:   datos.ciudad         || userActual.ciudad,
+        tel:      datos.telefono       || userActual.tel,
+        email:    datos.email          || userActual.email,
         initials: iniciales(datos.nombre) || userActual.initials,
       });
 
@@ -113,7 +115,7 @@ const SheetsConnector = (() => {
     setField('f-cedula',    cedula);
     setField('f-nombre',    datos.nombre);
     setField('f-empresa',   datos.empresa);
-    setField('f-email',     '');          // No disponible en la BD actual
+    setField('f-email',     datos.email || '');
     setField('f-cel',       datos.telefono);
     setField('f-direccion', datos.direccion);
 

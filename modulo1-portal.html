@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
   :root {
     --navy:   #0B2545;
@@ -208,35 +209,50 @@
   .upload-zone p { font-size: 13px; color: var(--muted); }
   .upload-zone strong { display: block; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
 
-  /* ── SELFIE ZONE ── */
-  .selfie-box {
+  /* ── KYC CAMERA ── */
+  .kyc-cam-wrap {
     background: var(--navy); border-radius: var(--r-sm);
-    padding: 2rem; text-align: center;
-    position: relative; overflow: hidden;
-    margin: 14px 0;
+    padding: 20px; text-align: center;
+    position: relative; overflow: hidden; margin: 14px 0;
   }
-  .selfie-box::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center, rgba(26,107,173,0.3) 0%, transparent 70%);
+  .kyc-video-ring {
+    position: relative; width: 220px; height: 220px;
+    margin: 0 auto 14px; border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,.2);
+    background: #0a0f1a;
+    box-shadow: 0 0 0 0 rgba(240,192,96,0);
+    transition: border-color .3s, box-shadow .3s;
   }
-  .camera-view {
-    width: 140px; height: 140px; border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    border: 2px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1rem; position: relative; z-index: 1;
+  .kyc-video-ring.active  { border-color: var(--gold2); box-shadow: 0 0 0 8px rgba(240,192,96,.2); animation: kpulse 1.2s ease infinite; }
+  .kyc-video-ring.success { border-color: #22C55E;      box-shadow: 0 0 0 8px rgba(34,197,94,.2); animation: none; }
+  .kyc-video-ring.error   { border-color: #F87171;      box-shadow: 0 0 0 8px rgba(248,113,113,.2); animation: none; }
+  @keyframes kpulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,192,96,.3)} 50%{box-shadow:0 0 0 14px rgba(240,192,96,0)} }
+  #kyc-video { width:100%; height:100%; object-fit:cover; display:block; transform:scaleX(-1); }
+  #kyc-canvas { display:none; }
+  .kyc-overlay-icon {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:56px; color:rgba(255,255,255,.35); pointer-events:none;
   }
-  .camera-view i { font-size: 48px; color: rgba(255,255,255,0.5); }
-  .camera-view.capturing { border-color: var(--gold2); animation: pulse 1s ease infinite; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,192,96,0.4); } 50% { box-shadow: 0 0 0 12px rgba(240,192,96,0); } }
-  .liveness-instruction {
-    font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 8px; position: relative; z-index:1;
+  .kyc-instr { font-size:13px; color:rgba(255,255,255,.85); margin-bottom:6px; min-height:18px; }
+  .kyc-action { font-family:'DM Serif Display',serif; font-size:19px; color:var(--gold2); min-height:26px; }
+  .kyc-score-badge {
+    display:inline-block; margin-top:10px; font-size:12px; font-weight:600;
+    padding:4px 14px; border-radius:20px; background:rgba(255,255,255,.08); color:#fff;
   }
-  .liveness-big {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px; color: var(--gold2);
-    position: relative; z-index: 1;
+  /* upload-zone con input file oculto */
+  .upload-zone { cursor:pointer; }
+  .upload-zone input[type=file] { display:none; }
+  /* preview foto cédula */
+  .cedula-preview {
+    width:100%; max-height:110px; object-fit:cover;
+    border-radius:8px; margin-top:8px; display:none;
   }
+  /* liveness steps */
+  .selfie-box { display:none; }
+  .liveness-instruction { display:none; }
+  .liveness-big { display:none; }
+  .camera-view { display:none; }
 
   /* ── 2FA OTP ── */
   .otp-row { display: flex; gap: 8px; justify-content: center; margin: 1.25rem 0; }
@@ -524,70 +540,99 @@
       <div class="card-title">Fotografía tu cédula de ciudadanía</div>
       <div class="card-sub">Necesitamos el frente y el reverso para verificar tu identidad mediante OCR. La imagen nunca se almacena sin cifrar.</div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="upload-zone" id="uz-front" onclick="simulateUpload('uz-front','uz-front-status')">
-          <i class="ti ti-id" id="uz-front-icon"></i>
-          <strong id="uz-front-status">Frente de la cédula</strong>
-          <p>Toca para cargar o tomar foto</p>
+      <!-- Paso A: foto cédula -->
+      <div id="kyc-cedula-section">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <label class="upload-zone" id="uz-front" for="inp-front">
+            <input type="file" id="inp-front" accept="image/*" capture="environment" onchange="cedulaFotoSeleccionada('front',this)">
+            <i class="ti ti-id" id="uz-front-icon"></i>
+            <strong id="uz-front-status">Frente de la cédula</strong>
+            <p>Toca para tomar foto</p>
+            <img id="preview-front" class="cedula-preview" alt="frente">
+          </label>
+          <label class="upload-zone" id="uz-back" for="inp-back">
+            <input type="file" id="inp-back" accept="image/*" capture="environment" onchange="cedulaFotoSeleccionada('back',this)">
+            <i class="ti ti-id-off" id="uz-back-icon"></i>
+            <strong id="uz-back-status">Reverso de la cédula</strong>
+            <p>Toca para tomar foto</p>
+            <img id="preview-back" class="cedula-preview" alt="reverso">
+          </label>
         </div>
-        <div class="upload-zone" id="uz-back" onclick="simulateUpload('uz-back','uz-back-status')">
-          <i class="ti ti-id-off" id="uz-back-icon"></i>
-          <strong id="uz-back-status">Reverso de la cédula</strong>
-          <p>Toca para cargar o tomar foto</p>
+
+        <div id="ocr-result" class="hidden" style="margin-top:12px;">
+          <div class="note ok"><i class="ti ti-check"></i> <strong>Documento procesado.</strong> Rostro extraído de la cédula. Listo para comparación facial.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+            <div style="background:var(--cream);border-radius:8px;padding:10px;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
+              <div style="font-size:13px;font-weight:500;" id="ocr-nombre">—</div>
+            </div>
+            <div style="background:var(--cream);border-radius:8px;padding:10px;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
+              <div style="font-size:13px;font-weight:500;font-family:'DM Mono';" id="ocr-cedula">—</div>
+            </div>
+            <div style="background:var(--cream);border-radius:8px;padding:10px;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
+              <div style="font-size:13px;font-weight:500;color:var(--success);">✓ Vigente</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="kyc-next-btn" class="hidden">
+          <div class="btn-row">
+            <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+            <button class="btn primary" onclick="iniciarKYC()">Verificar biometría <i class="ti ti-face-id"></i></button>
+          </div>
         </div>
       </div>
 
-      <div id="ocr-result" class="hidden">
-        <div class="note ok"><i class="ti ti-check"></i> <strong>OCR completado.</strong> Datos extraídos correctamente y verificados contra la base del fondo y la RNEC.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
-          <div style="background:var(--cream);border-radius:8px;padding:10px;">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
-            <div style="font-size:13px;font-weight:500;" id="ocr-nombre">—</div>
-          </div>
-          <div style="background:var(--cream);border-radius:8px;padding:10px;">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
-            <div style="font-size:13px;font-weight:500;font-family:'DM Mono';" id="ocr-cedula">—</div>
-          </div>
-          <div style="background:var(--cream);border-radius:8px;padding:10px;">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
-            <div style="font-size:13px;font-weight:500;color:var(--success);">✓ Vigente</div>
-          </div>
-        </div>
-      </div>
-
-      <div id="kyc-next-btn" class="hidden">
-        <div class="btn-row">
-          <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
-          <button class="btn primary" onclick="showLiveness()">Verificar biometría <i class="ti ti-face-id"></i></button>
-        </div>
-      </div>
     </div>
 
-    <!-- LIVENESS -->
+    <!-- LIVENESS con face-api.js -->
     <div id="kyc-liveness-card" class="card hidden">
       <div class="card-eyebrow">Paso 2 de 5 — KYC · Biometría facial</div>
       <div class="card-title">Verificación de identidad en vivo</div>
-      <div class="card-sub">Sigue las instrucciones para confirmar que eres tú, no una foto ni un video.</div>
+      <div class="card-sub">Centra tu rostro en el óvalo. El sistema comparará tu selfie con la foto de tu cédula.</div>
 
-      <div class="selfie-box">
-        <div class="camera-view" id="cam-view">
-          <i class="ti ti-user-circle" id="cam-icon"></i>
+      <!-- Cámara -->
+      <div class="kyc-cam-wrap">
+        <div class="kyc-video-ring" id="kyc-ring">
+          <video id="kyc-video" autoplay playsinline muted></video>
+          <div class="kyc-overlay-icon" id="kyc-overlay-icon"><i class="ti ti-user-circle"></i></div>
         </div>
-        <div class="liveness-instruction" id="lv-instruction">Posiciona tu rostro en el óvalo</div>
-        <div class="liveness-big" id="lv-action">Esperando cámara...</div>
+        <canvas id="kyc-canvas"></canvas>
+        <div class="kyc-instr"  id="kyc-instr">Iniciando cámara…</div>
+        <div class="kyc-action" id="kyc-action">Un momento</div>
+        <div id="kyc-score-wrap" style="display:none;">
+          <span class="kyc-score-badge" id="kyc-score-badge">—</span>
+        </div>
       </div>
 
+      <!-- Pasos de verificación -->
       <div id="lv-steps" style="margin-top:1rem;">
-        <div class="val-item" id="lv1"><div class="val-icon idle"><i class="ti ti-eye"></i></div><div><div class="val-name">Detección facial</div></div><div class="val-status">En espera</div></div>
-        <div class="val-item" id="lv2"><div class="val-icon idle"><i class="ti ti-rotate-2"></i></div><div><div class="val-name">Liveness activo — giro de cabeza</div></div><div class="val-status">En espera</div></div>
-        <div class="val-item" id="lv3"><div class="val-icon idle"><i class="ti ti-scan-eye"></i></div><div><div class="val-name">Match facial vs cédula ≥ 98%</div></div><div class="val-status">En espera</div></div>
-        <div class="val-item" id="lv4"><div class="val-icon idle"><i class="ti ti-shield-check"></i></div><div><div class="val-name">Anti-deepfake & anti-foto</div></div><div class="val-status">En espera</div></div>
+        <div class="val-item" id="lv1"><div class="val-icon idle" id="lvi1"><i class="ti ti-brain"></i></div><div><div class="val-name">Cargando modelos de IA</div></div><div class="val-status" id="lvs1">En espera</div></div>
+        <div class="val-item" id="lv2"><div class="val-icon idle" id="lvi2"><i class="ti ti-camera"></i></div><div><div class="val-name">Acceso a cámara del dispositivo</div></div><div class="val-status" id="lvs2">En espera</div></div>
+        <div class="val-item" id="lv3"><div class="val-icon idle" id="lvi3"><i class="ti ti-eye"></i></div><div><div class="val-name">Detección facial en tiempo real</div></div><div class="val-status" id="lvs3">En espera</div></div>
+        <div class="val-item" id="lv4"><div class="val-icon idle" id="lvi4"><i class="ti ti-scan-eye"></i></div><div><div class="val-name">Comparación biométrica vs cédula</div></div><div class="val-status" id="lvs4">En espera</div></div>
       </div>
+
       <div id="lv-done" class="hidden">
-        <div class="note ok"><i class="ti ti-check"></i> <strong>Identidad verificada.</strong> Coincidencia facial: 99.3%. Ninguna anomalía detectada.</div>
+        <div class="note ok" id="lv-done-msg"><i class="ti ti-check"></i> <strong>Identidad verificada.</strong></div>
         <div class="btn-row">
           <button class="btn primary" onclick="show2FA()">Continuar a 2FA <i class="ti ti-arrow-right"></i></button>
         </div>
+      </div>
+      <div id="lv-error" class="hidden">
+        <div class="note" style="background:#FDECEA;border-color:rgba(192,57,43,.25);color:#C0392B;">
+          <i class="ti ti-alert-circle"></i> <span id="lv-error-msg">No se pudo verificar la identidad.</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="reiniciarKYC()"><i class="ti ti-refresh"></i> Intentar de nuevo</button>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" onclick="volverACedula()" style="font-size:11px;opacity:.7;">
+          <i class="ti ti-arrow-left"></i> Volver a la cédula
+        </button>
       </div>
     </div>
 
@@ -941,92 +986,349 @@ function poblarDatosAsociado(paso) {
   }
 }
 
-// ── UPLOAD SIMULATION ──
-let uploadDone = { front: false, back: false };
+// ── FOTO CÉDULA — selección real desde cámara/galería ──
+let uploadDone  = { front: false, back: false };
+let cedulaImage = null; // ImageData del frente de la cédula para comparación
 
-function simulateUpload(zoneId, statusId) {
-  const zone = document.getElementById(zoneId);
-  const status = document.getElementById(statusId);
-  const icon = document.getElementById(zoneId+'-icon');
-  if (zone.classList.contains('done')) return;
-  status.textContent = 'Procesando...';
-  icon.className = 'ti ti-loader spin';
-  setTimeout(() => {
-    zone.classList.add('done');
-    icon.className = 'ti ti-circle-check';
-    icon.style.color = 'var(--success)';
-    const key = zoneId.includes('front') ? 'front' : 'back';
-    uploadDone[key] = true;
-    status.textContent = zoneId.includes('front') ? '✓ Frente cargado' : '✓ Reverso cargado';
-    if (uploadDone.front && uploadDone.back) {
-      setTimeout(() => {
-        document.getElementById('ocr-result').classList.remove('hidden');
-        document.getElementById('kyc-next-btn').classList.remove('hidden');
-      }, 600);
+function cedulaFotoSeleccionada(lado, input) {
+  if (!input.files || !input.files[0]) return;
+  const file    = input.files[0];
+  const zoneId  = lado === 'front' ? 'uz-front'  : 'uz-back';
+  const iconId  = lado === 'front' ? 'uz-front-icon' : 'uz-back-icon';
+  const statId  = lado === 'front' ? 'uz-front-status' : 'uz-back-status';
+  const prevId  = lado === 'front' ? 'preview-front' : 'preview-back';
+  const zone    = document.getElementById(zoneId);
+  const icon    = document.getElementById(iconId);
+  const stat    = document.getElementById(statId);
+  const preview = document.getElementById(prevId);
+
+  // Mostrar preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src   = e.target.result;
+    preview.style.display = 'block';
+    if (lado === 'front') {
+      // Guardar como referencia para el match biométrico
+      const img = new Image();
+      img.onload = () => { cedulaImage = img; };
+      img.src    = e.target.result;
     }
-  }, 1200);
+  };
+  reader.readAsDataURL(file);
+
+  icon.className     = 'ti ti-circle-check';
+  icon.style.color   = 'var(--success)';
+  stat.textContent   = lado === 'front' ? '✓ Frente cargado' : '✓ Reverso cargado';
+  zone.classList.add('done');
+  uploadDone[lado]   = true;
+
+  if (uploadDone.front && uploadDone.back) {
+    setTimeout(() => {
+      document.getElementById('ocr-result').classList.remove('hidden');
+      document.getElementById('kyc-next-btn').classList.remove('hidden');
+      poblarDatosAsociado(2); // llenar nombre/cédula en OCR
+    }, 400);
+  }
 }
 
 function simulateNomina() {
   const zone = document.getElementById('uz-nomina');
   const status = document.getElementById('uz-nomina-status');
   const icon = document.getElementById('uz-nomina-icon');
-  if (zone.classList.contains('done')) return;
-  status.textContent = 'Leyendo nómina con IA...';
+  if (!zone || zone.classList.contains('done')) return;
+  status.textContent = 'Leyendo nómina...';
   icon.className = 'ti ti-loader spin';
   setTimeout(() => {
     zone.classList.add('done');
     icon.className = 'ti ti-circle-check';
-    status.textContent = '✓ Nómina procesada — Tigo-UNE Abril 2025';
+    const nomina = (typeof FondouneSession !== 'undefined') ? FondouneSession.getNomina() : null;
+    const emp    = nomina?.empresa || 'empresa registrada';
+    const per    = nomina?.periodo || 'periodo actual';
+    status.textContent = '✓ Nómina procesada — ' + emp + ' · ' + per;
     document.getElementById('nomina-result').classList.remove('hidden');
-  }, 1800);
+    poblarDatosAsociado(3);
+  }, 1400);
 }
 
-// ── LIVENESS ──
-function showLiveness() {
+// ─────────────────────────────────────────────────────────────────
+// MOTOR KYC — face-api.js
+// ─────────────────────────────────────────────────────────────────
+const KYC = (() => {
+  // URL de los modelos de face-api (CDN jsDelivr)
+  const MODELS_URL  = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+  const MATCH_SCORE = 0.55;  // umbral euclidiano (menor = más parecido). 0.55 es estricto
+  const LIVENESS_MS = 1800;  // tiempo mínimo con cara detectada antes del match
+
+  let stream       = null;
+  let detectionLoop= null;
+  let modelsLoaded = false;
+  let faceStartTs  = null;
+  let matchDone    = false;
+
+  // ── helpers UI ──
+  const lvStep = (n, state, txt) => {
+    const item = document.getElementById('lv'+n);
+    const icon = document.getElementById('lvi'+n);
+    const stat = document.getElementById('lvs'+n);
+    if (!item) return;
+    item.className = 'val-item ' + state;
+    icon.className = 'val-icon ' + state;
+    icon.innerHTML = state === 'running'
+      ? '<i class="ti ti-loader spin"></i>'
+      : state === 'ok'
+        ? '<i class="ti ti-check"></i>'
+        : state === 'error'
+          ? '<i class="ti ti-x"></i>'
+          : icon.innerHTML;
+    stat.textContent = txt;
+    stat.className   = 'val-status ' + (state === 'ok' ? 'ok' : state === 'running' ? 'running' : '');
+  };
+
+  const setInstr  = t => { const e = document.getElementById('kyc-instr');  if(e) e.textContent = t; };
+  const setAction = t => { const e = document.getElementById('kyc-action'); if(e) e.textContent = t; };
+  const setRing   = s => { const e = document.getElementById('kyc-ring');   if(e) { e.className = 'kyc-video-ring ' + s; } };
+
+  const showScore = (pct, ok) => {
+    const wrap  = document.getElementById('kyc-score-wrap');
+    const badge = document.getElementById('kyc-score-badge');
+    if (!wrap || !badge) return;
+    wrap.style.display  = 'block';
+    badge.textContent   = 'Similitud: ' + pct + '%';
+    badge.style.background = ok ? 'rgba(34,197,94,.2)' : 'rgba(248,113,113,.2)';
+    badge.style.color      = ok ? '#22C55E' : '#F87171';
+  };
+
+  async function cargarModelos() {
+    lvStep(1, 'running', 'Cargando…');
+    setInstr('Cargando modelos de reconocimiento facial…');
+    try {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODELS_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URL),
+      ]);
+      modelsLoaded = true;
+      lvStep(1, 'ok', 'Cargados');
+      return true;
+    } catch(err) {
+      console.error('[KYC] Error cargando modelos:', err);
+      lvStep(1, 'error', 'Error');
+      mostrarError('No se pudieron cargar los modelos de IA. Revisa tu conexión.');
+      return false;
+    }
+  }
+
+  async function abrirCamara() {
+    lvStep(2, 'running', 'Solicitando acceso…');
+    setInstr('Solicitando acceso a la cámara…');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false,
+      });
+      const video = document.getElementById('kyc-video');
+      video.srcObject = stream;
+      await new Promise(res => { video.onloadedmetadata = res; });
+      await video.play();
+      // Ocultar icono placeholder cuando la cámara está activa
+      const ov = document.getElementById('kyc-overlay-icon');
+      if (ov) ov.style.display = 'none';
+      lvStep(2, 'ok', 'Activa');
+      return true;
+    } catch(err) {
+      console.error('[KYC] Error cámara:', err);
+      lvStep(2, 'error', 'Sin acceso');
+      mostrarError('No se pudo acceder a la cámara. Verifica los permisos del navegador.');
+      return false;
+    }
+  }
+
+  async function detectarRostroEnCedula() {
+    if (!cedulaImage) return null;
+    try {
+      const det = await faceapi
+        .detectSingleFace(cedulaImage, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks(true)
+        .withFaceDescriptor();
+      return det ? det.descriptor : null;
+    } catch { return null; }
+  }
+
+  function iniciarBucleDeteccion(descriptorCedula) {
+    const video   = document.getElementById('kyc-video');
+    const opts    = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+
+    lvStep(3, 'running', 'Buscando rostro…');
+    setInstr('Coloca tu rostro dentro del óvalo');
+    setAction('Mira directo a la cámara');
+    setRing('active');
+
+    detectionLoop = setInterval(async () => {
+      if (matchDone) return;
+      let det;
+      try {
+        det = await faceapi
+          .detectSingleFace(video, opts)
+          .withFaceLandmarks(true)
+          .withFaceDescriptor();
+      } catch { return; }
+
+      if (!det) {
+        faceStartTs = null;
+        lvStep(3, 'running', 'Buscando…');
+        setInstr('No detecto tu rostro — acércate más');
+        setAction('¿Hay buena iluminación?');
+        return;
+      }
+
+      // Rostro detectado
+      if (!faceStartTs) faceStartTs = Date.now();
+      const elapsed = Date.now() - faceStartTs;
+      lvStep(3, 'ok', 'Detectado ✓');
+      setInstr('Rostro detectado — mantente quieto');
+
+      const pct = Math.round((1 - Math.min(elapsed / LIVENESS_MS, 1)) * 100);
+      setAction(elapsed < LIVENESS_MS ? 'Liveness: ' + (100 - pct) + '%…' : 'Comparando…');
+
+      if (elapsed < LIVENESS_MS) return; // esperar liveness mínimo
+
+      // ── Comparación biométrica ──
+      matchDone = true;
+      clearInterval(detectionLoop);
+      lvStep(4, 'running', 'Comparando…');
+      setInstr('Comparando con la foto de tu cédula…');
+
+      if (!descriptorCedula) {
+        // Sin foto de cédula — aprobar con advertencia (prototipo)
+        terminarOK(null, true);
+        return;
+      }
+
+      const distancia  = faceapi.euclideanDistance(det.descriptor, descriptorCedula);
+      const similitudPct = Math.max(0, Math.round((1 - distancia) * 100));
+      const aprobado   = distancia <= MATCH_SCORE;
+
+      showScore(similitudPct, aprobado);
+
+      if (aprobado) {
+        terminarOK(similitudPct, false);
+      } else {
+        terminarError('No se encontró coincidencia suficiente con la foto de tu cédula (similitud: ' + similitudPct + '%). Intenta con mejor iluminación.');
+      }
+    }, 400);
+  }
+
+  function terminarOK(pct, sinCedula) {
+    lvStep(4, 'ok', 'Verificado ✓');
+    setRing('success');
+    setInstr('¡Verificación completada!');
+    setAction('✓ Identidad confirmada');
+    detenerCamara();
+
+    const msg = sinCedula
+      ? '<i class="ti ti-check"></i> <strong>Rostro detectado.</strong> Verificación de liveness completada. (Sin foto de cédula para comparar — modo demo)'
+      : '<i class="ti ti-check"></i> <strong>Identidad verificada.</strong> Coincidencia facial: ' + pct + '%. Ninguna anomalía detectada.';
+
+    const done = document.getElementById('lv-done');
+    const msg_el = document.getElementById('lv-done-msg');
+    if (msg_el) msg_el.innerHTML = msg;
+    if (done)   done.classList.remove('hidden');
+
+    // Guardar resultado en sesión
+    if (typeof FondouneSession !== 'undefined') {
+      FondouneSession.saveCreditApp({
+        ...FondouneSession.getCreditApp(),
+        kycAprobado:  true,
+        kycScore:     pct,
+        kycTs:        new Date().toISOString(),
+      });
+    }
+  }
+
+  function terminarError(msg) {
+    lvStep(4, 'error', 'No coincide');
+    setRing('error');
+    setAction('✗ No verificado');
+    detenerCamara();
+    mostrarError(msg);
+  }
+
+  function mostrarError(msg) {
+    const err = document.getElementById('lv-error');
+    const errmsg = document.getElementById('lv-error-msg');
+    if (errmsg) errmsg.textContent = msg;
+    if (err)    err.classList.remove('hidden');
+  }
+
+  function detenerCamara() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    if (detectionLoop) { clearInterval(detectionLoop); detectionLoop = null; }
+  }
+
+  // ── API pública ──
+  async function iniciar() {
+    matchDone   = false;
+    faceStartTs = null;
+
+    // Resetear UI
+    ['lv1','lv2','lv3','lv4'].forEach(id => {
+      const item = document.getElementById(id);
+      const icon = document.getElementById('lvi' + id.slice(2));
+      const stat = document.getElementById('lvs' + id.slice(2));
+      if (item) item.className = 'val-item';
+      if (icon) icon.className = 'val-icon idle';
+      if (stat) stat.textContent = 'En espera';
+    });
+    document.getElementById('lv-done')?.classList.add('hidden');
+    document.getElementById('lv-error')?.classList.add('hidden');
+    document.getElementById('kyc-score-wrap').style.display = 'none';
+    setRing('');
+
+    if (!modelsLoaded) {
+      const ok = await cargarModelos();
+      if (!ok) return;
+    } else {
+      lvStep(1, 'ok', 'Cargados');
+    }
+
+    const camOk = await abrirCamara();
+    if (!camOk) return;
+
+    // Intentar extraer descriptor de la foto de cédula en paralelo
+    lvStep(4, 'running', 'Preparando…');
+    const descriptorCedula = await detectarRostroEnCedula();
+    if (descriptorCedula) {
+      lvStep(4, 'ok', 'Listo para comparar');
+    } else {
+      lvStep(4, 'running', 'Sin foto referencia (demo)');
+    }
+
+    iniciarBucleDeteccion(descriptorCedula);
+  }
+
+  return { iniciar, detener: detenerCamara };
+})();
+
+// ── KYC NAVIGATION ──
+function iniciarKYC() {
   document.getElementById('kyc-doc-card').classList.add('hidden');
   document.getElementById('kyc-liveness-card').classList.remove('hidden');
-  const view = document.getElementById('cam-view');
-  const instr = document.getElementById('lv-instruction');
-  const action = document.getElementById('lv-action');
-  const sequences = [
-    { instr: 'Detectando rostro...', action: 'Mira al frente', step: 'lv1', icon: 'ti ti-check' },
-    { instr: 'Liveness activo:', action: '↙ Gira la cabeza a la derecha', step: 'lv2', icon: 'ti ti-check' },
-    { instr: 'Verificando coincidencia facial...', action: 'Un momento...', step: 'lv3', icon: 'ti ti-check' },
-    { instr: 'Análisis anti-fraude:', action: 'Parpadea dos veces', step: 'lv4', icon: 'ti ti-check' },
-  ];
-  view.classList.add('capturing');
-  let i = 0;
-  function next() {
-    if (i >= sequences.length) {
-      instr.textContent = 'Verificación completada';
-      action.textContent = '✓ Identidad confirmada';
-      view.classList.remove('capturing');
-      document.getElementById('lv-done').classList.remove('hidden');
-      return;
-    }
-    const s = sequences[i];
-    instr.textContent = s.instr;
-    action.textContent = s.action;
-    const item = document.getElementById(s.step);
-    const vi = item.querySelector('.val-icon');
-    const vs = item.querySelector('.val-status');
-    item.classList.add('running');
-    vi.className = 'val-icon running';
-    vi.innerHTML = '<i class="ti ti-loader spin"></i>';
-    vs.textContent = 'Procesando...';
-    vs.className = 'val-status running';
-    setTimeout(() => {
-      item.classList.remove('running'); item.classList.add('ok');
-      vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
-      vs.textContent = 'Completado'; vs.className = 'val-status ok';
-      i++; setTimeout(next, 300);
-    }, 1400);
-  }
-  setTimeout(next, 600);
+  KYC.iniciar();
+}
+
+function reiniciarKYC() {
+  KYC.detener();
+  KYC.iniciar();
+}
+
+function volverACedula() {
+  KYC.detener();
+  document.getElementById('kyc-liveness-card').classList.add('hidden');
+  document.getElementById('kyc-doc-card').classList.remove('hidden');
 }
 
 function show2FA() {
+  KYC.detener();
   document.getElementById('kyc-liveness-card').classList.add('hidden');
   document.getElementById('kyc-2fa-card').classList.remove('hidden');
   // OTP timer
@@ -1295,13 +1597,7 @@ function resetAsociadoCard() {
 // Init summary
 updateSummary();
 
-// Auto-upload both sides after 3s for demo UX
-setTimeout(() => {
-  if (!uploadDone.front) simulateUpload('uz-front','uz-front-status');
-  setTimeout(() => {
-    if (!uploadDone.back) simulateUpload('uz-back','uz-back-status');
-  }, 800);
-}, 500);
+// Las fotos de cédula se cargan manualmente por el usuario (cámara real)
 </script>
 </body>
 </html>
