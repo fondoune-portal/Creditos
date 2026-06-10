@@ -4,285 +4,334 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FondoUne — Acceso al Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<script src="navigation.js"></script>
-<script src="session.js"></script>
 <style>
-:root{
-  --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
-  --gold:#C9963B;--gold2:#F0C060;--cream:#F7F4EE;--white:#fff;
-  --muted:#8A9BB5;--border:rgba(11,37,69,.1);
-  --success:#1A7A4A;--sucbg:#EAF5EE;
-  --danger:#C0392B;--danbg:#FDECEA;
-  --r:12px;--shadow:0 4px 32px rgba(11,37,69,.10);
-}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-}
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 70% 50% at 10% 15%,rgba(26,107,173,.07) 0%,transparent 60%),
-             radial-gradient(ellipse 50% 40% at 90% 85%,rgba(201,150,59,.06) 0%,transparent 60%);
-}
+html,body{height:100%}
+body{font-family:'IBM Plex Sans',sans-serif;background:#07090F;color:#DCE6F5;display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
 
-.wrap{position:relative;z-index:1;width:100%;max-width:400px;padding:1.5rem 1.25rem 4rem;}
+/* Fondo degradado */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(37,99,235,.12) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(200,151,58,.09) 0%,transparent 60%);pointer-events:none;z-index:0}
 
-/* ── Logo ── */
-.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem;justify-content:center}
-.logo-mark{width:44px;height:44px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,37,69,.25)}
-.logo-mark i{font-size:22px;color:var(--gold2)}
-.logo-text h1{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy)}
-.logo-text p{font-size:12px;color:var(--muted);margin-top:2px}
+/* Grid de fondo */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
 
-/* ── Card base ── */
-.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;box-shadow:var(--shadow)}
-.card-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:5px}
-.card-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:20px}
 
-/* ── Formulario ── */
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-.field label{font-size:12px;font-weight:500;color:var(--navy)}
-.field input,.field select{
-  padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;
-  border:1.5px solid var(--border);border-radius:8px;
-  background:var(--cream);color:var(--navy);outline:none;transition:all .2s
-}
-.field input:focus,.field select:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(26,107,173,.1)}
+/* Card */
+.login-card{background:rgba(14,20,32,.92);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:36px 36px 32px;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04)}
 
-/* ── Botón principal ── */
-.btn-primary{
-  width:100%;padding:11px;border-radius:8px;background:var(--navy);color:#fff;
-  border:none;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;
-  cursor:pointer;transition:background .2s;
-  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px
-}
-.btn-primary:hover{background:var(--navy2)}
-.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+/* Header */
+.lc-head{text-align:center;margin-bottom:28px}
+.lc-logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px}
+.lc-logo-mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#C8973A,#EDB84E);display:flex;align-items:center;justify-content:center}
+.lc-logo-mark i{font-size:22px;color:#07090F}
+.lc-logo-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.lc-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:7px}
+.lc-sub{font-size:13px;color:#5A6E8C;line-height:1.5}
 
-/* ── Divider ── */
-.divider{display:flex;align-items:center;gap:10px;margin:1.25rem 0;color:var(--muted);font-size:11px}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Steps */
+.step{display:none}.step.active{display:block}
 
-/* ── Bloques de acceso por rol ── */
-.role-blocks{display:flex;flex-direction:column;gap:8px}
+/* Input */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:#A8BAD8;margin-bottom:7px;letter-spacing:.03em}
+.inp-wrap{position:relative}
+.inp-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:#5A6E8C}
+.inp{width:100%;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px 11px 38px;font-size:14px;color:#DCE6F5;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border-color .2s}
+.inp:focus{border-color:#C8973A}
+.inp::placeholder{color:#3A4E6A}
+.inp-otp{font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:.18em;text-align:center;padding:14px 13px;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;width:100%;color:#EDB84E;outline:none;transition:border-color .2s}
+.inp-otp:focus{border-color:#C8973A}
+.inp-otp::placeholder{color:#3A4E6A;font-size:14px;letter-spacing:.05em}
 
-.role-block{
-  border-radius:var(--r);padding:1rem 1.25rem;
-  border:1.5px solid var(--border);
-  display:flex;align-items:center;gap:12px;
-  cursor:pointer;transition:all .18s;background:var(--cream);
-}
-.role-block:hover{border-color:currentColor;background:var(--white);box-shadow:0 2px 12px rgba(11,37,69,.08)}
+/* Buttons */
+.btn-primary{width:100%;background:linear-gradient(135deg,#C8973A,#EDB84E);border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#07090F;cursor:pointer;transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{opacity:.92;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{width:100%;background:none;border:1.5px solid rgba(255,255,255,.09);border-radius:10px;padding:11px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:#A8BAD8;cursor:pointer;transition:border-color .15s,color .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:#DCE6F5}
+.btn-link{background:none;border:none;font-size:12px;color:#5A6E8C;cursor:pointer;padding:0;font-family:inherit;transition:color .15s;display:inline-flex;align-items:center;gap:4px}
+.btn-link:hover{color:#A8BAD8}
 
-/* Asociado */
-.rb-asociado{--rc:#1A6BAD;--rbg:#EFF4FB;color:var(--rc)}
-.rb-asociado:hover{border-color:var(--rc)}
-.rb-asociado .rb-icon{background:rgba(26,107,173,.12);color:var(--rc)}
+/* Divider */
+.or-divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:11px;color:#3A4E6A}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
 
-/* Analista */
-.rb-analista{--rc:#5B3FC8;--rbg:#F0EDFF;color:var(--rc)}
-.rb-analista:hover{border-color:var(--rc)}
-.rb-analista .rb-icon{background:rgba(91,63,200,.12);color:var(--rc)}
+/* Email enviado */
+.email-sent-box{background:rgba(37,99,235,.08);border:1px solid rgba(75,142,248,.2);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.email-sent-box i{font-size:20px;color:#4B8EF8;flex-shrink:0;margin-top:1px}
+.email-sent-box .esb-txt{font-size:12px;color:#A8BAD8;line-height:1.6}
+.email-sent-box .esb-em{color:#93BFF9;font-weight:600}
 
-/* Gerencia */
-.rb-gerencia{--rc:#A06000;--rbg:#FEF6E6;color:var(--rc)}
-.rb-gerencia:hover{border-color:var(--rc)}
-.rb-gerencia .rb-icon{background:rgba(160,96,0,.12);color:var(--rc)}
+/* Timer */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.timer{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6E8C}
 
-.rb-icon{
-  width:38px;height:38px;border-radius:10px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.rb-info{flex:1}
-.rb-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
-.rb-desc{font-size:11px;color:var(--muted);line-height:1.4}
-.rb-arrow{font-size:16px;opacity:.4;flex-shrink:0}
+/* Error */
+.error-box{background:rgba(220,38,38,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#FCA5A5;display:none;align-items:center;gap:8px}
+.error-box i{font-size:15px;flex-shrink:0}
 
-/* ── Alerta ── */
-.alert{
-  border-radius:8px;padding:10px 13px;font-size:12px;
-  display:none;align-items:flex-start;gap:8px;margin-bottom:12px;line-height:1.5
-}
-.alert.show{display:flex}
-.alert.err{background:var(--danbg);color:var(--danger);border:1px solid rgba(192,57,43,.2)}
-.alert.ok{background:var(--sucbg);color:var(--success);border:1px solid rgba(26,122,74,.2)}
-.alert i{font-size:15px;flex-shrink:0;margin-top:1px}
-
-/* ── Loading overlay ── */
-.loading{
-  position:fixed;inset:0;background:rgba(247,244,238,.9);
-  display:none;align-items:center;justify-content:center;
-  flex-direction:column;gap:12px;z-index:100;
-}
-.loading.show{display:flex}
-.spin{animation:spin 1s linear infinite;font-size:30px;color:var(--blue)}
+/* Loading */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(7,9,15,.3);border-top-color:#07090F;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:13px;color:var(--navy)}
 
-/* ── Footer ── */
-.footer{text-align:center;font-size:10px;color:var(--muted);margin-top:1.5rem;line-height:1.7}
+/* Success */
+.success-box{text-align:center;padding:12px 0}
+.success-ico{width:56px;height:56px;border-radius:50%;background:rgba(5,150,105,.15);border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px;color:#22C55E}
+
+/* Roles info */
+.roles-hint{background:rgba(27,38,64,.5);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;margin-top:14px;font-size:11px;color:#5A6E8C;line-height:1.7}
+.roles-hint strong{color:#A8BAD8}
+
+/* Footer */
+.lc-footer{text-align:center;margin-top:16px;font-size:11px;color:#3A4E6A}
+.lc-footer a{color:#5A6E8C;text-decoration:none}
+.lc-footer a:hover{color:#A8BAD8}
+
+/* Stytch badge */
+.stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A;margin-top:12px}
+.stytch-badge::before{content:'🔒';font-size:11px}
 </style>
 </head>
 <body>
+<div class="login-wrap">
+  <div class="login-card">
 
-<div class="loading" id="loading">
-  <i class="ti ti-loader spin"></i>
-  <p id="loading-msg">Verificando acceso…</p>
+    <!-- HEADER -->
+    <div class="lc-head">
+      <div class="lc-logo">
+        <div class="lc-logo-mark"><i class="ti ti-building-bank"></i></div>
+        <span class="lc-logo-name">FondoUne</span>
+      </div>
+      <div class="lc-title" id="step-title">Acceso al portal</div>
+      <div class="lc-sub" id="step-sub">Ingresa tu correo corporativo para continuar</div>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-box" id="error-box"><i class="ti ti-alert-circle"></i><span id="error-txt"></span></div>
+
+    <!-- ══ PASO 1: EMAIL ══ -->
+    <div class="step active" id="step-email">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <div class="inp-wrap">
+          <i class="ti ti-mail"></i>
+          <input class="inp" type="email" id="inp-email" placeholder="tucorreo@fondoune.com" autocomplete="email">
+        </div>
+      </div>
+      <button class="btn-primary" id="btn-otp" onclick="sendOTP()">
+        <i class="ti ti-password"></i> Enviar código de acceso
+      </button>
+      <div class="or-divider">o</div>
+      <button class="btn-ghost" onclick="sendMagicLink()">
+        <i class="ti ti-wand"></i> Enviar enlace mágico al correo
+      </button>
+      <div class="roles-hint">
+        <strong>Acceso según tu perfil:</strong><br>
+        🟡 Asociado → Portal de solicitudes<br>
+        🔵 Analista → Dashboard de análisis<br>
+        🟣 Gerencia → Panel ejecutivo
+      </div>
+    </div>
+
+    <!-- ══ PASO 2: OTP ══ -->
+    <div class="step" id="step-otp">
+      <div class="email-sent-box">
+        <i class="ti ti-send"></i>
+        <div class="esb-txt">
+          Enviamos un código de 6 dígitos a<br>
+          <span class="esb-em" id="otp-email-display">—</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Código de verificación</label>
+        <input class="inp-otp" type="text" id="inp-otp" placeholder="• • • • • •" maxlength="6" inputmode="numeric" oninput="onOTPInput(this)" onkeydown="onOTPKey(event)">
+      </div>
+      <button class="btn-primary" id="btn-verify" onclick="verifyOTP()">
+        <i class="ti ti-shield-check"></i> Verificar e ingresar
+      </button>
+      <div class="timer-row">
+        <button class="btn-link" onclick="goBack()"><i class="ti ti-arrow-left"></i> Cambiar correo</button>
+        <span class="timer" id="timer-txt">Reenviar en <span id="timer-sec">60</span>s</span>
+      </div>
+      <div style="text-align:right;margin-top:6px;display:none" id="resend-row">
+        <button class="btn-link" onclick="sendOTP(true)"><i class="ti ti-refresh"></i> Reenviar código</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 3: MAGIC LINK ENVIADO ══ -->
+    <div class="step" id="step-magic">
+      <div class="email-sent-box">
+        <i class="ti ti-wand"></i>
+        <div class="esb-txt">
+          Enviamos un enlace de acceso a<br>
+          <span class="esb-em" id="magic-email-display">—</span><br>
+          <span style="color:#5A6E8C">Haz clic en el enlace del correo para ingresar.</span>
+        </div>
+      </div>
+      <button class="btn-ghost" onclick="goBack()"><i class="ti ti-arrow-left"></i> Volver</button>
+    </div>
+
+    <!-- ══ PASO 4: ÉXITO ══ -->
+    <div class="step" id="step-success">
+      <div class="success-box">
+        <div class="success-ico"><i class="ti ti-check"></i></div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:6px">¡Acceso verificado!</div>
+        <div style="font-size:13px;color:#5A6E8C">Redirigiendo a tu portal...<br><span id="success-role" style="color:#A8BAD8"></span></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="lc-footer">
+      <div class="stytch-badge">Autenticación segura por Stytch</div><br>
+      NIT 811018807-8 · FondoUne © <span id="yr"></span>
+    </div>
+  </div>
 </div>
 
-<div class="wrap">
-  <div class="logo-row">
-    <div class="logo-mark"><i class="ti ti-building-bank"></i></div>
-    <div class="logo-text">
-      <h1>FondoUne</h1>
-      <p>Portal de Crédito Inteligente</p>
-    </div>
-  </div>
+<script src="https://cdn.jsdelivr.net/npm/@stytch/vanilla-js@latest/dist/index.umd.js"></script>
+<script src="stytch-auth.js"></script>
+<script src="session.js"></script>
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
 
-  <div class="card">
-    <div class="card-title">Iniciar sesión</div>
-    <div class="card-sub">Ingresa con tu correo corporativo para acceder.</div>
+// ── Verificar si viene de magic link ──────────────────────────────
+window.addEventListener('load', async function() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+  const type   = params.get('stytch_token_type');
 
-    <div class="alert err" id="alert-err"><i class="ti ti-alert-circle"></i><span id="err-txt"></span></div>
-
-    <div class="field">
-      <label>Correo corporativo</label>
-      <input type="email" id="inp-email" placeholder="nombre@une.net.co" value="carlos.gil@une.net.co" autocomplete="username">
-    </div>
-    <div class="field">
-      <label>Contraseña</label>
-      <input type="password" id="inp-pass" placeholder="••••••••" value="Demo1234!"
-        autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-
-    <button class="btn-primary" id="btn-login" onclick="doLogin()">
-      <i class="ti ti-login"></i> Entrar al portal
-    </button>
-
-    <!-- ── Separador ── -->
-    <div class="divider">Accesos rápidos de demostración</div>
-
-    <!-- ── Botones de rol diferenciados ── -->
-    <div class="role-blocks">
-
-      <div class="role-block rb-asociado" onclick="quickAccess('asociado')" title="Acceder como asociado">
-        <div class="rb-icon"><i class="ti ti-user-circle"></i></div>
-        <div class="rb-info">
-          <div class="rb-title">Asociado</div>
-          <div class="rb-desc">Solicitar crédito · Seguimiento · Firma digital</div>
-        </div>
-        <i class="ti ti-arrow-right rb-arrow"></i>
-      </div>
-
-      <div class="role-block rb-analista" onclick="quickAccess('analista')" title="Acceder como analista">
-        <div class="rb-icon"><i class="ti ti-user-check"></i></div>
-        <div class="rb-info">
-          <div class="rb-title">Analista de Crédito</div>
-          <div class="rb-desc">Revisar solicitudes · Aprobar · Gestionar cartera</div>
-        </div>
-        <i class="ti ti-arrow-right rb-arrow"></i>
-      </div>
-
-      <div class="role-block rb-gerencia" onclick="quickAccess('gerencia')" title="Acceder como gerencia">
-        <div class="rb-icon"><i class="ti ti-crown"></i></div>
-        <div class="rb-info">
-          <div class="rb-title">Gerencia / Jefe de Crédito</div>
-          <div class="rb-desc">Panel ejecutivo · KPIs · Reversiones · Config. IA</div>
-        </div>
-        <i class="ti ti-arrow-right rb-arrow"></i>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="footer">
-    FondoUne © 2025 — Versión 1.0<br>
-    Conexión cifrada TLS 1.3 · Protección de datos Ley 1581/2012
-  </div>
-</div>
-
-<script type="module">
-  // ── Destinos por rol ──────────────────────────────────────────────
-  const DESTINOS = {
-    asociado: 'modulo1-portal.html',
-    analista: 'modulo2-analista.html',
-    gerencia: 'modulo3-gerencia.html',
-    jefe_credito: 'modulo3-gerencia.html',
-  };
-
-  // ── Usuarios demo ─────────────────────────────────────────────────
-  const USUARIOS_DEMO = {
-    asociado: { id:'1045678901', name:'Carlos Andrés Gil',   email:'carlos.gil@une.net.co',      role:'asociado', empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes',  initials:'CG' },
-    analista: { id:'31598742',   name:'María Rodríguez',     email:'analista.maria@une.net.co',   role:'analista', empresa:'FondoUne',          cargo:'Analista de crédito', initials:'MR' },
-    gerencia: { id:'71234891',   name:'Diego Montoya',       email:'gerencia.diego@une.net.co',   role:'gerencia', empresa:'FondoUne',          cargo:'Jefe de Crédito',   initials:'DM' },
-  };
-
-  // ── Verificar si ya hay sesión activa ─────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => {
-    const user = FondouneSession.getUser();
-    if (user?.role && DESTINOS[user.role]) {
-      // Sesión activa → redirigir directamente
-      setLoading('Retomando sesión…');
-      setTimeout(() => window.location.href = DESTINOS[user.role], 500);
+  if (token && type === 'magic_links') {
+    showStep('success');
+    document.getElementById('step-title').textContent = 'Verificando enlace...';
+    try {
+      await StytchAuth.handleMagicLink(token);
+    } catch(e) {
+      showError('El enlace expiró o ya fue usado. Solicita uno nuevo.');
+      showStep('email');
     }
-  });
-
-  // ── Login por formulario ──────────────────────────────────────────
-  async function doLogin() {
-    const email = document.getElementById('inp-email').value.trim();
-    const pass  = document.getElementById('inp-pass').value;
-    if (!email) return showErr('Ingresa tu correo corporativo.');
-    if (!pass)  return showErr('Ingresa tu contraseña.');
-
-    setLoading('Verificando credenciales…');
-    await sleep(1000);
-
-    // Detectar rol por email demo
-    let rol = 'asociado';
-    if (email.includes('analista')) rol = 'analista';
-    if (email.includes('gerencia') || email.includes('jefe')) rol = 'gerencia';
-
-    const userData = USUARIOS_DEMO[rol] || USUARIOS_DEMO.asociado;
-    FondouneSession.initUser({ ...userData, email });
-
-    setLoading('Cargando tu portal…');
-    await sleep(600);
-    window.location.href = DESTINOS[rol];
   }
 
-  // ── Acceso rápido por rol ─────────────────────────────────────────
-  async function quickAccess(rol) {
-    const nombres = { asociado:'Accediendo como Asociado…', analista:'Accediendo como Analista…', gerencia:'Accediendo como Gerencia…' };
-    setLoading(nombres[rol] || 'Cargando…');
-
-    const userData = USUARIOS_DEMO[rol];
-    FondouneSession.initUser(userData);
-    await sleep(700);
-    window.location.href = DESTINOS[rol];
+  // Verificar si ya hay sesión activa
+  if (StytchAuth.hasSession()) {
+    const role = StytchAuth.getCurrentRole();
+    StytchAuth.redirectByRole(role);
   }
+});
 
-  // ── Helpers ───────────────────────────────────────────────────────
-  function setLoading(msg) {
-    document.getElementById('loading-msg').textContent = msg;
-    document.getElementById('loading').classList.add('show');
-    document.getElementById('btn-login').disabled = true;
-  }
-  function showErr(msg) {
-    const el = document.getElementById('alert-err');
-    document.getElementById('err-txt').textContent = msg;
-    el.classList.add('show');
-    document.getElementById('loading').classList.remove('show');
-    document.getElementById('btn-login').disabled = false;
-    setTimeout(() => el.classList.remove('show'), 5000);
-  }
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+// ── Enviar OTP ────────────────────────────────────────────────────
+async function sendOTP(isResend) {
+  const email = document.getElementById('inp-email').value.trim();
+  if (!email || !email.includes('@')) { showError('Ingresa un correo válido.'); return; }
 
-  window.doLogin     = doLogin;
-  window.quickAccess = quickAccess;
+  const btn = document.getElementById('btn-otp');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Enviando...';
+  hideError();
+
+  try {
+    await StytchAuth.sendOTP(email);
+    document.getElementById('otp-email-display').textContent  = email;
+    document.getElementById('magic-email-display').textContent = email;
+    showStep('otp');
+    startTimer();
+    document.getElementById('inp-otp').focus();
+  } catch(e) {
+    showError(e.message || 'No se pudo enviar el código. Verifica el correo.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-password"></i> Enviar código de acceso';
+  }
+}
+
+// ── Enviar magic link ─────────────────────────────────────────────
+async function sendMagicLink() {
+  const email = document.getElementById('inp-email').value.trim();
+  if (!email || !email.includes('@')) { showError('Ingresa un correo válido.'); return; }
+  hideError();
+
+  try {
+    await StytchAuth.sendMagicLink(email, window.location.href.split('?')[0]);
+    document.getElementById('magic-email-display').textContent = email;
+    showStep('magic');
+  } catch(e) {
+    showError(e.message || 'No se pudo enviar el enlace.');
+  }
+}
+
+// ── Verificar OTP ─────────────────────────────────────────────────
+async function verifyOTP() {
+  const code = document.getElementById('inp-otp').value.replace(/\s/g,'');
+  if (code.length < 6) { showError('Ingresa el código de 6 dígitos completo.'); return; }
+
+  const btn = document.getElementById('btn-verify');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Verificando...';
+  hideError();
+
+  try {
+    const role = await StytchAuth.verifyOTP(code);
+    showStep('success');
+    const labels = {asociado:'Asociado — Portal de solicitudes',analista:'Analista — Dashboard de análisis',gerencia:'Gerencia — Panel ejecutivo',jefe_credito:'Jefe de Crédito — Panel ejecutivo'};
+    document.getElementById('success-role').textContent = labels[role] || role;
+    setTimeout(() => StytchAuth.redirectByRole(role), 1800);
+  } catch(e) {
+    showError('Código incorrecto o expirado. Verifica e intenta de nuevo.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-shield-check"></i> Verificar e ingresar';
+  }
+}
+
+// ── UI helpers ────────────────────────────────────────────────────
+function showStep(name) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-'+name).classList.add('active');
+  const titles = {email:'Acceso al portal',otp:'Ingresa el código',magic:'Revisa tu correo',success:'¡Bienvenido!'};
+  const subs   = {email:'Ingresa tu correo corporativo para continuar',otp:'Código de un solo uso enviado a tu correo',magic:'Haz clic en el enlace para ingresar automáticamente',success:''};
+  document.getElementById('step-title').textContent = titles[name] || '';
+  document.getElementById('step-sub').textContent   = subs[name]  || '';
+}
+
+function goBack() { hideError(); showStep('email'); }
+
+function showError(msg) {
+  const b = document.getElementById('error-box');
+  document.getElementById('error-txt').textContent = msg;
+  b.style.display = 'flex';
+}
+function hideError() { document.getElementById('error-box').style.display = 'none'; }
+
+function onOTPInput(el) {
+  el.value = el.value.replace(/\D/g,'');
+  if (el.value.length === 6) { document.getElementById('btn-verify').focus(); }
+}
+function onOTPKey(e) { if (e.key === 'Enter') verifyOTP(); }
+
+// ── Timer reenvío ─────────────────────────────────────────────────
+let _timerInterval = null;
+function startTimer() {
+  let secs = 60;
+  document.getElementById('timer-txt').style.display = '';
+  document.getElementById('resend-row').style.display = 'none';
+  clearInterval(_timerInterval);
+  _timerInterval = setInterval(function() {
+    secs--;
+    document.getElementById('timer-sec').textContent = secs;
+    if (secs <= 0) {
+      clearInterval(_timerInterval);
+      document.getElementById('timer-txt').style.display = 'none';
+      document.getElementById('resend-row').style.display = 'block';
+    }
+  }, 1000);
+}
+
+// Enter en email
+document.getElementById('inp-email').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') sendOTP();
+});
 </script>
 </body>
 </html>
