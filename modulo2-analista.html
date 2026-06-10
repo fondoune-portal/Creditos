@@ -356,39 +356,44 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <!-- MAIN -->
   <div class="main">
 
-    <!-- STATS BAR -->
-    <div class="stats-bar">
-      <div class="stat active">
-        <div class="stat-l">Total hoy</div>
-        <div class="stat-v" id="sv-total">26</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>+8 vs ayer</div>
-      </div>
-      <div class="stat">
-        <div class="stat-l">Pendientes</div>
-        <div class="stat-v" id="sv-pend" style="color:var(--amber3)">4</div>
-        <div class="stat-d trend-n">Requieren acción</div>
-      </div>
-      <div class="stat">
-        <div class="stat-l">Pre-aprobadas IA</div>
-        <div class="stat-v" id="sv-pre" style="color:var(--green2)">15</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>57.7% tasa</div>
-      </div>
-      <div class="stat">
-        <div class="stat-l">Rechazadas auto</div>
-        <div class="stat-v" style="color:var(--red2)">4</div>
-        <div class="stat-d trend-n">Riesgo alto</div>
-      </div>
-      <div class="stat">
-        <div class="stat-l">Tiempo prom.</div>
-        <div class="stat-v" style="color:var(--blue2)">4.2m</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>vs 3 días anterior</div>
-      </div>
-      <div class="stat">
-        <div class="stat-l">Monto COP</div>
-        <div class="stat-v">$184M</div>
-        <div class="stat-d trend-up"><i class="ti ti-trending-up" style="font-size:10px"></i>solicitado hoy</div>
-      </div>
-    </div>
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat active">
+    <div class="stat-l">Total hoy</div>
+    <div class="stat-v" id="sv-total">0</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-l">Pendientes</div>
+    <div class="stat-v" id="sv-pend" style="color:var(--amber2)">0</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-l">Pre-aprobadas IA</div>
+    <div class="stat-v" id="sv-pre" style="color:var(--green2)">0</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-l">Rechazadas auto</div>
+    <div class="stat-v" style="color:var(--red2)">0</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-l">Tiempo prom.</div>
+    <div class="stat-v" style="color:var(--blue2)">0m</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-l">Monto COP</div>
+    <div class="stat-v">$0</div>
+    <div class="stat-d trend-n">Sin datos</div>
+  </div>
+</div>
 
     <!-- CONTENT -->
     <div class="content">
@@ -419,7 +424,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
       <div class="detail-panel" id="detail-panel">
         <div class="empty-state" id="empty-state">
           <i class="ti ti-file-search"></i>
-          <p>Selecciona una solicitud para ver el análisis completo</p>
+          <p>Aún no hay solicitudes disponibles. Aquí aparecerán las solicitudes reales enviadas por los asociados.</p>
         </div>
         <div id="detail-body" style="display:none"></div>
       </div>
@@ -445,7 +450,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 
 <script>
 // ── DATA ──────────────────────────────────────────────
-const DATA = [
+const DATA = [];
   {
     id:'SOL-2025-0847', nombre:'Carlos Andrés Gil', ced:'1.045.678.901',
     empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes', tiempo:'Hace 18 min', ts:'09:42',
