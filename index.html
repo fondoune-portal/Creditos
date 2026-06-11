@@ -91,6 +91,22 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .lc-footer a{color:#5A6E8C;text-decoration:none}
 .lc-footer a:hover{color:#A8BAD8}
 
+/* SMS block */
+.sms-block{border-top:1px solid rgba(255,255,255,.07);margin-top:16px;padding-top:14px}
+.sms-title{font-size:11px;color:#5A6E8C;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sms-title i{font-size:13px}
+.phone-wrap{display:flex;gap:8px}
+.phone-prefix{background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 12px;font-size:14px;color:#6B7FA0;font-family:'IBM Plex Mono',monospace;flex-shrink:0;display:flex;align-items:center;gap:5px}
+.phone-prefix img{width:16px;height:12px;border-radius:2px}
+.inp-phone{flex:1;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px;font-size:14px;color:#DCE6F5;font-family:'IBM Plex Mono',monospace;outline:none;transition:border-color .2s}
+.inp-phone:focus{border-color:#4B8EF8}
+.inp-phone::placeholder{color:#3A4E6A}
+.btn-sms{width:100%;background:rgba(37,99,235,.12);border:1.5px solid rgba(75,142,248,.25);border-radius:10px;padding:11px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;color:#4B8EF8;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.btn-sms:hover{background:rgba(37,99,235,.22);border-color:rgba(75,142,248,.4)}
+.btn-sms:disabled{opacity:.4;cursor:not-allowed}
+.sms-sent{background:rgba(37,99,235,.08);border:1px solid rgba(75,142,248,.2);border-radius:8px;padding:9px 12px;font-size:11px;color:#93BFF9;display:none;align-items:center;gap:7px;margin-top:8px}
+.sms-sent i{font-size:15px;flex-shrink:0}
+
 /* Stytch badge */
 .stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A;margin-top:12px}
 .stytch-badge::before{content:'🔒';font-size:11px}
@@ -160,6 +176,26 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
       <div style="text-align:right;margin-top:6px;display:none" id="resend-row">
         <button class="btn-link" onclick="sendOTP(true)"><i class="ti ti-refresh"></i> Reenviar código</button>
       </div>
+
+      <!-- BLOQUE SMS -->
+      <div class="sms-block">
+        <div class="sms-title">
+          <i class="ti ti-device-mobile"></i>
+          ¿Quieres recibirlo también en tu celular?
+        </div>
+        <div class="phone-wrap">
+          <div class="phone-prefix">🇨🇴 +57</div>
+          <input class="inp-phone" type="tel" id="inp-phone" placeholder="300 123 4567"
+            maxlength="13" inputmode="tel" onkeydown="if(event.key==='Enter') enviarSMS()">
+        </div>
+        <button class="btn-sms" id="btn-sms" onclick="enviarSMS()">
+          <i class="ti ti-message"></i> Enviar código al celular
+        </button>
+        <div class="sms-sent" id="sms-sent">
+          <i class="ti ti-check"></i>
+          <span>Código enviado al celular. Úsalo en el campo de arriba.</span>
+        </div>
+      </div>
     </div>
 
     <!-- ══ PASO 3: MAGIC LINK ENVIADO ══ -->
@@ -192,7 +228,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
   </div>
 </div>
 
-<!-- Stytch: autenticación via REST API directa — sin SDK externo -->
 <script src="stytch-auth.js"></script>
 <script src="session.js"></script>
 <script>
@@ -200,7 +235,10 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 // ── Verificar si viene de magic link ──────────────────────────────
 window.addEventListener('load', async function() {
-  // Verificar magic link desde URL
+  if (typeof StytchAuth !== 'undefined' && !StytchAuth.isConfigured()) {
+    showError('⚙️ Portal en configuración: reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');
+    return;
+  }
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('token');
   const type   = params.get('stytch_token_type');
@@ -214,10 +252,9 @@ window.addEventListener('load', async function() {
       showError('El enlace expiró o ya fue usado. Solicita uno nuevo.');
       showStep('email');
     }
-    return;
   }
 
-  // Si ya hay sesión activa, redirigir directamente
+  // Verificar si ya hay sesión activa
   if (StytchAuth.hasSession()) {
     const role = StytchAuth.getCurrentRole();
     StytchAuth.redirectByRole(role);
@@ -312,7 +349,32 @@ function onOTPInput(el) {
 }
 function onOTPKey(e) { if (e.key === 'Enter') verifyOTP(); }
 
+// ── Enviar SMS ────────────────────────────────────────────────────
+async function enviarSMS() {
+  const raw  = document.getElementById('inp-phone').value.replace(/\s/g,'');
+  if (!raw || raw.replace(/\D/g,'').length < 10) {
+    alert('Ingresa un número de celular colombiano válido (10 dígitos).');
+    return;
+  }
+  const btn = document.getElementById('btn-sms');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Enviando...';
+  hideError();
+  try {
+    await StytchAuth.sendSMSOTP(raw);
+    document.getElementById('sms-sent').style.display = 'flex';
+    btn.innerHTML = '<i class="ti ti-check"></i> Código enviado';
+    btn.style.color = 'var(--green2,#22C55E)';
+    btn.style.borderColor = 'rgba(34,197,94,.3)';
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-message"></i> Enviar código al celular';
+    showError(e.message || 'No se pudo enviar el SMS. Verifica el número.');
+  }
+}
+
 // ── Timer reenvío ─────────────────────────────────────────────────
+────
 let _timerInterval = null;
 function startTimer() {
   let secs = 60;
