@@ -16,7 +16,7 @@
 const StytchAuth = (() => {
 
   // ── CONFIGURACIÓN ─────────────────────────────────────────────
-  const PUBLIC_TOKEN = 'public-token-test-REEMPLAZA-CON-TU-TOKEN';
+  const PUBLIC_TOKEN = 'public-token-test-8c7a5db8-cc10-487e-8137-05fda1c3c138';
 
   // URL base de la API web de Stytch (usada internamente por su SDK)
   const API = 'https://web.stytch.com/sdk/v1';
