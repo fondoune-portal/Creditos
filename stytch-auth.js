@@ -42,8 +42,13 @@ const StytchAuth = (() => {
   // ── OTP — ENVIAR ──────────────────────────────────────────────
   async function sendOTP(email) {
     const client = await _getClient();
-    _currentEmail = email;
-    const res = await client.otps.email.loginOrCreate({ email }, { expiration_minutes: 5 });
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    _currentEmail = cleanEmail;
+  
+    const res = await client.otps.email.loginOrCreate(cleanEmail, {
+      expiration_minutes: 5,
+    });
+  
     _methodId = res.method_id;
     return res;
   }
