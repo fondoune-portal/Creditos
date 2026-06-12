@@ -11,7 +11,7 @@ const StytchAuth = (() => {
   // Mapa email → rol
   const ROL_POR_EMAIL = {
     'nicolas.ramos@fondoune.com':  'analista',
-    'naramosa@fondoune.com':       'analista',
+    'naramosa@fondoune.com':       'admin',
     'gerencia@fondoune.com':       'gerencia',
     'jefe.credito@fondoune.com':   'jefe_credito',
     'director@fondoune.com':       'gerencia',
@@ -142,9 +142,10 @@ const StytchAuth = (() => {
 
   function redirectByRole(role) {
     const mapa = {
-      asociado:     'modulo1-portal.html',
-      analista:     'modulo2-analista.html',
-      gerencia:     'modulo3-gerencia.html',
+      admin: 'modulo1-portal.html',
+      asociado: 'modulo1-portal.html',
+      analista: 'modulo2-analista.html',
+      gerencia: 'modulo3-gerencia.html',
       jefe_credito: 'modulo3-gerencia.html',
     };
     window.location.href = mapa[role] || 'modulo1-portal.html';
