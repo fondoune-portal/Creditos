@@ -6,7 +6,7 @@
 
 const StytchAuth = (() => {
 
-  const PUBLIC_TOKEN = 'public-token-test-8c7a5db8-cc10-487e-8137-05fda1c3c138';
+  const PUBLIC_TOKEN = 'public-token-test-271a860b-aa52-4105-87ac-d5af1ccab375';
 
   // Mapa email → rol
   const ROL_POR_EMAIL = {
