@@ -3,340 +3,350 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FondoUne — Acceso al Portal</title>
+<title>FondoUne &mdash; Acceso al Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:'IBM Plex Sans',sans-serif;background:#07090F;color:#DCE6F5;display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
-
-/* Fondo degradado */
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(37,99,235,.12) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(200,151,58,.09) 0%,transparent 60%);pointer-events:none;z-index:0}
-
-/* Grid de fondo */
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
-
-.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:20px}
-
-/* Card */
-.login-card{background:rgba(14,20,32,.92);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:36px 36px 32px;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04)}
-
-/* Header */
-.lc-head{text-align:center;margin-bottom:28px}
-.lc-logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px}
-.lc-logo-mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#C8973A,#EDB84E);display:flex;align-items:center;justify-content:center}
-.lc-logo-mark i{font-size:22px;color:#07090F}
-.lc-logo-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
-.lc-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:7px}
-.lc-sub{font-size:13px;color:#5A6E8C;line-height:1.5}
-
-/* Steps */
+html,body{height:100%;min-height:100vh}
+body{font-family:'IBM Plex Sans',sans-serif;background:#07090F;color:#DCE6F5;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(37,99,235,.12) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 90%,rgba(200,151,58,.09) 0%,transparent 60%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:44px 44px}
+.wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:20px}
+.card{background:rgba(14,20,32,.92);border:1px solid rgba(255,255,255,.09);border-radius:18px;
+  padding:36px 36px 28px;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.head{text-align:center;margin-bottom:24px}
+.logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#C8973A,#EDB84E);
+  display:flex;align-items:center;justify-content:center}
+.logo-mark i{font-size:22px;color:#07090F}
+.logo-nm{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff}
+.ttl{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
+.sub{font-size:13px;color:#5A6E8C;line-height:1.5}
 .step{display:none}.step.active{display:block}
-
-/* Input */
-.field{margin-bottom:16px}
-.field label{display:block;font-size:12px;font-weight:600;color:#A8BAD8;margin-bottom:7px;letter-spacing:.03em}
-.inp-wrap{position:relative}
-.inp-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:#5A6E8C}
-.inp{width:100%;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px 11px 38px;font-size:14px;color:#DCE6F5;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border-color .2s}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:#A8BAD8;margin-bottom:7px}
+.inp-w{position:relative}.inp-w i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:#5A6E8C}
+.inp{width:100%;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;
+  padding:11px 13px 11px 38px;font-size:14px;color:#DCE6F5;font-family:inherit;outline:none;transition:border-color .2s}
 .inp:focus{border-color:#C8973A}
 .inp::placeholder{color:#3A4E6A}
-.inp-otp{font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:.18em;text-align:center;padding:14px 13px;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;width:100%;color:#EDB84E;outline:none;transition:border-color .2s}
-.inp-otp:focus{border-color:#C8973A}
-.inp-otp::placeholder{color:#3A4E6A;font-size:14px;letter-spacing:.05em}
-
-/* Buttons */
-.btn-primary{width:100%;background:linear-gradient(135deg,#C8973A,#EDB84E);border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#07090F;cursor:pointer;transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-primary:hover{opacity:.92;transform:translateY(-1px)}
-.btn-primary:active{transform:translateY(0)}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-ghost{width:100%;background:none;border:1.5px solid rgba(255,255,255,.09);border-radius:10px;padding:11px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:#A8BAD8;cursor:pointer;transition:border-color .15s,color .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
-.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:#DCE6F5}
-.btn-link{background:none;border:none;font-size:12px;color:#5A6E8C;cursor:pointer;padding:0;font-family:inherit;transition:color .15s;display:inline-flex;align-items:center;gap:4px}
-.btn-link:hover{color:#A8BAD8}
-
-/* Divider */
-.or-divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:11px;color:#3A4E6A}
-.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
-
-/* Email enviado */
-.email-sent-box{background:rgba(37,99,235,.08);border:1px solid rgba(75,142,248,.2);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
-.email-sent-box i{font-size:20px;color:#4B8EF8;flex-shrink:0;margin-top:1px}
-.email-sent-box .esb-txt{font-size:12px;color:#A8BAD8;line-height:1.6}
-.email-sent-box .esb-em{color:#93BFF9;font-weight:600}
-
-/* Timer */
+.otp-inp{font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:.18em;text-align:center;
+  padding:14px;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;
+  width:100%;color:#EDB84E;outline:none;transition:border-color .2s}
+.otp-inp:focus{border-color:#C8973A}
+.otp-inp::placeholder{color:#3A4E6A;font-size:14px;letter-spacing:.05em}
+.btn-pri{width:100%;background:linear-gradient(135deg,#C8973A,#EDB84E);border:none;border-radius:10px;
+  padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#07090F;cursor:pointer;
+  transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-pri:hover{opacity:.9;transform:translateY(-1px)}.btn-pri:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{width:100%;background:none;border:1.5px solid rgba(255,255,255,.09);border-radius:10px;
+  padding:11px;font-family:inherit;font-size:13px;font-weight:500;color:#A8BAD8;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.22);color:#DCE6F5}
+.btn-sms{width:100%;background:rgba(37,99,235,.12);border:1.5px solid rgba(75,142,248,.25);border-radius:10px;
+  padding:10px;font-family:inherit;font-size:13px;font-weight:600;color:#4B8EF8;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.btn-sms:hover{background:rgba(37,99,235,.22)}.btn-sms:disabled{opacity:.4;cursor:not-allowed}
+.btn-lnk{background:none;border:none;font-size:12px;color:#5A6E8C;cursor:pointer;padding:0;font-family:inherit;
+  transition:color .15s;display:inline-flex;align-items:center;gap:4px}
+.btn-lnk:hover{color:#A8BAD8}
+.or{display:flex;align-items:center;gap:12px;margin:14px 0;font-size:11px;color:#3A4E6A}
+.or::before,.or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.info-box{background:rgba(37,99,235,.08);border:1px solid rgba(75,142,248,.2);border-radius:10px;
+  padding:13px 15px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px}
+.info-box i{font-size:20px;color:#4B8EF8;flex-shrink:0;margin-top:1px}
+.info-box span{font-size:12px;color:#A8BAD8;line-height:1.6}
+.info-box em{color:#93BFF9;font-style:normal;font-weight:600}
+.err-box{background:rgba(220,38,38,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;
+  padding:10px 13px;margin-bottom:12px;font-size:12px;color:#FCA5A5;display:none;align-items:center;gap:8px}
+.err-box i{font-size:15px;flex-shrink:0}
+.sms-divider{border-top:1px solid rgba(255,255,255,.07);margin-top:16px;padding-top:14px}
+.sms-lbl{font-size:11px;color:#5A6E8C;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sms-lbl i{font-size:14px}
+.phone-row{display:flex;gap:8px}
+.pfx{background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;
+  padding:11px 12px;font-size:13px;color:#6B7FA0;font-family:'IBM Plex Mono',monospace;
+  flex-shrink:0;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.inp-ph{flex:1;background:rgba(27,38,64,.7);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;
+  padding:11px 13px;font-size:14px;color:#DCE6F5;font-family:'IBM Plex Mono',monospace;outline:none;transition:border-color .2s}
+.inp-ph:focus{border-color:#4B8EF8}
+.inp-ph::placeholder{color:#3A4E6A}
+.sms-ok{background:rgba(37,99,235,.08);border:1px solid rgba(75,142,248,.2);border-radius:8px;
+  padding:9px 12px;font-size:11px;color:#93BFF9;display:none;align-items:center;gap:7px;margin-top:8px}
+.sms-ok i{font-size:15px;flex-shrink:0}
 .timer-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
 .timer{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6E8C}
-
-/* Error */
-.error-box{background:rgba(220,38,38,.1);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#FCA5A5;display:none;align-items:center;gap:8px}
-.error-box i{font-size:15px;flex-shrink:0}
-
-/* Loading */
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(7,9,15,.3);border-top-color:#07090F;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Success */
-.success-box{text-align:center;padding:12px 0}
-.success-ico{width:56px;height:56px;border-radius:50%;background:rgba(5,150,105,.15);border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px;color:#22C55E}
-
-/* Roles info */
-.roles-hint{background:rgba(27,38,64,.5);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;margin-top:14px;font-size:11px;color:#5A6E8C;line-height:1.7}
+.success-c{text-align:center;padding:8px 0}
+.s-ico{width:56px;height:56px;border-radius:50%;background:rgba(5,150,105,.15);border:2px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px;color:#22C55E}
+.roles-hint{background:rgba(27,38,64,.5);border:1px solid rgba(255,255,255,.06);border-radius:8px;
+  padding:12px 14px;margin-top:12px;font-size:11px;color:#5A6E8C;line-height:1.8}
 .roles-hint strong{color:#A8BAD8}
-
-/* Footer */
-.lc-footer{text-align:center;margin-top:16px;font-size:11px;color:#3A4E6A}
-.lc-footer a{color:#5A6E8C;text-decoration:none}
-.lc-footer a:hover{color:#A8BAD8}
-
-/* Stytch badge */
-.stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A;margin-top:12px}
-.stytch-badge::before{content:'🔒';font-size:11px}
+.foot{text-align:center;margin-top:14px;font-size:11px;color:#3A4E6A}
+.stytch-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#3A4E6A}
+.sp{display:inline-block;width:15px;height:15px;border:2px solid rgba(7,9,15,.3);border-top-color:#07090F;
+  border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="login-wrap">
-  <div class="login-card">
-
-    <!-- HEADER -->
-    <div class="lc-head">
-      <div class="lc-logo">
-        <div class="lc-logo-mark"><i class="ti ti-building-bank"></i></div>
-        <span class="lc-logo-name">FondoUne</span>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="logo">
+        <div class="logo-mark"><i class="ti ti-building-bank"></i></div>
+        <span class="logo-nm">FondoUne</span>
       </div>
-      <div class="lc-title" id="step-title">Acceso al portal</div>
-      <div class="lc-sub" id="step-sub">Ingresa tu correo corporativo para continuar</div>
+      <div class="ttl" id="ttl">Acceso al portal</div>
+      <div class="sub" id="sub">Ingresa tu correo corporativo para continuar</div>
     </div>
 
-    <!-- ERROR -->
-    <div class="error-box" id="error-box"><i class="ti ti-alert-circle"></i><span id="error-txt"></span></div>
+    <div class="err-box" id="err-box"><i class="ti ti-alert-circle"></i><span id="err-txt"></span></div>
 
-    <!-- ══ PASO 1: EMAIL ══ -->
+    <!-- PASO 1: EMAIL -->
     <div class="step active" id="step-email">
       <div class="field">
-        <label>Correo electrónico</label>
-        <div class="inp-wrap">
+        <label>Correo electr&oacute;nico</label>
+        <div class="inp-w">
           <i class="ti ti-mail"></i>
           <input class="inp" type="email" id="inp-email" placeholder="tucorreo@fondoune.com" autocomplete="email">
         </div>
       </div>
-      <button class="btn-primary" id="btn-otp" onclick="sendOTP()">
-        <i class="ti ti-password"></i> Enviar código de acceso
+      <button class="btn-pri" id="btn-email" onclick="doSendOTP()">
+        <i class="ti ti-password"></i> Enviar c&oacute;digo de acceso
       </button>
-      <div class="or-divider">o</div>
-      <button class="btn-ghost" onclick="sendMagicLink()">
-        <i class="ti ti-wand"></i> Enviar enlace mágico al correo
+      <div class="or">o</div>
+      <button class="btn-ghost" onclick="doSendMagic()">
+        <i class="ti ti-wand"></i> Enviar enlace m&aacute;gico al correo
       </button>
       <div class="roles-hint">
-        <strong>Acceso según tu perfil:</strong><br>
-        🟡 Asociado → Portal de solicitudes<br>
-        🔵 Analista → Dashboard de análisis<br>
-        🟣 Gerencia → Panel ejecutivo
+        <strong>Acceso seg&uacute;n tu perfil:</strong><br>
+        &#x1F7E1; Asociado &rarr; Portal de solicitudes<br>
+        &#x1F535; Analista &rarr; Dashboard de an&aacute;lisis<br>
+        &#x1F7E3; Gerencia &rarr; Panel ejecutivo
       </div>
     </div>
 
-    <!-- ══ PASO 2: OTP ══ -->
+    <!-- PASO 2: OTP -->
     <div class="step" id="step-otp">
-      <div class="email-sent-box">
+      <div class="info-box">
         <i class="ti ti-send"></i>
-        <div class="esb-txt">
-          Enviamos un código de 6 dígitos a<br>
-          <span class="esb-em" id="otp-email-display">—</span>
-        </div>
+        <span>C&oacute;digo enviado a <em id="otp-email">---</em>.<br>Tambi&eacute;n puedes recibirlo en tu celular abajo.</span>
       </div>
       <div class="field">
-        <label>Código de verificación</label>
-        <input class="inp-otp" type="text" id="inp-otp" placeholder="• • • • • •" maxlength="6" inputmode="numeric" oninput="onOTPInput(this)" onkeydown="onOTPKey(event)">
+        <label>C&oacute;digo de verificaci&oacute;n</label>
+        <input class="otp-inp" type="text" id="inp-otp" placeholder="&bull; &bull; &bull; &bull; &bull; &bull;"
+          maxlength="6" inputmode="numeric" autocomplete="one-time-code">
       </div>
-      <button class="btn-primary" id="btn-verify" onclick="verifyOTP()">
+      <button class="btn-pri" id="btn-verify" onclick="doVerify()">
         <i class="ti ti-shield-check"></i> Verificar e ingresar
       </button>
       <div class="timer-row">
-        <button class="btn-link" onclick="goBack()"><i class="ti ti-arrow-left"></i> Cambiar correo</button>
+        <button class="btn-lnk" onclick="goBack()"><i class="ti ti-arrow-left"></i> Cambiar correo</button>
         <span class="timer" id="timer-txt">Reenviar en <span id="timer-sec">60</span>s</span>
       </div>
       <div style="text-align:right;margin-top:6px;display:none" id="resend-row">
-        <button class="btn-link" onclick="sendOTP(true)"><i class="ti ti-refresh"></i> Reenviar código</button>
+        <button class="btn-lnk" onclick="doSendOTP(true)"><i class="ti ti-refresh"></i> Reenviar c&oacute;digo</button>
+      </div>
+
+      <!-- SMS -->
+      <div class="sms-divider">
+        <div class="sms-lbl"><i class="ti ti-device-mobile"></i> Recibir tambi&eacute;n en tu celular</div>
+        <div class="phone-row">
+          <div class="pfx">&#x1F1E8;&#x1F1F4; +57</div>
+          <input class="inp-ph" type="tel" id="inp-phone" placeholder="300 123 4567" maxlength="13" inputmode="numeric">
+        </div>
+        <button class="btn-sms" id="btn-sms" onclick="doSendSMS()">
+          <i class="ti ti-message"></i> Enviar c&oacute;digo al celular
+        </button>
+        <div class="sms-ok" id="sms-ok">
+          <i class="ti ti-circle-check"></i>
+          C&oacute;digo SMS enviado. Usa cualquiera de los dos c&oacute;digos arriba.
+        </div>
       </div>
     </div>
 
-    <!-- ══ PASO 3: MAGIC LINK ENVIADO ══ -->
+    <!-- PASO 3: MAGIC ENVIADO -->
     <div class="step" id="step-magic">
-      <div class="email-sent-box">
+      <div class="info-box">
         <i class="ti ti-wand"></i>
-        <div class="esb-txt">
-          Enviamos un enlace de acceso a<br>
-          <span class="esb-em" id="magic-email-display">—</span><br>
-          <span style="color:#5A6E8C">Haz clic en el enlace del correo para ingresar.</span>
-        </div>
+        <span>Enlace enviado a <em id="magic-email">---</em>.<br>Haz clic en &eacute;l para ingresar autom&aacute;ticamente.</span>
       </div>
       <button class="btn-ghost" onclick="goBack()"><i class="ti ti-arrow-left"></i> Volver</button>
     </div>
 
-    <!-- ══ PASO 4: ÉXITO ══ -->
-    <div class="step" id="step-success">
-      <div class="success-box">
-        <div class="success-ico"><i class="ti ti-check"></i></div>
-        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:6px">¡Acceso verificado!</div>
-        <div style="font-size:13px;color:#5A6E8C">Redirigiendo a tu portal...<br><span id="success-role" style="color:#A8BAD8"></span></div>
+    <!-- PASO 4: EXITO -->
+    <div class="step" id="step-ok">
+      <div class="success-c">
+        <div class="s-ico"><i class="ti ti-check"></i></div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:6px">Acceso verificado</div>
+        <div style="font-size:13px;color:#5A6E8C">Redirigiendo...<br><span id="ok-role" style="color:#A8BAD8"></span></div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="lc-footer">
-      <div class="stytch-badge">Autenticación segura por Stytch</div><br>
-      NIT 811018807-8 · FondoUne © <span id="yr"></span>
+    <div class="foot">
+      <div class="stytch-badge">&#x1F512; Autenticaci&oacute;n segura por Stytch</div><br>
+      NIT 811018807-8 &middot; FondoUne &copy; <span id="yr"></span>
     </div>
   </div>
 </div>
 
-<!-- Stytch SDK cargado como ES Module desde esm.sh — funciona en GitHub Pages -->
-<script type="module">
-  import { StytchUIClient } from 'https://esm.sh/@stytch/vanilla-js@0.42.0';
-  window.StytchUIClient = StytchUIClient;
-</script>
-<script src="session.js"></script>
 <script src="stytch-auth.js"></script>
+<script src="session.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-// ── Verificar si viene de magic link ──────────────────────────────
-window.addEventListener('load', async function() {
-  // Verificar magic link desde URL
-  const params = new URLSearchParams(window.location.search);
-  const token  = params.get('token');
-  const type   = params.get('stytch_token_type');
+/* ---- helpers UI ---- */
+function setStep(n) {
+  document.querySelectorAll('.step').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById('step-' + n);
+  if (el) el.classList.add('active');
+  var titles = { email:'Acceso al portal', otp:'Ingresa el código', magic:'Revisa tu correo', ok:'Bienvenido' };
+  var subs   = { email:'Ingresa tu correo corporativo para continuar',
+                 otp:'Código de un solo uso enviado a tu correo',
+                 magic:'Haz clic en el enlace para ingresar automáticamente', ok:'' };
+  document.getElementById('ttl').textContent = titles[n] || '';
+  document.getElementById('sub').textContent = subs[n]  || '';
+}
+function showErr(msg) {
+  document.getElementById('err-txt').textContent = msg;
+  document.getElementById('err-box').style.display = 'flex';
+}
+function hideErr() { document.getElementById('err-box').style.display = 'none'; }
+function goBack()  { hideErr(); setStep('email'); }
 
-  if (token && type === 'magic_links') {
-    showStep('success');
-    document.getElementById('step-title').textContent = 'Verificando enlace...';
-    try {
-      await StytchAuth.handleMagicLink(token);
-    } catch(e) {
-      showError('El enlace expiró o ya fue usado. Solicita uno nuevo.');
-      showStep('email');
-    }
-    return;
-  }
-
-  // Si ya hay sesión activa, redirigir directamente
-  if (StytchAuth.hasSession()) {
-    const role = StytchAuth.getCurrentRole();
-    StytchAuth.redirectByRole(role);
-  }
-});
-
-// ── Enviar OTP ────────────────────────────────────────────────────
-async function sendOTP(isResend) {
-  const email = document.getElementById('inp-email').value.trim();
-  if (!email || !email.includes('@')) { showError('Ingresa un correo válido.'); return; }
-
-  const btn = document.getElementById('btn-otp');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Enviando...';
-  hideError();
-
-  try {
-    await StytchAuth.sendOTP(email);
-    document.getElementById('otp-email-display').textContent  = email;
-    document.getElementById('magic-email-display').textContent = email;
-    showStep('otp');
-    startTimer();
-    document.getElementById('inp-otp').focus();
-  } catch(e) {
-    showError(e.message || 'No se pudo enviar el código. Verifica el correo.');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-password"></i> Enviar código de acceso';
-  }
+function setBtn(id, loading, label) {
+  var btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="sp"></span> ' + label : label;
 }
 
-// ── Enviar magic link ─────────────────────────────────────────────
-async function sendMagicLink() {
-  const email = document.getElementById('inp-email').value.trim();
-  if (!email || !email.includes('@')) { showError('Ingresa un correo válido.'); return; }
-  hideError();
-
-  try {
-    await StytchAuth.sendMagicLink(email, window.location.href.split('?')[0]);
-    document.getElementById('magic-email-display').textContent = email;
-    showStep('magic');
-  } catch(e) {
-    showError(e.message || 'No se pudo enviar el enlace.');
-  }
+/* ---- STEP 1: enviar OTP ---- */
+function doSendOTP(isResend) {
+  var email = document.getElementById('inp-email').value.trim();
+  if (!email || email.indexOf('@') < 0) { showErr('Ingresa un correo válido.'); return; }
+  setBtn('btn-email', true, 'Enviando...');
+  hideErr();
+  StytchAuth.sendOTP(email)
+    .then(function() {
+      document.getElementById('otp-email').textContent = email;
+      setStep('otp');
+      startTimer();
+      var i = document.getElementById('inp-otp'); if (i) { i.value = ''; i.focus(); }
+    })
+    .catch(function(e) { showErr(e.message || 'No se pudo enviar el código.'); })
+    .finally(function() { setBtn('btn-email', false, '<i class="ti ti-password"></i> Enviar código de acceso'); });
 }
 
-// ── Verificar OTP ─────────────────────────────────────────────────
-async function verifyOTP() {
-  const code = document.getElementById('inp-otp').value.replace(/\s/g,'');
-  if (code.length < 6) { showError('Ingresa el código de 6 dígitos completo.'); return; }
-
-  const btn = document.getElementById('btn-verify');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Verificando...';
-  hideError();
-
-  try {
-    const role = await StytchAuth.verifyOTP(code);
-    showStep('success');
-    const labels = {asociado:'Asociado — Portal de solicitudes',analista:'Analista — Dashboard de análisis',gerencia:'Gerencia — Panel ejecutivo',jefe_credito:'Jefe de Crédito — Panel ejecutivo'};
-    document.getElementById('success-role').textContent = labels[role] || role;
-    setTimeout(() => StytchAuth.redirectByRole(role), 1800);
-  } catch(e) {
-    showError('Código incorrecto o expirado. Verifica e intenta de nuevo.');
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-shield-check"></i> Verificar e ingresar';
-  }
+/* ---- STEP 1: magic link ---- */
+function doSendMagic() {
+  var email = document.getElementById('inp-email').value.trim();
+  if (!email || email.indexOf('@') < 0) { showErr('Ingresa un correo válido.'); return; }
+  hideErr();
+  StytchAuth.sendMagicLink(email)
+    .then(function() {
+      document.getElementById('magic-email').textContent = email;
+      setStep('magic');
+    })
+    .catch(function(e) { showErr(e.message || 'No se pudo enviar el enlace.'); });
 }
 
-// ── UI helpers ────────────────────────────────────────────────────
-function showStep(name) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step-'+name).classList.add('active');
-  const titles = {email:'Acceso al portal',otp:'Ingresa el código',magic:'Revisa tu correo',success:'¡Bienvenido!'};
-  const subs   = {email:'Ingresa tu correo corporativo para continuar',otp:'Código de un solo uso enviado a tu correo',magic:'Haz clic en el enlace para ingresar automáticamente',success:''};
-  document.getElementById('step-title').textContent = titles[name] || '';
-  document.getElementById('step-sub').textContent   = subs[name]  || '';
+/* ---- STEP 2: verificar OTP ---- */
+function doVerify() {
+  var code = document.getElementById('inp-otp').value.replace(/\s/g, '');
+  if (code.length < 6) { showErr('Ingresa el código de 6 dígitos completo.'); return; }
+  setBtn('btn-verify', true, 'Verificando...');
+  hideErr();
+  StytchAuth.verifyOTP(code)
+    .then(function(role) {
+      setStep('ok');
+      var labels = { asociado:'Asociado → Portal de solicitudes',
+                     analista:'Analista → Dashboard de análisis',
+                     gerencia:'Gerencia → Panel ejecutivo',
+                     jefe_credito:'Jefe de Crédito → Panel ejecutivo' };
+      document.getElementById('ok-role').textContent = labels[role] || role;
+      setTimeout(function() { StytchAuth.redirectByRole(role); }, 1800);
+    })
+    .catch(function(e) {
+      showErr(e.message || 'Código incorrecto o expirado.');
+      setBtn('btn-verify', false, '<i class="ti ti-shield-check"></i> Verificar e ingresar');
+    });
 }
 
-function goBack() { hideError(); showStep('email'); }
-
-function showError(msg) {
-  const b = document.getElementById('error-box');
-  document.getElementById('error-txt').textContent = msg;
-  b.style.display = 'flex';
+/* ---- STEP 2: enviar SMS ---- */
+function doSendSMS() {
+  var raw = document.getElementById('inp-phone').value.replace(/\s/g, '');
+  var digits = raw.replace(/\D/g, '');
+  if (digits.length < 10) { showErr('Ingresa un número colombiano válido (10 dígitos).'); return; }
+  setBtn('btn-sms', true, 'Enviando...');
+  hideErr();
+  StytchAuth.sendSMSOTP(raw)
+    .then(function() {
+      document.getElementById('sms-ok').style.display = 'flex';
+      setBtn('btn-sms', false, '<i class="ti ti-check"></i> SMS enviado');
+      var b = document.getElementById('btn-sms');
+      if (b) { b.style.color = '#22C55E'; b.style.borderColor = 'rgba(34,197,94,.3)'; }
+    })
+    .catch(function(e) {
+      showErr(e.message || 'No se pudo enviar el SMS. Verifica el número.');
+      setBtn('btn-sms', false, '<i class="ti ti-message"></i> Enviar código al celular');
+    });
 }
-function hideError() { document.getElementById('error-box').style.display = 'none'; }
 
-function onOTPInput(el) {
-  el.value = el.value.replace(/\D/g,'');
-  if (el.value.length === 6) { document.getElementById('btn-verify').focus(); }
-}
-function onOTPKey(e) { if (e.key === 'Enter') verifyOTP(); }
-
-// ── Timer reenvío ─────────────────────────────────────────────────
-let _timerInterval = null;
+/* ---- Timer reenvío ---- */
+var _tmr = null;
 function startTimer() {
-  let secs = 60;
+  var secs = 60;
   document.getElementById('timer-txt').style.display = '';
   document.getElementById('resend-row').style.display = 'none';
-  clearInterval(_timerInterval);
-  _timerInterval = setInterval(function() {
+  clearInterval(_tmr);
+  _tmr = setInterval(function() {
     secs--;
-    document.getElementById('timer-sec').textContent = secs;
+    var el = document.getElementById('timer-sec'); if (el) el.textContent = secs;
     if (secs <= 0) {
-      clearInterval(_timerInterval);
+      clearInterval(_tmr);
       document.getElementById('timer-txt').style.display = 'none';
       document.getElementById('resend-row').style.display = 'block';
     }
   }, 1000);
 }
 
-// Enter en email
-document.getElementById('inp-email').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') sendOTP();
+/* ---- Enter keys ---- */
+document.getElementById('inp-email').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSendOTP(); });
+document.getElementById('inp-otp').addEventListener('keydown',   function(e) { if (e.key === 'Enter') doVerify(); });
+document.getElementById('inp-phone').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSendSMS(); });
+document.getElementById('inp-otp').addEventListener('input', function(e) {
+  e.target.value = e.target.value.replace(/\D/g, '');
+});
+
+/* ---- Verificar magic link en URL ---- */
+window.addEventListener('load', function() {
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get('token');
+  var type   = params.get('stytch_token_type');
+  if (token && type === 'magic_links') {
+    setStep('ok');
+    StytchAuth.handleMagicLink(token)
+      .catch(function(e) {
+        showErr('El enlace expiró o ya fue usado. Solicita uno nuevo.');
+        setStep('email');
+      });
+    return;
+  }
+  if (StytchAuth.hasSession()) {
+    StytchAuth.redirectByRole(StytchAuth.getCurrentRole());
+  }
+  if (!StytchAuth.isConfigured()) {
+    showErr('⚙️ Reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');
+  }
 });
 </script>
 </body>
