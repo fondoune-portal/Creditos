@@ -145,15 +145,21 @@ const StytchAuth = (() => {
     window.location.href = mapa[role] || 'modulo1-portal.html';
   }
 
-  return {
-    sendOTP,
-    verifyOTP,
-    sendMagicLink,
-    handleMagicLink,
-    hasSession,
-    getCurrentRole,
-    logout,
-    redirectByRole,
-  };
+// ── CONFIGURACIÓN ────────────────────────────────────────────
+function isConfigured() {
+  return typeof PUBLIC_TOKEN === 'string' && PUBLIC_TOKEN.startsWith('public-token');
+}
+
+return {
+  isConfigured,
+  sendOTP,
+  verifyOTP,
+  sendMagicLink,
+  handleMagicLink,
+  hasSession,
+  getCurrentRole,
+  logout,
+  redirectByRole,
+};
 
 })();
