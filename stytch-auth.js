@@ -10,7 +10,7 @@ const StytchAuth = (() => {
 
   // Mapa email → rol
   const ROL_POR_EMAIL = {
-    'nicolas.ramos@fondoune.com':  'analista',
+    'Creditosvivienda@fondoune.com':  'analista',
     'naramosa@fondoune.com':       'admin',
     'gerencia@fondoune.com':       'gerencia',
     'jefe.credito@fondoune.com':   'jefe_credito',
