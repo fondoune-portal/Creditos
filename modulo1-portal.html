@@ -427,7 +427,7 @@
     <div class="logo-block"><i class="ti ti-building-bank"></i></div>
     <div class="logo-text">
       <h1>FondoUne</h1>
-      <p>Portal de Crédito Inteligente — Prototipo v1.0</p>
+      <p>Portal de Crédito Inteligente · FondoUne</p>
     </div>
     <div class="header-right">
       <div class="secure-badge"><i class="ti ti-shield-check" style="font-size:13px;"></i> Sesión segura</div>
@@ -437,10 +437,9 @@
   <!-- PROGRESS TRACK -->
   <div class="progress-track" id="prog-track">
     <div class="p-step active" id="pt1"><div class="p-dot" id="pd1">1</div><div class="p-label">Identificación</div></div>
-    <div class="p-step" id="pt2"><div class="p-dot" id="pd2">2</div><div class="p-label">Verificación KYC</div></div>
-    <div class="p-step" id="pt3"><div class="p-dot" id="pd3">3</div><div class="p-label">Solicitud</div></div>
-    <div class="p-step" id="pt4"><div class="p-dot" id="pd4">4</div><div class="p-label">Validación IA</div></div>
-    <div class="p-step" id="pt5"><div class="p-dot" id="pd5"><i class="ti ti-check" style="font-size:14px;"></i></div><div class="p-label">Resultado</div></div>
+    <div class="p-step" id="pt2"><div class="p-dot" id="pd2">2</div><div class="p-label">Solicitud</div></div>
+    <div class="p-step" id="pt3"><div class="p-dot" id="pd3">3</div><div class="p-label">Validación IA</div></div>
+    <div class="p-step" id="pt4"><div class="p-dot" id="pd4"><i class="ti ti-check" style="font-size:14px;"></i></div><div class="p-label">Resultado</div></div>
   </div>
 
   <!-- ═══ PASO 1: IDENTIFICACIÓN ═══ -->
@@ -533,136 +532,10 @@
     </div>
   </div>
 
-  <!-- ═══ PASO 2: KYC ═══ -->
-  <div id="s2" class="hidden">
-    <div class="card" id="kyc-doc-card">
-      <div class="card-eyebrow">Paso 2 de 5 — KYC · Verificación de Identidad</div>
-      <div class="card-title">Fotografía tu cédula de ciudadanía</div>
-      <div class="card-sub">Necesitamos el frente y el reverso para verificar tu identidad mediante OCR. La imagen nunca se almacena sin cifrar.</div>
-
-      <!-- Paso A: foto cédula -->
-      <div id="kyc-cedula-section">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <label class="upload-zone" id="uz-front" for="inp-front">
-            <input type="file" id="inp-front" accept="image/*" capture="environment" onchange="cedulaFotoSeleccionada('front',this)">
-            <i class="ti ti-id" id="uz-front-icon"></i>
-            <strong id="uz-front-status">Frente de la cédula</strong>
-            <p>Toca para tomar foto</p>
-            <img id="preview-front" class="cedula-preview" alt="frente">
-          </label>
-          <label class="upload-zone" id="uz-back" for="inp-back">
-            <input type="file" id="inp-back" accept="image/*" capture="environment" onchange="cedulaFotoSeleccionada('back',this)">
-            <i class="ti ti-id-off" id="uz-back-icon"></i>
-            <strong id="uz-back-status">Reverso de la cédula</strong>
-            <p>Toca para tomar foto</p>
-            <img id="preview-back" class="cedula-preview" alt="reverso">
-          </label>
-        </div>
-
-        <div id="ocr-result" class="hidden" style="margin-top:12px;">
-          <div class="note ok"><i class="ti ti-check"></i> <strong>Documento procesado.</strong> Rostro extraído de la cédula. Listo para comparación facial.</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
-            <div style="background:var(--cream);border-radius:8px;padding:10px;">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NOMBRE</div>
-              <div style="font-size:13px;font-weight:500;" id="ocr-nombre">—</div>
-            </div>
-            <div style="background:var(--cream);border-radius:8px;padding:10px;">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">CÉDULA</div>
-              <div style="font-size:13px;font-weight:500;font-family:'DM Mono';" id="ocr-cedula">—</div>
-            </div>
-            <div style="background:var(--cream);border-radius:8px;padding:10px;">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">RNEC</div>
-              <div style="font-size:13px;font-weight:500;color:var(--success);">✓ Vigente</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="kyc-next-btn" class="hidden">
-          <div class="btn-row">
-            <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
-            <button class="btn primary" onclick="iniciarKYC()">Verificar biometría <i class="ti ti-face-id"></i></button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- LIVENESS con face-api.js -->
-    <div id="kyc-liveness-card" class="card hidden">
-      <div class="card-eyebrow">Paso 2 de 5 — KYC · Biometría facial</div>
-      <div class="card-title">Verificación de identidad en vivo</div>
-      <div class="card-sub">Centra tu rostro en el óvalo. El sistema comparará tu selfie con la foto de tu cédula.</div>
-
-      <!-- Cámara -->
-      <div class="kyc-cam-wrap">
-        <div class="kyc-video-ring" id="kyc-ring">
-          <video id="kyc-video" autoplay playsinline muted></video>
-          <div class="kyc-overlay-icon" id="kyc-overlay-icon"><i class="ti ti-user-circle"></i></div>
-        </div>
-        <canvas id="kyc-canvas"></canvas>
-        <div class="kyc-instr"  id="kyc-instr">Iniciando cámara…</div>
-        <div class="kyc-action" id="kyc-action">Un momento</div>
-        <div id="kyc-score-wrap" style="display:none;">
-          <span class="kyc-score-badge" id="kyc-score-badge">—</span>
-        </div>
-      </div>
-
-      <!-- Pasos de verificación -->
-      <div id="lv-steps" style="margin-top:1rem;">
-        <div class="val-item" id="lv1"><div class="val-icon idle" id="lvi1"><i class="ti ti-brain"></i></div><div><div class="val-name">Cargando modelos de IA</div></div><div class="val-status" id="lvs1">En espera</div></div>
-        <div class="val-item" id="lv2"><div class="val-icon idle" id="lvi2"><i class="ti ti-camera"></i></div><div><div class="val-name">Acceso a cámara del dispositivo</div></div><div class="val-status" id="lvs2">En espera</div></div>
-        <div class="val-item" id="lv3"><div class="val-icon idle" id="lvi3"><i class="ti ti-eye"></i></div><div><div class="val-name">Detección facial en tiempo real</div></div><div class="val-status" id="lvs3">En espera</div></div>
-        <div class="val-item" id="lv4"><div class="val-icon idle" id="lvi4"><i class="ti ti-scan-eye"></i></div><div><div class="val-name">Comparación biométrica vs cédula</div></div><div class="val-status" id="lvs4">En espera</div></div>
-      </div>
-
-      <div id="lv-done" class="hidden">
-        <div class="note ok" id="lv-done-msg"><i class="ti ti-check"></i> <strong>Identidad verificada.</strong></div>
-        <div class="btn-row">
-          <button class="btn primary" onclick="show2FA()">Continuar a 2FA <i class="ti ti-arrow-right"></i></button>
-        </div>
-      </div>
-      <div id="lv-error" class="hidden">
-        <div class="note" style="background:#FDECEA;border-color:rgba(192,57,43,.25);color:#C0392B;">
-          <i class="ti ti-alert-circle"></i> <span id="lv-error-msg">No se pudo verificar la identidad.</span>
-        </div>
-        <div class="btn-row">
-          <button class="btn" onclick="reiniciarKYC()"><i class="ti ti-refresh"></i> Intentar de nuevo</button>
-        </div>
-      </div>
-      <div class="btn-row" style="margin-top:8px;">
-        <button class="btn" onclick="volverACedula()" style="font-size:11px;opacity:.7;">
-          <i class="ti ti-arrow-left"></i> Volver a la cédula
-        </button>
-      </div>
-    </div>
-
-    <!-- 2FA -->
-    <div id="kyc-2fa-card" class="card hidden">
-      <div class="card-eyebrow">Paso 2 de 5 — KYC · Doble factor de autenticación</div>
-      <div class="card-title">Confirma tu identidad</div>
-      <div class="card-sub">Enviamos un código de 6 dígitos a <strong id="2fa-tel">+57 *** ****</strong> y un enlace a <strong id="2fa-email">tu correo registrado</strong>. Ingresa el código para continuar.</div>
-
-      <div class="otp-row">
-        <input class="otp-box" maxlength="1" value="7" id="otp1" oninput="otpMove(this,null,'otp2')">
-        <input class="otp-box" maxlength="1" value="4" id="otp2" oninput="otpMove(this,'otp1','otp3')">
-        <input class="otp-box" maxlength="1" value="8" id="otp3" oninput="otpMove(this,'otp2','otp4')">
-        <input class="otp-box" maxlength="1" value="2" id="otp4" oninput="otpMove(this,'otp3','otp5')">
-        <input class="otp-box" maxlength="1" value="0" id="otp5" oninput="otpMove(this,'otp4','otp6')">
-        <input class="otp-box" maxlength="1" value="3" id="otp6" oninput="otpMove(this,'otp5',null)">
-      </div>
-      <div style="text-align:center;font-size:12px;color:var(--muted);">Código demo: <span style="font-family:'DM Mono';font-weight:500;color:var(--navy);">748203</span> · Expira en <span id="otp-timer">4:58</span></div>
-
-      <div class="btn-row">
-        <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn primary" onclick="goTo(3)">Verificar y continuar <i class="ti ti-lock-check"></i></button>
-      </div>
-    </div>
-  </div>
-
   <!-- ═══ PASO 3: SOLICITUD ═══ -->
-  <div id="s3" class="hidden">
+  <div id="s2" class="hidden">
     <div class="card">
-      <div class="card-eyebrow">Paso 3 de 5 — Solicitud de Crédito</div>
+      <div class="card-eyebrow">Paso 2 de 4 — Solicitud de Crédito</div>
       <div class="card-title">Configura tu crédito</div>
       <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
 
@@ -750,15 +623,15 @@
 
       <div class="btn-row">
         <button class="btn" onclick="goTo(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn primary" onclick="goTo(4)">Enviar a validación <i class="ti ti-cpu"></i></button>
+        <button class="btn primary" onclick="goTo(2)">Enviar a validación <i class="ti ti-cpu"></i></button>
       </div>
     </div>
   </div>
 
   <!-- ═══ PASO 4: VALIDACIÓN IA ═══ -->
-  <div id="s4" class="hidden">
+  <div id="s2" class="hidden">
     <div class="card">
-      <div class="card-eyebrow">Paso 4 de 5 — Motor de Decisión IA</div>
+      <div class="card-eyebrow">Paso 3 de 4 — Motor de Decisión IA</div>
       <div class="card-title">Validación automática en curso</div>
       <div class="card-sub">El sistema está consultando múltiples fuentes en paralelo. Esto toma menos de 60 segundos.</div>
 
@@ -788,16 +661,16 @@
       <div id="v-done" class="hidden">
         <div class="note ok"><i class="ti ti-check"></i> Todas las validaciones completadas exitosamente. Sin alertas. Perfil de riesgo: <strong>BAJO</strong>.</div>
         <div class="btn-row">
-          <button class="btn primary" onclick="goTo(5)">Ver resultado <i class="ti ti-arrow-right"></i></button>
+          <button class="btn primary" onclick="goTo(2)">Ver resultado <i class="ti ti-arrow-right"></i></button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ═══ PASO 5: RESULTADO ═══ -->
-  <div id="s5" class="hidden">
+  <div id="s2" class="hidden">
     <div class="card">
-      <div class="card-eyebrow">Paso 5 de 5 — Resultado</div>
+      <div class="card-eyebrow">Paso 4 de 4 — Resultado</div>
 
       <div class="result-hero">
         <div class="result-ring approved"><i class="ti ti-circle-check"></i></div>
@@ -878,17 +751,17 @@
 <div class="status-bar">
   <div class="sb-item"><div class="sb-dot"></div> Sesión activa</div>
   <div class="sb-item"><div class="sb-dot"></div> Cifrado TLS 1.3</div>
-  <div class="sb-item"><div class="sb-dot warn"></div> Prototipo v1.0</div>
+  <div class="sb-item"><div class="sb-dot warn"></div> Portal FondoUne</div>
   <div class="sb-item" style="margin-left:auto;"><div class="sb-dot idle"></div> FondoUne — Portal Crédito Inteligente</div>
 </div>
 
 <script>
 // ── NAVIGATION ──
 let currentStep = 1;
-const steps = [1,2,3,4,5];
+const steps = [1,2,3,4];
 
 function goTo(n) {
-  steps.forEach(i => {
+  [1,2,3,4].forEach(i => {
     const el = document.getElementById('s'+i);
     if (el) el.classList.add('hidden');
     const pt = document.getElementById('pt'+i);
@@ -903,7 +776,9 @@ function goTo(n) {
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
   poblarDatosAsociado(n);
-  if (n === 4) startValidation();
+  if (n === 2) buildLineaGrid();
+  if (n === 3) startValidation();
+  if (n === 4) buildResult();
 }
 
 // ── POBLAR DATOS DEL ASOCIADO EN TODOS LOS PASOS ──
@@ -946,7 +821,7 @@ function poblarDatosAsociado(paso) {
   }
 
   // Paso 3 — Nómina desde sesión
-  if (paso === 3 && nomina) {
+  if (paso === 2 && nomina) {
     set('nom-basico',      fmt(nomina.basico));
     set('nom-devengado',   fmt(nomina.devengado || nomina.basico));
     set('nom-deducciones', fmt(nomina.deducciones || nomina.cuotaAporte));
@@ -967,7 +842,7 @@ function poblarDatosAsociado(paso) {
   }
 
   // Paso 5 — Resultado con datos reales
-  if (paso === 5 && nomina) {
+  if (paso === 4 && nomina) {
     const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
     const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
     const plazo  = parseInt(plazoS.replace(' meses',''));
@@ -1089,15 +964,14 @@ const KYC = (() => {
   const setRing   = s => { const e = document.getElementById('kyc-ring');   if(e) { e.className = 'kyc-video-ring ' + s; } };
 
   const showScore = (pct, ok) => {
-  const wrap  = document.getElementById('kyc-score-wrap');
-  const badge = document.getElementById('kyc-score-badge');
-  if (!wrap || !badge) return;
-
-  wrap.style.display = 'block';
-  badge.textContent = 'Validación facial capturada';
-  badge.style.background = 'rgba(34,197,94,.2)';
-  badge.style.color = '#22C55E';
-};
+    const wrap  = document.getElementById('kyc-score-wrap');
+    const badge = document.getElementById('kyc-score-badge');
+    if (!wrap || !badge) return;
+    wrap.style.display  = 'block';
+    badge.textContent   = 'Similitud: ' + pct + '%';
+    badge.style.background = ok ? 'rgba(34,197,94,.2)' : 'rgba(248,113,113,.2)';
+    badge.style.color      = ok ? '#22C55E' : '#F87171';
+  };
 
   async function cargarModelos() {
     lvStep(1, 'running', 'Cargando…');
@@ -1205,11 +1079,17 @@ const KYC = (() => {
         return;
       }
 
-      const distancia = faceapi.euclideanDistance(det.descriptor, descriptorCedula);
-const similitudPct = Math.max(0, Math.round((1 - distancia) * 100));
+      const distancia  = faceapi.euclideanDistance(det.descriptor, descriptorCedula);
+      const similitudPct = Math.max(0, Math.round((1 - distancia) * 100));
+      const aprobado   = distancia <= MATCH_SCORE;
 
-showScore(similitudPct, true);
-terminarOK(similitudPct, false);
+      showScore(similitudPct, aprobado);
+
+      if (aprobado) {
+        terminarOK(similitudPct, false);
+      } else {
+        terminarError('No se encontró coincidencia suficiente con la foto de tu cédula (similitud: ' + similitudPct + '%). Intenta con mejor iluminación.');
+      }
     }, 400);
   }
 
