@@ -21,14 +21,16 @@ const FondouneNav = (() => {
   // ── Acceso estricto por rol ───────────────────────────────────────
   // El asociado NO tiene acceso a analista ni gerencia — punto.
   const ACCESO_ROL = {
+    admin:        ['home','solicitud','firma','analista','gerencia','jefe_credito','demo'],
     asociado:     ['home','solicitud','firma'],
     analista:     ['home','analista','firma'],
     gerencia:     ['home','analista','gerencia','firma'],
-    jefe_credito: ['home','analista','gerencia','firma'],
+    jefe_credito: ['home','analista','gerencia','firma','jefe_credito','demo'],
+    director:     ['home','analista','gerencia','firma','director','demo'],
   };
 
   // ── Portales restringidos (los que el asociado nunca debe ver) ────
-  const SOLO_STAFF = ['analista','gerencia'];
+  const SOLO_STAFF = ['admin','analista','gerencia','jefe_credito','director'];
 
   let _portalActual = 'home';
   let _navInyectada = false;
