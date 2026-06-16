@@ -6,6 +6,8 @@
 <title>FondoUne — Firma y Desembolso</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pagare-pdf-generator.js"></script> 
 <style>
 :root{
   --navy:#0B2545;--navy2:#134074;--blue:#1A6BAD;--sky:#4DA8DA;
@@ -534,110 +536,78 @@ function poblarSuccess() {
 
 // ── GENERAR PDF CON EL PAGARÉ REAL ────────────────────
 function descargarPagarePDF() {
-  if (typeof window.jspdf === 'undefined') {
-    showToast('Librería PDF no cargada aún, intenta en un momento.', 'warn');
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const d = window._pagareData || {};
-  const doc = new jsPDF({ unit: 'mm', format: 'letter' });
-  const L = 20, R = 195, W = R - L;
-  let y = 20;
+  const u = (typeof FondouneSession !== 'undefined')
+    ? (FondouneSession.getUser() || {})
+    : {};
 
-  const line  = (txt, size=10, bold=false, center=false) => {
-    doc.setFontSize(size);
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    const x = center ? 107 : L;
-    const lines = doc.splitTextToSize(txt, W);
-    lines.forEach(l => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.text(l, x, y, center ? { align: 'center' } : {});
-      y += size * 0.45;
-    });
-    y += 1;
+  const d = window._pagareData || {};
+
+  const meses = [
+    'enero','febrero','marzo','abril','mayo','junio',
+    'julio','agosto','septiembre','octubre','noviembre','diciembre'
+  ];
+
+  const fechaPrimeraCuota = d.primCuota instanceof Date
+    ? d.primCuota
+    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  const datos = {
+    // Datos del deudor principal
+    nombreDeudor: (u.name || d.nombre || '').toUpperCase(),
+    tipoIdDeudor: 'CC',
+    numIdDeudor: u.id || d.cedula || '',
+    ciudadDeudor: d.ciudad || 'Medellín',
+
+    // Datos del codeudor
+    nombreCodeudor: '',
+    tipoIdCodeudor: '',
+    numIdCodeudor: '',
+
+    // Condiciones del crédito
+    valorLetras: d.montoLetras || '',
+    valorNumeros: d.monto ? Number(d.monto).toLocaleString('es-CO') : '',
+    numeroCuotas: String(d.plazo || d.cuotas || ''),
+    periodicidad: 'mensuales',
+    valorCuotaLetras: d.cuotaLetras || '',
+    valorCuotaNumeros: d.cuota ? Math.round(d.cuota).toLocaleString('es-CO') : '',
+    diaPrimeraCuota: String(fechaPrimeraCuota.getDate()),
+    mesPrimeraCuota: meses[fechaPrimeraCuota.getMonth()],
+    anioPrimeraCuota: String(fechaPrimeraCuota.getFullYear()),
+    tasaEA: d.tasaEA || '18.90%',
+    tasaNA: d.tasaNA || '17.28%',
+
+    // Datos del pagaré
+    numeroPagare: d.nroPagare || ('PAG-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4)),
+    ciudadOtorgamiento: d.ciudad || 'Medellín',
+    hashFirma: d.hash || '',
+    nroTransaccion: d.txid || d.nroTx || '',
+    fechaFirma: new Date().toLocaleDateString('es-CO'),
+    horaDia: new Date().toLocaleString('es-CO')
   };
 
-  const gap = (mm=4) => { y += mm; };
-
-  // Encabezado
-  line('FONDO DE EMPLEADOS UNE - "FONDOUNE"', 12, true, true);
-  line('PAGARÉ A LA ORDEN Nro. ' + (d.nroPagare?.split('-').pop() || '___'), 11, true, true);
-  gap();
-
-  // Cuerpo
-  line('Yo, ' + (d.nombre||'___') + ', mayor de edad y domiciliado(a) en la ciudad de ' + (d.ciudad||'Medellín') + ', identificado(a) con cédula de ciudadanía No. ' + ((d.cedula||'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')) + ', por medio del presente pagaré hago constar que pagaré solidaria, incondicional e indivisiblemente a la orden del FONDO DE EMPLEADOS DE UNE "FONDOUNE", identificado con NIT 811018807-8, o a quien represente sus derechos, todos los valores estipulados en este título valor.');
-  gap(2);
-
-  line('PRIMERA. Valor.', 10, true); y -= 2;
-  line(' La suma de ' + numALetras(d.monto||0) + ' ($ ' + Number(d.monto||0).toLocaleString('es-CO') + ',00), la cual pagaré solidariamente.');
-  gap(2);
-
-  line('SEGUNDA. Amortización.', 10, true); y -= 2;
-  line(' El deudor se obliga a pagar la suma descrita en ' + (d.plazo||'__') + ' cuotas mensuales por un valor de ' + numALetras(Math.round(d.cuota||0)) + ' ($ ' + Number(Math.round(d.cuota||0)).toLocaleString('es-CO') + ',00) cada una, la primera el día ' + (d.primCuota?.getDate()||'__') + ' del mes de ' + (d.primCuota ? MESES[d.primCuota.getMonth()] : '___') + ' del año ' + (d.primCuota?.getFullYear()||'____') + ' y así sucesivamente cada mes hasta completar las ' + (d.plazo||'__') + ' cuotas.');
-  gap(2);
-
-  line('TERCERA. Interés de Plazo.', 10, true); y -= 2;
-  line(' Pagaré interés mensual corriente a la tasa del 14.03% efectivo anual (E.A.), equivalente a la tasa 1.1% efectivo mensual (E.M.), los cuales serán cubiertos mes vencido.');
-  gap(2);
-
-  line('CUARTA. Interés de Mora.', 10, true); y -= 2;
-  line(' En caso de mora pagaré una tasa equivalente a la tasa máxima legal permitida por la entidad competente y que rija al momento de verificarse la mora.');
-  gap(2);
-
-  line('QUINTA. Vencimiento Anticipado.', 10, true); y -= 2;
-  line(' Autorizo al FONDO DE EMPLEADOS DE UNE "FONDOUNE" para extinguir el plazo y exigir el pago de la totalidad del saldo insoluto si ocurriere: A) Mora en una o más cuotas; B) Pérdida de la calidad de asociado; C) Causales del Reglamento de Crédito; D) Embargo de bienes por terceros; E) Desmejora de garantías; F) No pago de pólizas de seguro; G) No destinar el crédito para los fines solicitados.');
-  gap(2);
-
-  line('SEXTA. Autorización de descuentos.', 10, true); y -= 2;
-  line(' El obligado autorizo irrevocablemente al pagador de la empresa en la cual laboro para que descuente del salario mensual la cuota establecida en la cláusula segunda, y en caso de extinción del plazo, para que se descuente de mi salario, prestaciones sociales o cualquier suma que me corresponda.');
-  gap(2);
-
-  line('SÉPTIMA. Costos.', 10, true); y -= 2;
-  line(' Los gastos del otorgamiento de este pagaré y los costos de cobranza judicial o extrajudicial serán a cargo del deudor. Los honorarios de abogado corresponderán al 30% del saldo insoluto.');
-  gap(2);
-
-  line('OCTAVA.', 10, true); y -= 2;
-  line(' El recibo de abonos parciales no implica novación. Los suscriptores se confieren poder recíprocamente en caso de refinanciación, prórroga o reestructuración de la deuda.');
-  gap(2);
-
-  line('NOVENA.', 10, true); y -= 2;
-  line(' El presente pagaré respalda y garantiza obligaciones pasadas, presentes y futuras por mí constituidas con el FONDO DE EMPLEADOS DE UNE "FONDOUNE".');
-  gap(4);
-
-  line('En constancia se firma en la ciudad de ' + (d.ciudad||'Medellín') + ' a los ' + (d.primCuota ? new Date().getDate() : '__') + ' días del mes de ' + MESES[new Date().getMonth()] + ' del año ' + new Date().getFullYear() + '.');
-  gap(14);
-
-  // Firmas
-  doc.setDrawColor(11, 37, 69);
-  doc.line(L, y, L+70, y);
-  doc.line(R-70, y, R, y);
-  y += 4;
-  line('Deudor Principal', 9, true);
-  doc.text('Deudor(a) Solidario(a)', R - 70, y - 4);
-  line(d.nombre || '___', 9);
-  line('C.C. ' + ((d.cedula||'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')), 9);
-  gap(8);
-
-  // Pie de firma electrónica
-  doc.setFillColor(247, 244, 238);
-  doc.roundedRect(L, y, W, 20, 2, 2, 'F');
-  y += 5;
-  line('Firmado electrónicamente — Ley 527 de 1999 · Decreto 2364 de 2012', 8, true);
-  line('Nro. Transacción: ' + (d.txid||'—') + '  ·  Fecha: ' + (d.tsNow||'—'), 8);
-  line('SHA-256: ' + (d.hash||'—'), 8);
-
-  doc.save('Pagare_FondoUne_' + (d.nroPagare||'DOC') + '.pdf');
-  showToast('Pagaré descargado correctamente.', 'ok');
+  if (typeof generarPagarePDF === 'function') {
+    generarPagarePDF(datos);
+    showToast('Pagaré descargado correctamente.', 'ok');
+  } else {
+    showToast('Error: el generador de PDF no está cargado.', 'error');
+    console.error('No se encontró generarPagarePDF(). Verifica que pagare-pdf-generator.js esté cargado.');
+  }
 }
 
 // ── AUTO-INICIALIZAR AL CARGAR ─────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Sesión demo si no hay ninguna (GitHub Pages)
   if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
-    FondouneSession.initUser({ id: 'demo', name: 'Asociado FondoUne', role: 'asociado', initials: 'AF', ciudad: 'Medellín' });
+    FondouneSession.initUser({
+      id: 'demo',
+      name: 'Asociado FondoUne',
+      role: 'asociado',
+      initials: 'AF',
+      ciudad: 'Medellín'
+    });
   }
+
   poblarPagare();
-});
+}); 
 
 // ── CANVAS FIRMA ──────────────────────────────────────
 const canvas = document.getElementById('firma-canvas');
