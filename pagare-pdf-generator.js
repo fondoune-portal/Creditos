@@ -58,65 +58,6 @@ window.generarPagarePDF = function(datos) {
   }
 
   const { jsPDF } = window.jspdf || { jsPDF: window.jsPDF };
-  function normalizarNumero(valor) {
-    if (valor == null) return 0;
-    if (typeof valor === 'number') return valor;
-    return Number(String(valor).replace(/\./g, '').replace(/,/g, '.').replace(/[^\d.-]/g, '')) || 0;
-  }
-  
-  function numeroALetras(num) {
-    num = Math.floor(normalizarNumero(num));
-  
-    const unidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-    const especiales = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
-    const decenas = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
-    const centenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
-  
-    function convertirMenor100(n) {
-      if (n < 10) return unidades[n];
-      if (n >= 10 && n < 20) return especiales[n - 10];
-      if (n >= 20 && n < 30) return n === 20 ? 'veinte' : 'veinti' + unidades[n - 20];
-      const d = Math.floor(n / 10);
-      const u = n % 10;
-      return u === 0 ? decenas[d] : `${decenas[d]} y ${unidades[u]}`;
-    }
-  
-    function convertirMenor1000(n) {
-      if (n === 0) return '';
-      if (n === 100) return 'cien';
-      if (n < 100) return convertirMenor100(n);
-      const c = Math.floor(n / 100);
-      const resto = n % 100;
-      return resto === 0 ? centenas[c] : `${centenas[c]} ${convertirMenor100(resto)}`;
-    }
-  
-    function convertirNumero(n) {
-      if (n === 0) return 'cero';
-      if (n < 1000) return convertirMenor1000(n);
-      if (n < 1000000) {
-        const miles = Math.floor(n / 1000);
-        const resto = n % 1000;
-        const milesTxt = miles === 1 ? 'mil' : `${convertirMenor1000(miles)} mil`;
-        return resto === 0 ? milesTxt : `${milesTxt} ${convertirMenor1000(resto)}`;
-      }
-      if (n < 1000000000) {
-        const millones = Math.floor(n / 1000000);
-        const resto = n % 1000000;
-        const millonesTxt = millones === 1 ? 'un millón' : `${convertirNumero(millones)} millones`;
-        return resto === 0 ? millonesTxt : `${millonesTxt} ${convertirNumero(resto)}`;
-      }
-      return String(n);
-    }
-  
-    return `${convertirNumero(num)} pesos`;
-  }
-  
-  datos.ciudadDeudor = datos.ciudadDeudor || 'Medellín';
-  datos.ciudadOtorgamiento = datos.ciudadOtorgamiento || 'Medellín';
-  
-  if (!datos.valorCuotaLetras && datos.valorCuotaNumeros) {
-    datos.valorCuotaLetras = numeroALetras(datos.valorCuotaNumeros).toUpperCase();
-  } 
 
   // ── Constantes de diseño ───────────────────────────────────────────────────
   const PAGE_W   = 216;   // mm — carta
@@ -194,20 +135,11 @@ window.generarPagarePDF = function(datos) {
   y += 2;
 
   // ── PRIMERA. Valor ─────────────────────────────────────────────────────────
-  doc.setFont("helvetica", "bold");
-  doc.text("PRIMERA. Valor.", MAR_L, y);
-  const p1Lbl = "PRIMERA. Valor.";
-  const p1LblW = doc.getTextWidth(p1Lbl);
-  doc.setFont("helvetica", "normal");
-  const p1Resto =
-    ` La suma de ${datos.valorLetras || "_____________________________"} ` +
+  // Un solo render limpio — sin superposiciones
+  const p1Text =
+    `PRIMERA. Valor. La suma de ${datos.valorLetras || "___________________________________________________"} ` +
     `($ ${datos.valorNumeros || "________________"}), la cual pagare(mos) solidariamente.`;
-  y = wrappedText(doc, doc.splitTextToSize(p1LblW + p1Resto, COL_W).join(""), MAR_L, y, COL_W, LINE_H);
-
-  // texto limpio con bold intercalado
-  doc.setFont("helvetica", "normal");
-  const p1Text = ` La suma de ${datos.valorLetras || "___________________________________________________"} ($ ${datos.valorNumeros || "________________"}), la cual pagare(mos) solidariamente.`;
-  y = wrappedText(doc, "PRIMERA. Valor." + p1Text, MAR_L, y - LINE_H, COL_W, LINE_H);
+  y = wrappedText(doc, p1Text, MAR_L, y, COL_W, LINE_H);
   y += 2;
 
   // ── SEGUNDA. Amortización ──────────────────────────────────────────────────
