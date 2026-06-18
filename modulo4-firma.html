@@ -585,6 +585,32 @@ function descargarPagarePDF() {
     horaDia: new Date().toLocaleString('es-CO')
   };
 
+  // ── Capturar firma del canvas o firma escrita ──────────────
+  let firmaBase64 = null;
+
+  if (currentFirmaMode === 'draw' && hasSig) {
+    // Firma dibujada: exportar el canvas como PNG transparente
+    const firmaCanvas = document.getElementById('firma-canvas');
+    firmaBase64 = firmaCanvas.toDataURL('image/png');
+  } else if (currentFirmaMode === 'type' && typedSignature.trim().length > 0) {
+    // Firma escrita: renderizarla en un canvas auxiliar y exportar
+    const aux    = document.createElement('canvas');
+    const scale  = 3; // alta resolución
+    aux.width    = 400 * scale;
+    aux.height   = 100 * scale;
+    const axCtx  = aux.getContext('2d');
+    axCtx.scale(scale, scale);
+    axCtx.fillStyle    = 'transparent';
+    axCtx.clearRect(0, 0, 400, 100);
+    axCtx.font         = "italic 44px 'DM Serif Display', Georgia, serif";
+    axCtx.fillStyle    = '#0B2545';
+    axCtx.textBaseline = 'middle';
+    axCtx.fillText(typedSignature.trim(), 20, 50);
+    firmaBase64 = aux.toDataURL('image/png');
+  }
+
+  datos.firmaBase64 = firmaBase64;
+
   if (typeof generarPagarePDF === 'function') {
     generarPagarePDF(datos);
     showToast('Pagaré descargado correctamente.', 'ok');

@@ -307,6 +307,19 @@ window.generarPagarePDF = function(datos) {
   const COL2_X = PAGE_W / 2 + 5;
   const FIRMA_W = COL_W / 2 - 5;
 
+  // Imagen de firma dibujada/escrita (Página 1 — Deudor principal)
+  const IMG_H  = 18;   // altura reservada para la imagen (mm)
+  const IMG_W  = FIRMA_W;
+
+  if (datos.firmaBase64) {
+    try {
+      // Fondo blanco para que el trazo navy se vea sobre el PDF
+      doc.setFillColor(255, 255, 255);
+      doc.rect(COL1_X, y - IMG_H, IMG_W, IMG_H, 'F');
+      doc.addImage(datos.firmaBase64, 'PNG', COL1_X, y - IMG_H, IMG_W, IMG_H);
+    } catch(e) { /* si falla el addImage se muestra solo la línea */ }
+  }
+
   doc.setLineWidth(0.2);
   doc.setDrawColor(...BLACK);
   doc.line(COL1_X, y, COL1_X + FIRMA_W, y);
@@ -449,6 +462,15 @@ window.generarPagarePDF = function(datos) {
   y += 10;
 
   // Firmas — Página 2
+  // Imagen de firma (misma firma del deudor principal, Carta de Instrucciones)
+  if (datos.firmaBase64) {
+    try {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(COL1_X, y - IMG_H, IMG_W, IMG_H, 'F');
+      doc.addImage(datos.firmaBase64, 'PNG', COL1_X, y - IMG_H, IMG_W, IMG_H);
+    } catch(e) {}
+  }
+
   doc.setLineWidth(0.2);
   doc.setDrawColor(...BLACK);
   doc.line(COL1_X, y, COL1_X + FIRMA_W, y);
