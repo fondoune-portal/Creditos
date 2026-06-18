@@ -1,164 +1,294 @@
 /**
- * FondoUne — Generador de Pagaré PDF  v2.0
+ * FondoUne — Generador de Pagaré PDF  v3.0
  * ─────────────────────────────────────────────────────────────────
- * Genera las páginas 1 y 2 del pagaré con texto mixto bold/normal
- * respetando exactamente las negritas del documento oficial.
+ * - Texto 100% justificado (párrafos normales y mixtos bold/normal)
+ * - Firma del canvas insertada correctamente sobre la línea
+ * - Saltos de página automáticos con reserva de espacio para firma
  *
  * DEPENDENCIA: jsPDF 2.5.x (UMD)
  *   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
  *   <script src="pagare-pdf-generator.js"></script>
  *
  * USO:
- *   generarPagarePDF({ nombreDeudor, numIdDeudor, ... });
+ *   generarPagarePDF({ nombreDeudor, numIdDeudor, firmaBase64, ... });
  */
 
 window.generarPagarePDF = function(datos) {
 
   if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
-    console.error("jsPDF no está cargado.");
-    return null;
+    console.error("jsPDF no está cargado."); return null;
   }
   const { jsPDF } = window.jspdf || { jsPDF: window.jsPDF };
 
-  // ── Constantes ─────────────────────────────────────────────────
-  const PAGE_W  = 216;
+  // ── Constantes de página y tipografía ──────────────────────────
+  const PAGE_W  = 216;          // mm — Carta Colombia
   const PAGE_H  = 279;
-  const MAR_L   = 20;
-  const MAR_R   = 20;
-  const COL_W   = PAGE_W - MAR_L - MAR_R;
-  const FS      = 8.5;    // font size cuerpo
-  const FS_SM   = 7.5;    // font size pie/firmas
-  const FS_TIT  = 11;     // font size títulos
-  const LH      = 4.5;    // interlineado mm
-  const BLACK   = [0,0,0];
-  const GRAY    = [100,100,100];
+  const MAR_L   = 20;           // margen izquierdo
+  const MAR_R   = 20;           // margen derecho
+  const MAR_TOP = 18;           // Y inicial del contenido
+  const MAR_BOT = 15;           // espacio reservado al pie
+  const COL_W   = PAGE_W - MAR_L - MAR_R;   // 176 mm — ancho útil
+  const FS      = 8.5;          // tamaño cuerpo
+  const FS_SM   = 7.5;          // tamaño pie/firmas
+  const FS_TIT  = 11;           // tamaño títulos
+  const LH      = 4.8;          // interlineado mm (ligeramente mayor para legibilidad)
+  const FIRMA_H = 20;           // altura reservada para imagen de firma
+  const BLACK   = [0, 0, 0];
+  const GRAY    = [100, 100, 100];
 
-  const doc = new jsPDF({ unit:"mm", format:"letter", orientation:"portrait" });
+  const doc = new jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+
+  // ── Ancho del espacio " " en fuente normal FS ──────────────────
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(FS);
+  const SPACE_W = doc.getTextWidth(' ');
 
   // ══════════════════════════════════════════════════════════════
-  // MOTOR DE TEXTO MIXTO
-  // Renderiza un array de segmentos [{t:'texto', b:true/false}]
-  // con wrap automático y negritas inline.
-  // Retorna la nueva Y después del último renglón.
+  // MOTOR JUSTIFICADO PARA TEXTO PURO (sin mezcla de estilos)
   // ══════════════════════════════════════════════════════════════
-  function renderMixto(segmentos, xStart, yStart, maxW) {
+  function txtJ(text, x, y, maxW, bold) {
+    bold = !!bold;
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFontSize(FS);
+    doc.setTextColor(...BLACK);
 
-    // 1. Tokenizar en palabras preservando el flag bold de cada una
-    const palabras = [];
-    segmentos.forEach(seg => {
-      seg.t.split(/(\s+)/).forEach(tok => {
-        if (tok === '') return;
-        palabras.push({ w: tok, b: !!seg.b });
-      });
-    });
+    const words = text.replace(/\s+/g, ' ').trim().split(' ');
+    const lines = [];
+    let cur = [];
 
-    // 2. Armar renglones: acumular palabras hasta que superen maxW
-    const renglones = [];
-    let renglon = [];
-    let anchoAcum = 0;
-
-    palabras.forEach(p => {
-      // medir la palabra con su propio peso
-      doc.setFont('helvetica', p.b ? 'bold' : 'normal');
-      doc.setFontSize(FS);
-      const pw = doc.getTextWidth(p.w);
-
-      if (anchoAcum + pw > maxW && renglon.length > 0) {
-        renglones.push(renglon);
-        renglon = [];
-        anchoAcum = 0;
+    words.forEach(w => {
+      const test = [...cur, w].join(' ');
+      if (doc.getTextWidth(test) <= maxW + 0.01) {
+        cur.push(w);
+      } else {
+        if (cur.length) lines.push(cur);
+        cur = [w];
       }
-      renglon.push({ ...p, pw });
-      anchoAcum += pw;
     });
-    if (renglon.length > 0) renglones.push(renglon);
+    if (cur.length) lines.push(cur);
 
-    // 3. Dibujar renglón a renglón
-    let y = yStart;
-    renglones.forEach(ren => {
-      // Omitir espacios iniciales
-      while (ren.length && ren[0].w.trim() === '') ren.shift();
-
-      let x = xStart;
-      ren.forEach(p => {
-        doc.setFont('helvetica', p.b ? 'bold' : 'normal');
-        doc.setFontSize(FS);
-        doc.setTextColor(...BLACK);
-        doc.text(p.w, x, y);
-        x += p.pw;
-      });
+    lines.forEach((lw, li) => {
+      const isLast = li === lines.length - 1;
+      if (isLast || lw.length === 1) {
+        // última línea: alineada a la izquierda
+        doc.text(lw.join(' '), x, y);
+      } else {
+        // líneas intermedias: justificado
+        const textW = lw.reduce((a, w) => {
+          doc.setFont('helvetica', bold ? 'bold' : 'normal');
+          return a + doc.getTextWidth(w);
+        }, 0);
+        const gap = (maxW - textW) / (lw.length - 1);
+        let cx = x;
+        lw.forEach((w, wi) => {
+          doc.setFont('helvetica', bold ? 'bold' : 'normal');
+          doc.setFontSize(FS);
+          doc.text(w, cx, y);
+          cx += doc.getTextWidth(w) + (wi < lw.length - 1 ? gap : 0);
+        });
+      }
       y += LH;
     });
-
     return y;
   }
 
-  // ── Helpers simples ────────────────────────────────────────────
-  // Texto 100% normal (sin mezcla)
-  function txtN(text, x, y, maxW) {
-    doc.setFont('helvetica','normal');
+  // ══════════════════════════════════════════════════════════════
+  // MOTOR JUSTIFICADO PARA TEXTO MIXTO BOLD/NORMAL
+  // Recibe: [ {t: 'texto', b: true/false}, ... ]
+  // ══════════════════════════════════════════════════════════════
+  function renderMixto(segs, x, y, maxW) {
+
+    // 1. Tokenizar en palabras con su estilo
+    const words = [];
+    segs.forEach(seg => {
+      seg.t.split(/\s+/).forEach(tok => {
+        if (!tok) return;
+        words.push({ w: tok, b: !!seg.b });
+      });
+    });
+
+    // Medir palabra según su estilo
+    function ww(p) {
+      doc.setFont('helvetica', p.b ? 'bold' : 'normal');
+      doc.setFontSize(FS);
+      return doc.getTextWidth(p.w);
+    }
+
+    // 2. Armar renglones respetando maxW y separadores reales
+    const lines = [];
+    let cur = [], curW = 0;
+
+    words.forEach(p => {
+      const pw   = ww(p);
+      const need = cur.length === 0 ? pw : curW + SPACE_W + pw;
+      if (need > maxW + 0.01 && cur.length > 0) {
+        lines.push(cur);
+        cur = []; curW = 0;
+      }
+      cur.push({ ...p, pw });
+      curW = cur.length === 1 ? pw : curW + SPACE_W + pw;
+    });
+    if (cur.length) lines.push(cur);
+
+    // 3. Dibujar con justificado
+    lines.forEach((lw, li) => {
+      const isLast = li === lines.length - 1;
+
+      if (isLast || lw.length === 1) {
+        // Última línea → izquierda
+        let cx = x;
+        lw.forEach((p, wi) => {
+          doc.setFont('helvetica', p.b ? 'bold' : 'normal');
+          doc.setFontSize(FS);
+          doc.setTextColor(...BLACK);
+          doc.text(p.w, cx, y);
+          cx += p.pw + (wi < lw.length - 1 ? SPACE_W : 0);
+        });
+      } else {
+        // Líneas intermedias → justificado
+        const textW = lw.reduce((a, p) => a + p.pw, 0);
+        const gap   = (maxW - textW) / (lw.length - 1);
+        let cx = x;
+        lw.forEach((p, wi) => {
+          doc.setFont('helvetica', p.b ? 'bold' : 'normal');
+          doc.setFontSize(FS);
+          doc.setTextColor(...BLACK);
+          doc.text(p.w, cx, y);
+          cx += p.pw + (wi < lw.length - 1 ? gap : 0);
+        });
+      }
+      y += LH;
+    });
+
+    // Restaurar normal
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(FS);
-    doc.setTextColor(...BLACK);
-    const lines = doc.splitTextToSize(text, maxW);
-    lines.forEach((l,i) => doc.text(l, x, y + i*LH));
-    return y + lines.length * LH;
+    return y;
   }
 
-  // Texto 100% bold
-  function txtB(text, x, y, maxW, fs) {
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(fs || FS);
-    doc.setTextColor(...BLACK);
-    const lines = doc.splitTextToSize(text, maxW);
-    lines.forEach((l,i) => doc.text(l, x, y + i*LH));
-    return y + lines.length * LH;
+  // ── Helpers de estilo ──────────────────────────────────────────
+  const n = t => ({ t, b: false });
+  const b = t => ({ t, b: true  });
+
+  // Cuántas líneas ocupa un bloque de texto (estimación)
+  function estimarLineas(segs, maxW) {
+    const txt = segs.map(s => s.t).join(' ');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(FS);
+    return doc.splitTextToSize(txt, maxW).length;
   }
 
-  // Segmentos abreviados
-  const n  = t => ({ t, b: false });
-  const b  = t => ({ t, b: true  });
+  // Salto de página si no cabe `needed` mm
+  let pagActual = 1;
+  function checkY(y, needed) {
+    if (y + needed > PAGE_H - MAR_BOT) {
+      doc.addPage();
+      pagActual++;
+      return MAR_TOP;
+    }
+    return y;
+  }
 
-  // ── Shorthand para datos del crédito ─────────────────────────
+  // ── Datos del crédito ──────────────────────────────────────────
   const D = {
-    nombre:     datos.nombreDeudor        || '___________________________________',
-    ciudad:     datos.ciudadDeudor        || '________________',
-    valLetras:  datos.valorLetras         || '___________________________________________________',
-    valNum:     datos.valorNumeros        || '________________',
-    cuotas:     datos.numeroCuotas        || '___',
-    period:     datos.periodicidad        || '___________',
-    cuotaLet:   datos.valorCuotaLetras    || '________________________________',
-    cuotaNum:   datos.valorCuotaNumeros   || '________________',
-    dia1:       datos.diaPrimeraCuota     || '___',
-    mes1:       datos.mesPrimeraCuota     || '_________',
-    anio1:      datos.anioPrimeraCuota    || '______',
-    tasaEA:     datos.tasaEA              || '_____',
-    tasaNA:     datos.tasaNA              || '_____',
-    pagNro:     datos.numeroPagare        || '_______',
-    ciudadOtorg:datos.ciudadOtorgamiento  || 'Medellín',
-    tipoId:     datos.tipoIdDeudor        || 'CC',
-    numId:      datos.numIdDeudor         || '',
-    nombreCode: datos.nombreCodeudor      || '',
-    tipoIdCode: datos.tipoIdCodeudor      || '',
-    numIdCode:  datos.numIdCodeudor       || '',
-    nroTx:      datos.nroTransaccion      || '',
+    nombre:      datos.nombreDeudor       || '___________________________________',
+    ciudad:      datos.ciudadDeudor       || '________________',
+    valLetras:   datos.valorLetras        || '___________________________________________________',
+    valNum:      datos.valorNumeros       || '________________',
+    cuotas:      datos.numeroCuotas       || '___',
+    period:      datos.periodicidad       || 'mensuales',
+    cuotaLet:    datos.valorCuotaLetras   || '________________________________',
+    cuotaNum:    datos.valorCuotaNumeros  || '________________',
+    dia1:        datos.diaPrimeraCuota    || '___',
+    mes1:        datos.mesPrimeraCuota    || '_________',
+    anio1:       datos.anioPrimeraCuota   || '______',
+    tasaEA:      datos.tasaEA             || '_____',
+    tasaNA:      datos.tasaNA             || '_____',
+    pagNro:      datos.numeroPagare       || '_______',
+    ciudadOtorg: datos.ciudadOtorgamiento || 'Medellín',
+    tipoId:      datos.tipoIdDeudor       || 'CC',
+    numId:       datos.numIdDeudor        || '',
+    nombreCode:  datos.nombreCodeudor     || '',
+    tipoIdCode:  datos.tipoIdCodeudor     || '',
+    numIdCode:   datos.numIdCodeudor      || '',
+    nroTx:       datos.nroTransaccion     || '',
+    firma64:     datos.firmaBase64        || null,
   };
 
-  // ══════════════════════════════════════════════════════════════
+  // Columnas de firma
+  const COL1_X = MAR_L;
+  const COL2_X = PAGE_W / 2 + 5;
+  const FIRMA_W = COL_W / 2 - 5;
+
+  // ── Función: dibujar bloque de firmas ──────────────────────────
+  function dibujarFirmas(y) {
+    // Reservar espacio: FIRMA_H para imagen + línea + datos
+    y = checkY(y, FIRMA_H + 4 + LH * 4);
+
+    // Imagen de firma del deudor (si existe)
+    if (D.firma64) {
+      try {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(COL1_X, y, FIRMA_W, FIRMA_H, 'F');
+        doc.addImage(D.firma64, 'PNG', COL1_X, y, FIRMA_W, FIRMA_H);
+      } catch(e) { /* sin imagen, solo se muestra la línea */ }
+    }
+
+    const lineY = y + FIRMA_H;
+
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(...BLACK);
+    doc.line(COL1_X, lineY, COL1_X + FIRMA_W, lineY);   // deudor
+    doc.line(COL2_X, lineY, COL2_X + FIRMA_W, lineY);   // codeudor
+
+    let yD = lineY + 4;   // Y datos deudor
+    let yC = lineY + 4;   // Y datos codeudor
+
+    doc.setFontSize(FS_SM);
+    doc.setTextColor(...BLACK);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Deudor Principal',       COL1_X, yD);
+    doc.text('Deudor(a) Solidario(a)', COL2_X, yC);
+    yD += LH; yC += LH;
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Nombre: ${D.nombre}`,                      COL1_X, yD);
+    doc.text(`Nombre: ${D.nombreCode}`,                  COL2_X, yC);
+    yD += LH; yC += LH;
+    doc.text(`Tipo de Identificación: ${D.tipoId}`,      COL1_X, yD);
+    doc.text(`Tipo de Identificación: ${D.tipoIdCode}`,  COL2_X, yC);
+    yD += LH; yC += LH;
+    doc.text(`Número de identificación: ${D.numId}`,     COL1_X, yD);
+    doc.text(`Número de identificación: ${D.numIdCode}`, COL2_X, yC);
+    yD += LH;
+
+    return yD;
+  }
+
+  // ── Pie de página ──────────────────────────────────────────────
+  function piePagina() {
+    doc.setFontSize(6.5);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Firmado con Firma Plus, Nro. Transacción: ${D.nroTx}`, MAR_L, PAGE_H - 8);
+    doc.setTextColor(...BLACK);
+  }
+
+  // ════════════════════════════════════════════════════════════════
   // PÁGINA 1 — PAGARÉ
-  // ══════════════════════════════════════════════════════════════
-  let y = 18;
+  // ════════════════════════════════════════════════════════════════
+  let y = MAR_TOP;
 
   // Encabezado
-  doc.setFont('helvetica','bold');
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(FS_TIT);
   doc.setTextColor(...BLACK);
-  doc.text('FONDO DE EMPLEADOS UNE - "FONDOUNE"', PAGE_W/2, y, {align:'center'});
+  doc.text('FONDO DE EMPLEADOS UNE - "FONDOUNE"', PAGE_W / 2, y, { align: 'center' });
   y += 6;
-  doc.text(`PAGARÉ A LA ORDEN Nro. ${D.pagNro}`, PAGE_W/2, y, {align:'center'});
+  doc.text(`PAGARÉ A LA ORDEN Nro. ${D.pagNro}`, PAGE_W / 2, y, { align: 'center' });
   y += 10;
 
-  // Párrafo de identificación (sin negrita interna)
-  y = txtN(
+  // Párrafo de identificación
+  y = txtJ(
     `Yo(nosotros) ${D.nombre}, mayor(es) de edad y domiciliado(s) en la ciudad de ${D.ciudad}, ` +
     `identificado(s) como aparece al pie de mi(nuestras) firma(s), por medio del presente pagaré ` +
     `hago(hacemos) constar que pagare(mos) solidaria, incondicional e indivisiblemente a la orden del ` +
@@ -169,27 +299,26 @@ window.generarPagarePDF = function(datos) {
     `satisfacción a título de mutuo solidario, con intereses y de acuerdo a las siguientes cláusulas:`,
     MAR_L, y, COL_W
   );
-  y += 2;
+  y += 3;
 
-  // PRIMERA — negrita en título y valores del crédito
+  // PRIMERA
+  y = checkY(y, LH * 3);
   y = renderMixto([
     b('PRIMERA. Valor. '),
-    n(`La suma de ${D.valLetras} `),
-    b(`($ ${D.valNum})`),
+    n(`La suma de ${D.valLetras} `), b(`($ ${D.valNum})`),
     n(', la cual pagare(mos) solidariamente.'),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
-  // SEGUNDA — negrita en título, valores del crédito y referencias de cláusula
+  // SEGUNDA
+  y = checkY(y, LH * 7);
   y = renderMixto([
     b('SEGUNDA. Amortización. '),
     n(`El(los) deudor(es) se obliga(n) a pagar la suma descrita en `),
     b(D.cuotas), n(` cuotas `), b(D.period),
-    n(` por un valor de `), b(D.cuotaLet),
-    n(` (`), b(`$ ${D.cuotaNum}`), n(`) cada una, `),
+    n(` por un valor de `), b(D.cuotaLet), n(` (`), b(`$ ${D.cuotaNum}`), n(`) cada una, `),
     n(`la primera la pagare(mos) el día `), b(D.dia1),
-    n(` del mes de `), b(D.mes1),
-    n(` del año `), b(D.anio1),
+    n(` del mes de `), b(D.mes1), n(` del año `), b(D.anio1),
     n(` y así sucesivamente y sin interrupción cada mes hasta completar las `),
     b(D.cuotas), n(` cuotas. `),
     n(`Todo pago que se reciba se aplicará, salvo pacto en contrario, a: impuestos, gastos, costas, `),
@@ -199,30 +328,32 @@ window.generarPagarePDF = function(datos) {
     n(`intereses, que no tenga expreso el destino de dicho pago, sean aplicados, en primer lugar, a `),
     n(`los intereses adeudados y, en segundo orden, a capital con destino a la disminución del plazo.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
-  // TERCERA — negrita en título y tasas
+  // TERCERA
+  y = checkY(y, LH * 3);
   y = renderMixto([
     b('TERCERA. Interés de Plazo. '),
     n(`Pagare(mos) interés mensual corriente a la tasa del `),
     b(D.tasaEA), n(` efectivo anual (E.A), equivalente a la tasa `),
     b(D.tasaNA), n(` nominal anual (N.A) los cuales serán cubiertos mes vencido.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
   // CUARTA
+  y = checkY(y, LH * 3);
   y = renderMixto([
     b('CUARTA. Interés de Mora. '),
     n(`En caso de mora pagare(mos) una tasa equivalente a la tasa máxima legal permitida `),
     n(`por la entidad competente y que rija al momento de verificarse la mora.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
-  // QUINTA — negrita en título, nombre del fondo y letras A-G
+  // QUINTA
+  y = checkY(y, LH * 8);
   y = renderMixto([
     b('QUINTA. Vencimiento Anticipado. '),
-    n(`Autorizo(amos) al `),
-    b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
+    n(`Autorizo(amos) al `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
     n(` o cualquier otro tenedor legítimo del presente título valor para extinguir el plazo o plazos `),
     n(`que se estipulen para el pago del crédito al cual se refiere este documento y exigir `),
     n(`extrajudicialmente o judicialmente el pago de la totalidad del saldo insoluto, más los intereses `),
@@ -231,17 +362,17 @@ window.generarPagarePDF = function(datos) {
     n(`crédito otorgado; `), b('B)'), n(` Por la pérdida de la calidad de asociado del deudor en el `),
     b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n(`; `),
     b('C)'), n(` Por las causales previstas en el Reglamento de Crédito o en los Estatutos del `),
-    b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
-    n(` en el momento de la suscripción del pagaré; `),
+    b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n(` en el momento de la suscripción del pagaré; `),
     b('D)'), n(` En caso de que el deudor sea demandado o le sean embargados bienes por persona `),
     n(`distinta al `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n(`; `),
     b('E)'), n(` En caso de desmejorar las garantías por mí(nosotros) constituida(s); `),
     b('F)'), n(` En caso de no pagar las pólizas de seguro todo riesgo de las garantías; `),
     b('G)'), n(` En caso de no destinar los desembolsos de crédito para los fines solicitados.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
-  // SEXTA — negrita en título, nombre del fondo y "Autorización de descuentos"
+  // SEXTA
+  y = checkY(y, LH * 8);
   y = renderMixto([
     b('SEXTA. Autorización de descuentos. '),
     n(`El(los) obligado(s) en el presente título autorizo(amos) irrevocablemente al pagador de la `),
@@ -253,13 +384,13 @@ window.generarPagarePDF = function(datos) {
     n(`en virtud del contrato de trabajo y su liquidación, así también por conceptos como bonificaciones y `),
     n(`todo concepto constitutivo de salario, bonificaciones no constitutivas de salario, comisiones, `),
     n(`honorarios, vacaciones, liquidación, y cualquier otro concepto pagadero con ocasión de la prestación `),
-    n(`de sus servicios y las mismas sean entregadas al `),
-    b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
+    n(`de sus servicios y las mismas sean entregadas al `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
     n(` o su tenedor legítimo para que sean abonadas al presente pagaré.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
   // SÉPTIMA
+  y = checkY(y, LH * 6);
   y = renderMixto([
     b('SÉPTIMA. Costos. '),
     n(`Los gastos que se ocasionen por el otorgamiento de este pagaré, así como las costas y gastos de `),
@@ -270,9 +401,10 @@ window.generarPagarePDF = function(datos) {
     n(`cuales serán exigibles a partir de la fecha de vencimiento de este pagaré y ocasionarán intereses de `),
     n(`mora a la tasa máxima legal permitida a partir de la fecha en que sean exigibles.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
   // OCTAVA
+  y = checkY(y, LH * 5);
   y = renderMixto([
     b('OCTAVA. '),
     n(`En el caso de presentarse alguna(s) de la(s) causal(es) previstas para la extinción del plazo y `),
@@ -282,89 +414,47 @@ window.generarPagarePDF = function(datos) {
     n(`aclaración de las condiciones pactadas, manteniéndose la solidaridad, para lo cual cualquiera nosotros `),
     n(`podrá suscribir nuevos acuerdos en nombre y representación de los demás.`),
   ], MAR_L, y, COL_W);
-  y += 2;
+  y += 3;
 
   // NOVENA
+  y = checkY(y, LH * 3);
   y = renderMixto([
     b('NOVENA. '),
     n(`El presente pagaré respalda y garantiza obligaciones pasadas, presentes y futuras por mí(nosotros) `),
-    n(`constituidas con el `),
-    b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n('.'),
+    n(`constituidas con el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n('.'),
   ], MAR_L, y, COL_W);
-  y += 4;
+  y += 5;
 
-  // Lugar y fecha
-  if (y + 40 > PAGE_H - 15) { doc.addPage(); y = 18; }
-  y = txtN(
+  // Lugar y fecha de firma
+  y = checkY(y, LH * 2 + FIRMA_H + 4 + LH * 4 + 10);
+  y = txtJ(
     `En constancia se firma en la ciudad de ${D.ciudadOtorg} a los días del mes de ` +
     `${D.mes1} del año ${D.anio1}.`,
     MAR_L, y, COL_W
   );
-  y += 10;
+  y += 8;
 
   // Bloque de firmas — Página 1
-  const COL1_X = MAR_L;
-  const COL2_X = PAGE_W / 2 + 5;
-  const FIRMA_W = COL_W / 2 - 5;
+  y = dibujarFirmas(y);
 
-  // Imagen de firma dibujada/escrita (Página 1 — Deudor principal)
-  const IMG_H  = 18;   // altura reservada para la imagen (mm)
-  const IMG_W  = FIRMA_W;
+  // Pie página 1
+  piePagina();
 
-  if (datos.firmaBase64) {
-    try {
-      // Fondo blanco para que el trazo navy se vea sobre el PDF
-      doc.setFillColor(255, 255, 255);
-      doc.rect(COL1_X, y - IMG_H, IMG_W, IMG_H, 'F');
-      doc.addImage(datos.firmaBase64, 'PNG', COL1_X, y - IMG_H, IMG_W, IMG_H);
-    } catch(e) { /* si falla el addImage se muestra solo la línea */ }
-  }
-
-  doc.setLineWidth(0.2);
-  doc.setDrawColor(...BLACK);
-  doc.line(COL1_X, y, COL1_X + FIRMA_W, y);
-  doc.line(COL2_X, y, COL2_X + FIRMA_W, y);
-  y += 4;
-
-  doc.setFontSize(FS_SM);
-  doc.setTextColor(...BLACK);
-
-  doc.setFont('helvetica','bold');  doc.text('Deudor Principal', COL1_X, y);
-  doc.setFont('helvetica','bold');  doc.text('Deudor(a) Solidario(a)', COL2_X, y);
-  let y2 = y + LH;
-  y += LH;
-
-  doc.setFont('helvetica','normal');
-  doc.text(`Nombre: ${D.nombre}`,              COL1_X, y);
-  doc.text(`Nombre: ${D.nombreCode}`,          COL2_X, y2);
-  y += LH; y2 += LH;
-  doc.text(`Tipo de Identificación: ${D.tipoId}`,  COL1_X, y);
-  doc.text(`Tipo de Identificación: ${D.tipoIdCode}`, COL2_X, y2);
-  y += LH; y2 += LH;
-  doc.text(`Número de identificación: ${D.numId}`,    COL1_X, y);
-  doc.text(`Número de identificación: ${D.numIdCode}`,COL2_X, y2);
-
-  // Pie pág 1
-  doc.setFontSize(6.5);
-  doc.setTextColor(...GRAY);
-  doc.text(`Firmado con Firma Plus, Nro. Transacción: ${D.nroTx}`, MAR_L, PAGE_H - 8);
-
-  // ══════════════════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════
   // PÁGINA 2 — CARTA DE INSTRUCCIONES
-  // ══════════════════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════
   doc.addPage();
-  y = 18;
+  y = MAR_TOP;
 
-  // Encabezado
-  doc.setFont('helvetica','bold');
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(FS_TIT);
   doc.setTextColor(...BLACK);
-  doc.text('FONDO DE EMPLEADOS UNE - "FONDOUNE"', PAGE_W/2, y, {align:'center'});
+  doc.text('FONDO DE EMPLEADOS UNE - "FONDOUNE"', PAGE_W / 2, y, { align: 'center' });
   y += 6;
-  doc.text(`CARTA DE INSTRUCCIONES PARA DILIGENCIAR PAGARÉ No. ${D.pagNro}`, PAGE_W/2, y, {align:'center'});
+  doc.text(`CARTA DE INSTRUCCIONES PARA DILIGENCIAR PAGARÉ No. ${D.pagNro}`, PAGE_W / 2, y, { align: 'center' });
   y += 10;
 
-  // Párrafo introductorio — nombre del FONDO en negrita
+  // Párrafo introductorio
   y = renderMixto([
     n(`Yo(nosotros) `), b(D.nombre),
     n(`, identificado(s) como aparece al pie de mi(nuestras) firma(s), obrando en calidad de deudor y `),
@@ -378,128 +468,77 @@ window.generarPagarePDF = function(datos) {
     n(`, diligencie los espacios en blanco del respectivo pagaré, para lo cual debe ceñirse a las `),
     n(`siguientes instrucciones:`),
   ], MAR_L, y, COL_W);
-  y += 4;
+  y += 5;
 
-  // Lista numerada — el nombre del FONDO en negrita dentro de cada ítem
+  // Lista numerada
   const instrucciones = [
-    [
-      n(`El `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
+    [ n(`El `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
       n(` o su tenedor legítimo podrá llenar los espacios en blanco del Pagaré identificado anteriormente, `),
       n(`cuando se presente una o varias de las circunstancias de exigibilidad contenidas en la `),
-      b('Cláusula Quinta'), n(` del texto del Pagaré objeto de esta autorización.`),
-    ],
+      b('Cláusula Quinta'), n(` del texto del Pagaré objeto de esta autorización.`) ],
     [ n(`El número del pagare será el que determine el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n('.') ],
     [ n(`El espacio correspondiente a nombres de(l) (los) deudor(es) será diligenciado con el nombre de los suscribientes.`) ],
-    [
-      n(`El espacio en blanco correspondiente a la ciudad de domicilio de(l) (los) deudor(es) será diligenciado `),
+    [ n(`El espacio en blanco correspondiente a la ciudad de domicilio de(l) (los) deudor(es) será diligenciado `),
       n(`con la ciudad que haya informado el deudor principal del crédito en el formulario de afiliación al Fondo de `),
       n(`Empleados o en otro documento en el cual se pueda observar el lugar de residencia del mencionado deudor. `),
-      n(`A falta de información relacionada, será la ciudad de `), b('Medellín'), n('.'),
-    ],
-    [
-      n(`En el espacio correspondiente al valor del pagaré, en la `), b('cláusula primera'),
+      n(`A falta de información relacionada, será la ciudad de `), b('Medellín'), n('.') ],
+    [ n(`En el espacio correspondiente al valor del pagaré, en la `), b('cláusula primera'),
       n(`, se debe diligenciar el valor desembolsado al deudor por el `),
       b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
-      n(` o con el valor de la refinanciación, si éste último fuere mayor a la suma desembolsada inicialmente.`),
-    ],
-    [
-      n(`La `), b('cláusula segunda'), n(` será diligenciada en su orden así: número de cuotas pactadas en el `),
+      n(` o con el valor de la refinanciación, si éste último fuere mayor a la suma desembolsada inicialmente.`) ],
+    [ n(`La `), b('cláusula segunda'), n(` será diligenciada en su orden así: número de cuotas pactadas en el `),
       n(`crédito o en la refinanciación, si a ello hubiere lugar; periodicidad de la cuota si es quincenal o `),
       n(`mensual, pactadas en el crédito o en la refinanciación, si a ello hubiere lugar; valor de la cuota en `),
       n(`letras pactadas en el crédito o en la refinanciación, si a ello hubiere lugar; valor de la cuota en `),
       n(`números; día, mes y año de pago de la primera cuota pactada en el crédito o en la refinanciación, `),
       n(`si a ello hubiere lugar; el último espacio se diligenciará con el número total de cuotas pactadas `),
-      n(`en el crédito o en la refinanciación, si a ello hubiere lugar.`),
-    ],
-    [
-      n(`Los espacios correspondientes a las tasas de interés determinados en la `), b('cláusula tercera'),
+      n(`en el crédito o en la refinanciación, si a ello hubiere lugar.`) ],
+    [ n(`Los espacios correspondientes a las tasas de interés determinados en la `), b('cláusula tercera'),
       n(` serán diligenciados conforme a las tasas con las que se haya aprobado el crédito o sus respectivas `),
-      n(`modificaciones acordadas por las partes.`),
-    ],
-    [
-      n(`El espacio en blanco correspondiente a la ciudad de otorgamiento del pagaré será diligenciado en la `),
-      n(`ciudad donde tenga domicilio principal el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n('.'),
-    ],
-    [
-      n(`Para llenar el Pagaré, el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
-      n(` no requiere dar aviso a los firmantes del mismo.`),
-    ],
-    [
-      n(`Hago(hacemos) expreso reconocimiento de que conservo copia de estas instrucciones y documentos, `),
-      n(`y conozco plenamente el contenido de los mismos.`),
-    ],
+      n(`modificaciones acordadas por las partes.`) ],
+    [ n(`El espacio en blanco correspondiente a la ciudad de otorgamiento del pagaré será diligenciado en la `),
+      n(`ciudad donde tenga domicilio principal el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'), n('.') ],
+    [ n(`Para llenar el Pagaré, el `), b('FONDO DE EMPLEADOS DE UNE "FONDOUNE"'),
+      n(` no requiere dar aviso a los firmantes del mismo.`) ],
+    [ n(`Hago(hacemos) expreso reconocimiento de que conservo copia de estas instrucciones y documentos, `),
+      n(`y conozco plenamente el contenido de los mismos.`) ],
   ];
 
   instrucciones.forEach((segs, idx) => {
-    // Estimar altura del ítem para salto de página
-    const textoEstimado = segs.map(s => s.t).join('');
-    const linesEst = doc.splitTextToSize(textoEstimado, COL_W - 7);
-    if (y + linesEst.length * LH + 35 > PAGE_H - 15) {
-      doc.addPage(); y = 18;
-    }
+    const lineas = estimarLineas(segs, COL_W - 7);
+    y = checkY(y, lineas * LH + 4);
 
-    // Número del ítem en bold
-    doc.setFont('helvetica','bold');
+    // Número del ítem
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(FS);
     doc.setTextColor(...BLACK);
     const numeral = `${idx + 1}.  `;
     const nW = doc.getTextWidth(numeral);
     doc.text(numeral, MAR_L, y);
 
-    // Texto del ítem con negritas, indentado
+    // Texto justificado del ítem, indentado bajo el número
     const yFin = renderMixto(segs, MAR_L + nW, y, COL_W - nW);
-    y = yFin + 2;
+    y = yFin + 3;
   });
 
   // Cierre carta
   y += 3;
-  if (y + 35 > PAGE_H - 15) { doc.addPage(); y = 18; }
-  y = txtN(
+  y = checkY(y, LH * 2 + FIRMA_H + 4 + LH * 4 + 10);
+  y = txtJ(
     `En constancia de lo anterior se firma esta carta de instrucciones en duplicado a los ` +
     `días del mes de ${D.mes1} del año ${D.anio1}.`,
     MAR_L, y, COL_W
   );
-  y += 10;
+  y += 8;
 
-  // Firmas — Página 2
-  // Imagen de firma (misma firma del deudor principal, Carta de Instrucciones)
-  if (datos.firmaBase64) {
-    try {
-      doc.setFillColor(255, 255, 255);
-      doc.rect(COL1_X, y - IMG_H, IMG_W, IMG_H, 'F');
-      doc.addImage(datos.firmaBase64, 'PNG', COL1_X, y - IMG_H, IMG_W, IMG_H);
-    } catch(e) {}
-  }
+  // Bloque de firmas — Página 2
+  dibujarFirmas(y);
 
-  doc.setLineWidth(0.2);
-  doc.setDrawColor(...BLACK);
-  doc.line(COL1_X, y, COL1_X + FIRMA_W, y);
-  doc.line(COL2_X, y, COL2_X + FIRMA_W, y);
-  y += 4; y2 = y;
-
-  doc.setFontSize(FS_SM);
-  doc.setFont('helvetica','bold');
-  doc.text('Deudor Principal',       COL1_X, y);
-  doc.text('Deudor(a) Solidario(a)', COL2_X, y2);
-  y += LH; y2 += LH;
-
-  doc.setFont('helvetica','normal');
-  doc.text(`Nombre: ${D.nombre}`,                     COL1_X, y);
-  doc.text(`Nombre: ${D.nombreCode}`,                 COL2_X, y2);
-  y += LH; y2 += LH;
-  doc.text(`Tipo de Identificación: ${D.tipoId}`,     COL1_X, y);
-  doc.text(`Tipo de Identificación: ${D.tipoIdCode}`, COL2_X, y2);
-  y += LH; y2 += LH;
-  doc.text(`Número de identificación: ${D.numId}`,    COL1_X, y);
-  doc.text(`Número de identificación: ${D.numIdCode}`,COL2_X, y2);
-
-  // Pie pág 2
-  doc.setFontSize(6.5);
-  doc.setTextColor(...GRAY);
-  doc.text(`Firmado con Firma Plus, Nro. Transacción: ${D.nroTx}`, MAR_L, PAGE_H - 8);
+  // Pie página 2
+  piePagina();
 
   // ── Guardar ───────────────────────────────────────────────────
-  const archivo = `Pagare_FondoUne_${(D.numId || 'asociado').replace(/\s/g,'_')}.pdf`;
+  const archivo = `Pagare_FondoUne_${(D.numId || 'asociado').replace(/\s/g, '_')}.pdf`;
   doc.save(archivo);
   return doc;
 };
