@@ -622,14 +622,14 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn" onclick="goTo(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn primary" onclick="goTo(2)">Enviar a validación <i class="ti ti-cpu"></i></button>
+        <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="btn primary" onclick="goTo(3)">Enviar a validación <i class="ti ti-cpu"></i></button>
       </div>
     </div>
   </div>
 
   <!-- ═══ PASO 4: VALIDACIÓN IA ═══ -->
-  <div id="s2" class="hidden">
+  <div id="s3" class="hidden">
     <div class="card">
       <div class="card-eyebrow">Paso 3 de 4 — Motor de Decisión IA</div>
       <div class="card-title">Validación automática en curso</div>
@@ -661,14 +661,14 @@
       <div id="v-done" class="hidden">
         <div class="note ok"><i class="ti ti-check"></i> Todas las validaciones completadas exitosamente. Sin alertas. Perfil de riesgo: <strong>BAJO</strong>.</div>
         <div class="btn-row">
-          <button class="btn primary" onclick="goTo(2)">Ver resultado <i class="ti ti-arrow-right"></i></button>
+          <button class="btn primary" onclick="goTo(4)">Ver resultado <i class="ti ti-arrow-right"></i></button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ═══ PASO 5: RESULTADO ═══ -->
-  <div id="s2" class="hidden">
+  <div id="s4" class="hidden">
     <div class="card">
       <div class="card-eyebrow">Paso 4 de 4 — Resultado</div>
 
@@ -1288,7 +1288,28 @@ function updateSummary() {
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
-// ── RESET ──
+// ── BUILD RESULT (Paso 4) — puebla hero y metrics-band con datos reales ──
+function buildResult() {
+  const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+  const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
+  const plazo  = parseInt(plazoS.replace(' meses','')) || 24;
+  const tasa   = 0.011;
+  const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+
+  const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
+
+  // Metrics-band: monto / cuota / plazo reales en lugar de los valores fijos del HTML
+  const metrics = document.querySelectorAll('#s4 .metric .m-val');
+  if (metrics[0]) metrics[0].textContent = fmt(monto);
+  if (metrics[1]) metrics[1].textContent = fmt(cuota);
+  if (metrics[2]) metrics[2].textContent = plazo + ' meses';
+
+  // poblarDatosAsociado(4) ya calcula capacidad/% compromiso y los escribe
+  // en #res-capacidad / #res-porcentaje / #res-email-mask — solo nos
+  // asegura de que se ejecute con los datos más recientes del formulario.
+  poblarDatosAsociado(4);
+}
+
 function resetPortal() {
   location.reload();
 }
