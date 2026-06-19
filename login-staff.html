@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FondoUne — Acceso Interno</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="session.js"></script>
+<style>
+:root{
+  --bg:#07090F; --bg2:#0E1420; --bg3:#141D2E; --bg4:#1B2640;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#DCE6F5; --text2:#A8BAD8; --muted:#5A6E8C;
+  --gold:#C8973A; --gold2:#EDB84E; --gold3:#F5CF80;
+  --green:#059669; --green2:#22C55E; --green3:#86EFAC;
+  --red:#DC2626; --red2:#F87171;
+  --amber:#D97706; --amber2:#F59E0B; --amber3:#FCD34D;
+  --blue:#2563EB; --blue2:#4B8EF8;
+  --purple:#7C3AED; --purple2:#A78BFA;
+  --r:10px; --r-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+
+/* Fondo animado */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(37,99,235,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(200,151,58,.07) 0%,transparent 60%);
+  pointer-events:none;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    0deg, transparent, transparent 40px,
+    rgba(255,255,255,.012) 40px, rgba(255,255,255,.012) 41px
+  ),
+  repeating-linear-gradient(
+    90deg, transparent, transparent 40px,
+    rgba(255,255,255,.012) 40px, rgba(255,255,255,.012) 41px
+  );
+  pointer-events:none;
+}
+
+/* ── Contenedor ── */
+.shell{
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  padding:1.5rem 1.25rem;
+  display:flex;flex-direction:column;gap:0;
+  max-height:100vh;overflow-y:auto;
+}
+
+/* ── Marca superior ── */
+.topbrand{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:2rem;
+}
+.brand-logo{display:flex;align-items:center;gap:9px}
+.logo-mark{
+  width:30px;height:30px;border-radius:8px;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-mark i{font-size:16px;color:var(--bg)}
+.logo-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.staff-pill{
+  font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(200,151,58,.15);border:1px solid rgba(200,151,58,.25);
+  color:var(--gold2);padding:3px 10px;border-radius:20px;
+}
+
+/* ── Tarjeta de login ── */
+.card{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-lg);padding:2rem;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--blue2),var(--gold2));
+}
+
+.card-eyebrow{
+  font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.card-title{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:700;
+  color:var(--text);margin-bottom:6px;
+}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+
+/* ── Roles disponibles ── */
+.roles-strip{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;
+  margin-bottom:1.5rem;
+}
+.role-opt{
+  border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 12px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg3);
+}
+.role-opt:hover{border-color:var(--border2);background:var(--bg4)}
+.role-opt.active{border-color:var(--gold);background:rgba(200,151,58,.08)}
+.role-opt i{font-size:18px}
+.role-opt .rl{font-size:11px;font-weight:500;color:var(--text)}
+.role-opt .rs{font-size:10px;color:var(--muted);margin-top:1px}
+.ro-analista i{color:var(--purple2)}
+.ro-gerencia i{color:var(--gold2)}
+
+/* ── Formulario ── */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:11px;font-weight:500;color:var(--text2)}
+.field input{
+  padding:10px 13px;font-size:13px;font-family:'IBM Plex Sans',sans-serif;
+  border:1px solid var(--border2);border-radius:var(--r);
+  background:var(--bg3);color:var(--text);outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.field input:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(200,151,58,.12);
+  background:var(--bg4);
+}
+.field input::placeholder{color:var(--muted)}
+
+/* ── Botón ── */
+.btn-login{
+  width:100%;padding:11px;border-radius:var(--r);
+  background:var(--gold);color:var(--bg);border:none;
+  font-size:13px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:4px;
+}
+.btn-login:hover{background:var(--gold2);box-shadow:0 4px 20px rgba(200,151,58,.3)}
+.btn-login:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Alerta ── */
+.alert{
+  border-radius:var(--r);padding:10px 12px;font-size:12px;
+  display:none;align-items:flex-start;gap:8px;margin-bottom:12px;
+  line-height:1.5;
+}
+.alert.show{display:flex}
+.alert.err{
+  background:rgba(220,38,38,.1);border:1px solid rgba(248,113,113,.2);
+  color:var(--red2);
+}
+.alert.warn{
+  background:rgba(217,119,6,.1);border:1px solid rgba(252,211,77,.2);
+  color:var(--amber3);
+}
+.alert i{font-size:15px;flex-shrink:0;margin-top:1px}
+
+/* ── Separador ── */
+.divider{
+  display:flex;align-items:center;gap:10px;
+  margin:1.25rem 0;font-size:10px;color:var(--muted);
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ── OTP step ── */
+.otp-step{display:none}
+.otp-step.show{display:block}
+.otp-info{
+  font-size:12px;color:var(--text2);line-height:1.6;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px 12px;margin-bottom:12px;
+}
+.otp-row{display:flex;gap:8px;justify-content:center;margin:1rem 0}
+.otp-box{
+  width:44px;height:52px;text-align:center;
+  font-size:20px;font-family:'IBM Plex Mono',monospace;font-weight:500;
+  border:1px solid var(--border2);border-radius:var(--r);
+  background:var(--bg3);color:var(--text);outline:none;
+  transition:border-color .15s;
+}
+.otp-box:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,151,58,.15)}
+.otp-hint{text-align:center;font-size:11px;color:var(--muted)}
+.otp-hint span{color:var(--gold2);font-family:'IBM Plex Mono',monospace;font-weight:500}
+
+/* ── Link volver ── */
+.back-link{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--muted);cursor:pointer;
+  margin-top:1.25rem;justify-content:center;
+  transition:color .15s;background:none;border:none;font-family:inherit;
+}
+.back-link:hover{color:var(--text)}
+
+/* ── Loading overlay ── */
+.loading{
+  position:fixed;inset:0;background:rgba(7,9,15,.9);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;z-index:100;
+}
+.loading.show{display:flex}
+.spin{animation:spin 1s linear infinite;font-size:30px;color:var(--gold2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:13px;color:var(--text2)}
+
+/* ── Aviso portal asociado ── */
+.portal-link{
+  text-align:center;margin-top:1.25rem;
+  font-size:11px;color:var(--muted);
+}
+.portal-link a{color:var(--blue2);text-decoration:none;font-weight:500}
+.portal-link a:hover{color:var(--text)}
+
+/* ── Footer ── */
+.footer{
+  text-align:center;margin-top:1.5rem;
+  font-size:10px;color:var(--muted);line-height:1.7;
+  font-family:'IBM Plex Mono',monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <i class="ti ti-loader spin"></i>
+  <p id="loading-msg">Verificando credenciales…</p>
+</div>
+
+<div class="shell">
+
+  <!-- Marca -->
+  <div class="topbrand">
+    <div class="brand-logo">
+      <div class="logo-mark"><i class="ti ti-building-bank"></i></div>
+      <span class="logo-name">FondoUne</span>
+    </div>
+    <div class="staff-pill"><i class="ti ti-shield-lock" style="font-size:10px"></i> Acceso interno</div>
+  </div>
+
+  <div class="card">
+    <div class="card-eyebrow">Portal operativo</div>
+    <div class="card-title">Inicio de sesión</div>
+    <div class="card-sub">Este portal es exclusivo para el equipo interno del fondo. Si eres asociado, usa el <a href="index.html" style="color:var(--gold2);text-decoration:none">portal de créditos</a>.</div>
+
+    <!-- Selector de rol -->
+    <div class="roles-strip" id="roles-strip">
+      <div class="role-opt ro-analista active" id="opt-analista" onclick="selectRole('analista')">
+        <i class="ti ti-user-check"></i>
+        <div><div class="rl">Analista</div><div class="rs">Gestión de solicitudes</div></div>
+      </div>
+      <div class="role-opt ro-gerencia" id="opt-gerencia" onclick="selectRole('gerencia')">
+        <i class="ti ti-crown"></i>
+        <div><div class="rl">Gerencia</div><div class="rs">Panel ejecutivo</div></div>
+      </div>
+    </div>
+
+    <!-- Alertas -->
+    <div class="alert err" id="alert-err"><i class="ti ti-alert-circle"></i><span id="err-txt"></span></div>
+    <div class="alert warn" id="alert-warn"><i class="ti ti-alert-triangle"></i><span id="warn-txt"></span></div>
+
+    <!-- PASO 1: Credenciales -->
+    <div id="step-creds">
+      <div class="field">
+        <label>Correo institucional</label>
+        <input type="email" id="inp-email" placeholder="nombre@fondoune.com.co"
+          autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="inp-pass" placeholder="••••••••"
+          autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        <i class="ti ti-login"></i> Ingresar al sistema
+      </button>
+      <div class="divider">Accesos demo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        <button onclick="demoAccess('analista')" style="padding:9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+          <i class="ti ti-user-check" style="color:var(--purple2);font-size:14px"></i> Demo Analista
+        </button>
+        <button onclick="demoAccess('gerencia')" style="padding:9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+          <i class="ti ti-crown" style="color:var(--gold2);font-size:14px"></i> Demo Gerencia
+        </button>
+      </div>
+    </div>
+
+    <!-- PASO 2: OTP 2FA -->
+    <div class="otp-step" id="step-otp">
+      <div class="otp-info">
+        <i class="ti ti-device-mobile" style="font-size:14px;margin-right:4px"></i>
+        Ingresa el código de 6 dígitos enviado al celular registrado de <strong id="otp-email-hint"></strong>
+      </div>
+      <div class="otp-row">
+        <input class="otp-box" maxlength="1" id="o1" oninput="otpMove(1)" onkeydown="otpBack(event,1)">
+        <input class="otp-box" maxlength="1" id="o2" oninput="otpMove(2)" onkeydown="otpBack(event,2)">
+        <input class="otp-box" maxlength="1" id="o3" oninput="otpMove(3)" onkeydown="otpBack(event,3)">
+        <input class="otp-box" maxlength="1" id="o4" oninput="otpMove(4)" onkeydown="otpBack(event,4)">
+        <input class="otp-box" maxlength="1" id="o5" oninput="otpMove(5)" onkeydown="otpBack(event,5)">
+        <input class="otp-box" maxlength="1" id="o6" oninput="otpMove(6)" onkeydown="otpBack(event,6)">
+      </div>
+      <div class="otp-hint">Código demo: <span id="otp-demo-code"></span> · Expira en <span id="otp-timer">4:59</span></div>
+      <button class="btn-login" style="margin-top:1rem" onclick="verifyOTP()">
+        <i class="ti ti-lock-check"></i> Verificar código
+      </button>
+      <button class="back-link" onclick="backToCreds()">
+        <i class="ti ti-arrow-left" style="font-size:14px"></i> Volver a credenciales
+      </button>
+    </div>
+
+  </div>
+
+  <div class="portal-link">
+    ¿Eres asociado? <a href="index.html">Ingresa al portal de solicitudes →</a>
+  </div>
+
+  <div class="footer">
+    FondoUne © 2025 · Acceso restringido<br>
+    TLS 1.3 · Ley 1581/2012 · Solo personal autorizado
+  </div>
+
+</div>
+
+<script>
+// ── USUARIOS STAFF DEMO ───────────────────────────────────────────
+const STAFF_USERS = {
+  analista: {
+    email:'analista.maria@fondoune.com.co', pass:'Staff2025!',
+    id:'31598742', name:'María Rodríguez', role:'analista',
+    empresa:'FondoUne', cargo:'Analista de Crédito', initials:'MR',
+    destino:'modulo2-analista.html', otp:'284719',
+  },
+  gerencia: {
+    email:'gerencia.diego@fondoune.com.co', pass:'Staff2025!',
+    id:'71234891', name:'Diego Montoya', role:'gerencia',
+    empresa:'FondoUne', cargo:'Jefe de Crédito', initials:'DM',
+    destino:'modulo3-gerencia.html', otp:'531806',
+  },
+};
+
+let selectedRole = 'analista';
+let pendingUser  = null;
+let otpTimer     = null;
+
+// ── SELECCIÓN DE ROL ──────────────────────────────────────────────
+function selectRole(rol) {
+  selectedRole = rol;
+  document.getElementById('opt-analista').classList.toggle('active', rol==='analista');
+  document.getElementById('opt-gerencia').classList.toggle('active', rol==='gerencia');
+  // Pre-rellenar email demo
+  const usr = STAFF_USERS[rol];
+  const emailInp = document.getElementById('inp-email');
+  if (!emailInp.value || Object.values(STAFF_USERS).some(u => u.email === emailInp.value)) {
+    emailInp.value = usr.email;
+  }
+}
+
+// Auto-precargar email del analista al abrir
+window.addEventListener('DOMContentLoaded', () => {
+  // Si ya hay sesión de staff, redirigir directo
+  const user = FondouneSession.getUser();
+  if (user?.role && ['analista','gerencia','jefe_credito'].includes(user.role)) {
+    const dest = STAFF_USERS[user.role]?.destino || 'modulo2-analista.html';
+    setLoading('Retomando sesión…');
+    setTimeout(() => window.location.href = dest, 500);
+    return;
+  }
+  document.getElementById('inp-email').value = STAFF_USERS.analista.email;
+});
+
+// ── LOGIN ─────────────────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('inp-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('inp-pass').value;
+  clearAlerts();
+
+  if (!email) return showErr('Ingresa tu correo institucional.');
+  if (!pass)  return showErr('Ingresa tu contraseña.');
+
+  // Buscar usuario en la lista staff
+  const found = Object.values(STAFF_USERS).find(u => u.email === email);
+
+  // Bloquear si es un email de asociado
+  if (email.endsWith('@une.net.co') || email.endsWith('@tigo.com.co') || email.endsWith('@emtelco.com')) {
+    showWarn('Este portal es exclusivo para personal interno del fondo. Los asociados deben ingresar desde el portal principal.');
+    return;
+  }
+
+  if (!found) {
+    showErr('Correo no registrado en el sistema interno. Contacta al administrador.');
+    return;
+  }
+  if (found.pass !== pass) {
+    showErr('Contraseña incorrecta. Inténtalo de nuevo.');
+    return;
+  }
+
+  // Credenciales correctas → ir al paso OTP
+  pendingUser = found;
+  showOTPStep(found);
+}
+
+// ── OTP ───────────────────────────────────────────────────────────
+function showOTPStep(user) {
+  document.getElementById('step-creds').style.display = 'none';
+  const otp = document.getElementById('step-otp');
+  otp.classList.add('show');
+  document.getElementById('otp-email-hint').textContent = user.email;
+  document.getElementById('otp-demo-code').textContent  = user.otp;
+  startOTPTimer();
+  setTimeout(() => document.getElementById('o1').focus(), 100);
+}
+
+function otpMove(n) {
+  const val = document.getElementById('o'+n).value;
+  if (val && n < 6) document.getElementById('o'+(n+1)).focus();
+  if (n===6 && getOTPValue().length===6) verifyOTP();
+}
+function otpBack(e,n) {
+  if (e.key==='Backspace' && !document.getElementById('o'+n).value && n>1) {
+    document.getElementById('o'+(n-1)).focus();
+  }
+}
+function getOTPValue() {
+  return [1,2,3,4,5,6].map(i => document.getElementById('o'+i).value).join('');
+}
+
+function verifyOTP() {
+  const code = getOTPValue();
+  if (code.length < 6) { showErr('Ingresa los 6 dígitos del código.'); return; }
+  if (code !== pendingUser.otp) { showErr('Código incorrecto. Revisa el mensaje o solicita uno nuevo.'); return; }
+  clearAlerts();
+  finishLogin(pendingUser);
+}
+
+function startOTPTimer() {
+  if (otpTimer) clearInterval(otpTimer);
+  let secs = 299;
+  const el = document.getElementById('otp-timer');
+  otpTimer = setInterval(() => {
+    secs--;
+    const m = Math.floor(secs/60), s = secs%60;
+    el.textContent = m+':'+(s<10?'0':'')+s;
+    if (secs<=0) {
+      clearInterval(otpTimer);
+      el.textContent = 'Expirado';
+      el.style.color = 'var(--red2)';
+    }
+  }, 1000);
+}
+
+function backToCreds() {
+  clearInterval(otpTimer);
+  document.getElementById('step-otp').classList.remove('show');
+  document.getElementById('step-creds').style.display = 'block';
+  clearAlerts();
+  pendingUser = null;
+}
+
+// ── ACCESO DEMO RÁPIDO ────────────────────────────────────────────
+function demoAccess(rol) {
+  const usr = STAFF_USERS[rol];
+  selectRole(rol);
+  document.getElementById('inp-email').value = usr.email;
+  document.getElementById('inp-pass').value  = usr.pass;
+  clearAlerts();
+  // Saltamos OTP en acceso demo para agilizar
+  setLoading(`Accediendo como ${rol==='analista'?'Analista':'Gerencia'}…`);
+  setTimeout(() => finishLogin(usr), 900);
+}
+
+// ── FINALIZAR LOGIN ───────────────────────────────────────────────
+function finishLogin(usr) {
+  FondouneSession.initUser({
+    id:      usr.id,
+    name:    usr.name,
+    email:   usr.email,
+    role:    usr.role,
+    empresa: usr.empresa,
+    cargo:   usr.cargo,
+    initials:usr.initials,
+  });
+  setLoading('Cargando el panel…');
+  FondouneSession.queueNotif(`Bienvenido, ${usr.name.split(' ')[0]} 👋`, 'success');
+  setTimeout(() => window.location.href = usr.destino, 700);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function setLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading').classList.add('show');
+  if(document.getElementById('btn-login')) document.getElementById('btn-login').disabled = true;
+}
+function showErr(msg) {
+  const el = document.getElementById('alert-err');
+  document.getElementById('err-txt').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 6000);
+}
+function showWarn(msg) {
+  const el = document.getElementById('alert-warn');
+  document.getElementById('warn-txt').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 7000);
+}
+function clearAlerts() {
+  document.getElementById('alert-err').classList.remove('show');
+  document.getElementById('alert-warn').classList.remove('show');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FondoUne — Panel Gerencial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --ink:#0D1520;--ink2:#1A2535;--ink3:#243044;--ink4:#2E3D57;
+  --slate:#415470;--slate2:#5A7099;--slate3:#8BA4C8;
+  --paper:#F2F5FA;--paper2:#E8EEF7;--paper3:#D8E3F0;
+  --gold:#B8872A;--gold2:#D4A843;--gold3:#EFC96A;--gold4:#F8E8B5;
+  --emerald:#0A6B45;--emerald2:#12A068;--emerald3:#3ECFA0;
+  --crimson:#8B1A1A;--crimson2:#C0392B;--crimson3:#F07070;
+  --sapphire:#1A3A8B;--sapphire2:#2563EB;--sapphire3:#7EB3F8;
+  --amber:#8B5E0A;--amber2:#D97706;--amber3:#FCD34D;
+  --r:10px;--r-lg:14px;
+  --shadow:0 2px 12px rgba(13,21,32,.08);
+  --shadow-lg:0 8px 40px rgba(13,21,32,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);display:flex;flex-direction:column}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:3px}
+
+/* ── TOPNAV ── */
+.topnav{height:52px;background:var(--ink);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:var(--gold2);display:flex;align-items:center;justify-content:center}
+.logo-mark i{font-size:16px;color:var(--ink)}
+.logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#fff;font-weight:700;letter-spacing:.3px}
+.logo-sep{width:1px;height:18px;background:rgba(255,255,255,.12)}
+.modtag{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);padding:3px 9px;border-radius:4px}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(10,107,69,.25);border:1px solid rgba(62,207,160,.2);padding:4px 10px;border-radius:20px;font-size:10px;color:var(--emerald3);font-family:'JetBrains Mono',monospace}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--emerald3);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-btn{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;position:relative}
+.nav-btn:hover{background:rgba(255,255,255,.12)}
+.nav-btn i{font-size:15px;color:rgba(255,255,255,.5)}
+.pip{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--crimson3);border:1.5px solid var(--ink)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;cursor:pointer}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:210px;background:var(--ink2);display:flex;flex-direction:column;flex-shrink:0;padding:14px 8px;overflow-y:auto}
+.sb-grp{margin-bottom:6px}
+.sb-lbl{font-size:9px;font-weight:600;color:var(--slate2);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px 3px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.sb-item.active{background:rgba(212,168,67,.1);color:var(--gold3)}
+.sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--gold2)}
+.sb-item i{font-size:16px;flex-shrink:0;opacity:.7}
+.sb-item.active i{opacity:1}
+.sb-spacer{flex:1}
+.sb-user{padding:10px;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;align-items:center;gap:8px;margin-top:8px}
+.sb-user .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Playfair Display',serif}
+.sb-user .uname{font-size:11px;color:#fff;font-weight:600}
+.sb-user .urole{font-size:9px;color:var(--slate2)}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:20px 24px 40px}
+
+/* Header */
+.pg-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.pg-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.3px}
+.pg-sub{font-size:12px;color:var(--slate);margin-top:3px}
+.head-r{display:flex;gap:8px;align-items:center}
+.period-sel{background:var(--paper2);border:1px solid var(--paper3);border-radius:var(--r);padding:7px 12px;font-size:12px;font-family:'Outfit',sans-serif;color:var(--ink);cursor:pointer;outline:none}
+
+/* ── KPIS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid var(--paper3);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:default}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-color,var(--sapphire2))}
+.kpi-lbl{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.kpi-lbl i{font-size:13px}
+.kpi-val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:5px}
+.kpi-delta{font-size:10px;display:flex;align-items:center;gap:3px}
+.kpi-spark{position:absolute;bottom:0;right:0;opacity:.12;font-size:52px;line-height:1;color:var(--kpi-color,var(--sapphire2))}
+
+/* ── ROW LAYOUTS ── */
+.row{display:grid;gap:14px;margin-bottom:14px}
+.row-3-2{grid-template-columns:3fr 2fr}
+.row-2-3{grid-template-columns:2fr 3fr}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid var(--paper3);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.card-head{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px}
+.card-title i{font-size:16px;color:var(--slate2)}
+.card-body{padding:14px 18px}
+.card-foot{padding:10px 18px;border-top:1px solid var(--paper2);display:flex;align-items:center;gap:8px}
+
+/* ── CHART: BAR ── */
+.bar-chart{display:flex;gap:6px;align-items:flex-end;height:120px;padding-bottom:20px;position:relative}
+.bar-chart::after{content:'';position:absolute;bottom:20px;left:0;right:0;height:1px;background:var(--paper2)}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;transition:height .8s cubic-bezier(.4,0,.2,1);min-height:3px}
+.bar-lbl{font-size:9px;color:var(--slate);text-align:center;position:absolute;bottom:0;font-family:'JetBrains Mono',monospace}
+.bar-val{font-size:9px;font-weight:600;color:var(--ink);margin-bottom:2px;font-family:'JetBrains Mono',monospace}
+
+/* ── DONUT ── */
+.donut-wrap{display:flex;align-items:center;gap:20px;padding:12px 0}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:8px;flex:1}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.dl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.dl-lbl{color:var(--slate);flex:1}
+.dl-val{font-weight:600;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:11px}
+.dl-pct{font-size:10px;color:var(--slate);font-family:'JetBrains Mono',monospace}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--slate);padding:8px 12px;text-align:left;background:var(--paper);border-bottom:1px solid var(--paper3);font-weight:500}
+.data-table td{font-size:12px;color:var(--ink2);padding:10px 12px;border-bottom:1px solid var(--paper2);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--paper)}
+.data-table td .mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.data-table td .av-sm{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'Playfair Display',serif;margin-right:7px;vertical-align:middle;flex-shrink:0}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px}
+.b-green{background:rgba(10,107,69,.1);color:var(--emerald2)}
+.b-red{background:rgba(139,26,26,.08);color:var(--crimson2)}
+.b-amber{background:rgba(139,94,10,.08);color:var(--amber2)}
+.b-blue{background:rgba(26,58,139,.08);color:var(--sapphire2)}
+.b-gold{background:rgba(184,135,42,.1);color:var(--gold)}
+.b-slate{background:var(--paper2);color:var(--slate)}
+
+/* ── ALERTS ── */
+.alert-list{display:flex;flex-direction:column;gap:8px}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--r);border:1px solid transparent}
+.alert-item.al-red{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.15)}
+.alert-item.al-amber{background:rgba(217,119,6,.06);border-color:rgba(217,119,6,.15)}
+.alert-item.al-blue{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.12)}
+.alert-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.al-red .alert-ico{background:rgba(192,57,43,.12);color:var(--crimson2)}
+.al-amber .alert-ico{background:rgba(217,119,6,.12);color:var(--amber2)}
+.al-blue .alert-ico{background:rgba(37,99,235,.1);color:var(--sapphire2)}
+.alert-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.alert-body{font-size:11px;color:var(--slate);line-height:1.5}
+.alert-time{font-size:9px;color:var(--slate);font-family:'JetBrains Mono',monospace;margin-top:3px}
+
+/* ── ANALYST PERF ── */
+.analyst-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--paper2)}
+.analyst-row:last-child{border-bottom:none}
+.an-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Playfair Display',serif;flex-shrink:0}
+.an-name{font-size:12px;font-weight:600;color:var(--ink);flex:1}
+.an-role{font-size:10px;color:var(--slate)}
+.an-bar-wrap{width:80px}
+.an-bar-track{height:4px;background:var(--paper2);border-radius:2px;overflow:hidden}
+.an-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.an-val{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--ink);min-width:32px;text-align:right}
+
+/* ── TREND CHART ── */
+.line-chart{position:relative;height:80px;margin-top:8px}
+.line-chart svg{width:100%;height:100%}
+
+/* ── RISK MAP ── */
+.risk-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rm-cell{border-radius:var(--r);padding:10px 12px;text-align:center}
+.rm-cell .rml{font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.rm-cell .rmv{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.rm-cell .rms{font-size:10px;margin-top:2px}
+.rm-green{background:rgba(10,107,69,.07);border:1px solid rgba(10,107,69,.15)}
+.rm-green .rmv,.rm-green .rms{color:var(--emerald2)}
+.rm-amber{background:rgba(139,94,10,.07);border:1px solid rgba(139,94,10,.15)}
+.rm-amber .rmv,.rm-amber .rms{color:var(--amber2)}
+.rm-red{background:rgba(139,26,26,.07);border:1px solid rgba(139,26,26,.15)}
+.rm-red .rmv,.rm-red .rms{color:var(--crimson2)}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--paper3);background:var(--paper);color:var(--slate);display:inline-flex;align-items:center;gap:5px;transition:all .12s;font-family:'Outfit',sans-serif}
+.btn:hover{background:var(--paper2);color:var(--ink)}
+.btn-gold{background:var(--gold2);color:#fff;border-color:var(--gold2)}
+.btn-gold:hover{background:var(--gold)}
+.btn-dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn-dark:hover{background:var(--ink2)}
+.btn-revert{background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.2);color:var(--crimson2)}
+.btn-revert:hover{background:rgba(192,57,43,.15)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(13,21,32,.7);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px)}
+.modal{background:#fff;border-radius:var(--r-lg);padding:26px;width:400px;box-shadow:0 24px 80px rgba(13,21,32,.2);animation:mIn .2s ease}
+@keyframes mIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-t{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:8px}
+.modal-b{font-size:12px;color:var(--slate);line-height:1.7;margin-bottom:16px}
+.modal-nota{width:100%;border:1px solid var(--paper3);border-radius:var(--r);padding:9px 11px;font-size:12px;font-family:'Outfit',sans-serif;resize:none;outline:none;line-height:1.6;background:var(--paper);color:var(--ink);margin-bottom:14px;transition:border-color .15s}
+.modal-nota:focus{border-color:var(--gold2)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:#fff;border:1px solid var(--paper3);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;box-shadow:var(--shadow-lg);animation:tIn .25s ease;max-width:320px;color:var(--ink)}
+@keyframes tIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast i{font-size:18px;flex-shrink:0}
+.t-ok i{color:var(--emerald2)}.t-warn i{color:var(--amber2)}.t-err i{color:var(--crimson2)}
+.t-close{margin-left:auto;cursor:pointer;color:var(--slate);padding-left:8px}
+</style>
+  <!-- FondoUne: navegacion y sesion compartida -->
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script>FondouneNav.init('gerencia');</script>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-grp">
+      <div class="sb-lbl">Gerencia</div>
+      <div class="sb-item active"><i class="ti ti-layout-dashboard"></i> Panel ejecutivo</div>
+      <div class="sb-item"><i class="ti ti-chart-line"></i> Cartera activa</div>
+      <div class="sb-item"><i class="ti ti-report-analytics"></i> Reportes</div>
+      <div class="sb-item"><i class="ti ti-alert-triangle"></i> Alertas de riesgo</div>
+    </div>
+    <div class="sb-grp">
+      <div class="sb-lbl">Operativo</div>
+      <div class="sb-item"><i class="ti ti-users"></i> Equipo analistas</div>
+      <div class="sb-item"><i class="ti ti-rotate-clockwise"></i> Reversiones</div>
+      <div class="sb-item"><i class="ti ti-brain"></i> Motor IA — config</div>
+      <div class="sb-item"><i class="ti ti-shield-check"></i> Auditoría</div>
+    </div>
+    <div class="sb-grp">
+      <div class="sb-lbl">Config</div>
+      <div class="sb-item"><i class="ti ti-adjustments-horizontal"></i> Parámetros crédito</div>
+      <div class="sb-item"><i class="ti ti-key"></i> Accesos y roles</div>
+    </div>
+    <div class="sb-spacer"></div>
+    <div class="sb-user">
+      <div class="uav">DM</div>
+      <div><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- PAGE HEADER -->
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Panel Ejecutivo</div>
+        <div class="pg-sub">FondoUne — Cartera de crédito · Lunes 12 de mayo, 2025 · 10:04 a.m.</div>
+      </div>
+      <div class="head-r">
+        <select class="period-sel" onchange="changePeriod(this.value)">
+          <option value="dia">Hoy</option>
+          <option value="semana" selected>Esta semana</option>
+          <option value="mes">Este mes</option>
+          <option value="año">Este año</option>
+        </select>
+        <button class="btn btn-dark" onclick="showToast('Exportando informe ejecutivo PDF…','t-ok','ti-download')"><i class="ti ti-download"></i> Exportar</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi" style="--kpi-color:#2563EB">
+        <div class="kpi-lbl"><i class="ti ti-file-text"></i> Solicitudes</div>
+        <div class="kpi-val" id="kv-sol">142</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>+23% vs sem. anterior</div>
+        <div class="kpi-spark"><i class="ti ti-file-text"></i></div>
+      </div>
+      <div class="kpi" style="--kpi-color:#0A6B45">
+        <div class="kpi-lbl"><i class="ti ti-circle-check"></i> Aprobadas</div>
+        <div class="kpi-val" id="kv-apro">89</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>62.7% tasa</div>
+        <div class="kpi-spark"><i class="ti ti-circle-check"></i></div>
+      </div>
+      <div class="kpi" style="--kpi-color:#B8872A">
+        <div class="kpi-lbl"><i class="ti ti-coin"></i> Desembolsado</div>
+        <div class="kpi-val" id="kv-des">$612M</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>COP esta semana</div>
+        <div class="kpi-spark"><i class="ti ti-coin"></i></div>
+      </div>
+      <div class="kpi" style="--kpi-color:#D97706">
+        <div class="kpi-lbl"><i class="ti ti-clock"></i> Tiempo prom.</div>
+        <div class="kpi-val" id="kv-tiempo">4.2m</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>-96% vs proceso manual</div>
+        <div class="kpi-spark"><i class="ti ti-clock"></i></div>
+      </div>
+      <div class="kpi" style="--kpi-color:#8B1A1A">
+        <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora activa</div>
+        <div class="kpi-val" id="kv-mora" style="color:var(--crimson2)">2.1%</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-down" style="font-size:11px"></i>vs 3.4% industria</div>
+        <div class="kpi-spark"><i class="ti ti-alert-circle"></i></div>
+      </div>
+      <div class="kpi" style="--kpi-color:#1A3A8B">
+        <div class="kpi-lbl"><i class="ti ti-brain"></i> Automatización</div>
+        <div class="kpi-val" style="color:var(--sapphire2)">78%</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>resolución sin analista</div>
+        <div class="kpi-spark"><i class="ti ti-brain"></i></div>
+      </div>
+    </div>
+
+    <!-- ROW 1: Barras + Alertas -->
+    <div class="row row-3-2">
+
+      <!-- Solicitudes por día -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-chart-bar"></i> Solicitudes diarias — semana actual</div>
+          <div style="display:flex;gap:8px">
+            <span class="badge b-blue"><i class="ti ti-circle-filled" style="font-size:7px"></i> Aprobadas</span>
+            <span class="badge b-red"><i class="ti ti-circle-filled" style="font-size:7px"></i> Rechazadas</span>
+            <span class="badge b-amber"><i class="ti ti-circle-filled" style="font-size:7px"></i> Pendientes</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="bar-chart-wrap" style="position:relative">
+            <div class="bar-chart" id="bar-chart"></div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <span style="font-size:11px;color:var(--slate)">Total semana: <strong style="color:var(--ink)">142 solicitudes</strong></span>
+          <span style="font-size:11px;color:var(--slate);margin-left:12px">Monto acumulado: <strong style="color:var(--ink)">$612.400.000</strong></span>
+        </div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-alert-triangle"></i> Alertas activas</div>
+          <span class="badge b-red">3 críticas</span>
+        </div>
+        <div class="card-body">
+          <div class="alert-list">
+            <div class="alert-item al-red">
+              <div class="alert-ico"><i class="ti ti-alert-octagon"></i></div>
+              <div>
+                <div class="alert-title">Alerta SARLAFT — Sol. SOL-2025-0843</div>
+                <div class="alert-body">Rodrigo A. Ríos · Señal en listas de cumplimiento · Requiere revisión manual urgente por Jefe de Crédito</div>
+                <div class="alert-time">Hoy 06:59 · Sin resolver</div>
+              </div>
+              <button class="btn btn-revert" style="flex-shrink:0;margin-top:2px" onclick="showToast('Revisando alerta SARLAFT…','t-warn','ti-alert-triangle')">Ver</button>
+            </div>
+            <div class="alert-item al-amber">
+              <div class="alert-ico"><i class="ti ti-trending-up"></i></div>
+              <div>
+                <div class="alert-title">Concentración de cartera — Tigo-UNE</div>
+                <div class="alert-body">68% de solicitudes provienen de Tigo-UNE S.A.S. Diversificación recomendada entre empresas.</div>
+                <div class="alert-time">Hoy 08:00 · Informativo</div>
+              </div>
+            </div>
+            <div class="alert-item al-blue">
+              <div class="alert-ico"><i class="ti ti-clock"></i></div>
+              <div>
+                <div class="alert-title">4 solicitudes pendientes +2h sin acción</div>
+                <div class="alert-body">SOL-2025-0842, 0845, 0846, 0847 esperan decisión del analista.</div>
+                <div class="alert-time">Actualizado hace 12 min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2: Distribución + Analistas + Matriz riesgo -->
+    <div class="row row-3">
+
+      <!-- Distribución por tipo -->
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-chart-donut"></i> Distribución por tipo</div></div>
+        <div class="card-body">
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
+              <circle cx="45" cy="45" r="34" fill="none" stroke="#E8EEF7" stroke-width="14"/>
+            </svg>
+            <div class="donut-legend">
+              <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div><div class="dl-lbl">Consumo</div><div class="dl-val">58</div><div class="dl-pct">40.8%</div></div>
+              <div class="dl-item"><div class="dl-dot" style="background:#0A6B45"></div><div class="dl-lbl">Educativo</div><div class="dl-val">31</div><div class="dl-pct">21.8%</div></div>
+              <div class="dl-item"><div class="dl-dot" style="background:#B8872A"></div><div class="dl-lbl">Vivienda</div><div class="dl-val">22</div><div class="dl-pct">15.5%</div></div>
+              <div class="dl-item"><div class="dl-dot" style="background:#8B1A1A"></div><div class="dl-lbl">Emergencia</div><div class="dl-val">18</div><div class="dl-pct">12.7%</div></div>
+              <div class="dl-item"><div class="dl-dot" style="background:#5A7099"></div><div class="dl-lbl">Libranza</div><div class="dl-val">13</div><div class="dl-pct">9.2%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desempeño analistas -->
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-users"></i> Desempeño analistas</div></div>
+        <div class="card-body">
+          <div id="analysts-list"></div>
+        </div>
+      </div>
+
+      <!-- Matriz de riesgo -->
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-shield-half"></i> Matriz de riesgo de cartera</div></div>
+        <div class="card-body">
+          <div class="risk-matrix">
+            <div class="rm-cell rm-green"><div class="rml">Riesgo bajo</div><div class="rmv">74</div><div class="rms">52.1%</div></div>
+            <div class="rm-cell rm-amber"><div class="rml">Riesgo medio</div><div class="rmv">41</div><div class="rms">28.9%</div></div>
+            <div class="rm-cell rm-red"><div class="rml">Riesgo alto</div><div class="rmv">27</div><div class="rms">19.0%</div></div>
+            <div class="rm-cell rm-green"><div class="rml">Score prom.</div><div class="rmv">742</div><div class="rms">Bajo</div></div>
+            <div class="rm-cell rm-amber"><div class="rml">Score prom.</div><div class="rmv">618</div><div class="rms">Medio</div></div>
+            <div class="rm-cell rm-red"><div class="rml">Score prom.</div><div class="rmv">492</div><div class="rms">Alto</div></div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--slate);background:var(--paper);border-radius:7px;padding:8px 10px">
+            <i class="ti ti-info-circle" style="font-size:12px"></i> Índice de mora proyectado: <strong style="color:var(--ink)">2.1%</strong> — por debajo del benchmark del sector (3.4%)
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 3: Tabla solicitudes recientes + Reversiones -->
+    <div class="row row-3-2">
+
+      <!-- Solicitudes recientes -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-list-details"></i> Solicitudes recientes — vista gerencial</div>
+          <button class="btn" onclick="showToast('Cargando historial completo…','t-ok','ti-table')"><i class="ti ti-table"></i> Ver todas</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-sols"></table>
+        </div>
+      </div>
+
+      <!-- Reversiones pendientes -->
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-rotate-clockwise"></i> Solicitudes de reversión</div><span class="badge b-amber">2 pendientes</span></div>
+        <div class="card-body">
+          <div id="reversion-list"></div>
+        </div>
+        <div class="card-foot">
+          <span style="font-size:11px;color:var(--slate)">Solo el Jefe de Crédito puede revertir decisiones del analista</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-t" id="m-title"></div>
+    <div class="modal-b" id="m-body"></div>
+    <textarea class="modal-nota" id="m-nota" rows="3" placeholder="Justificación obligatoria para el registro de auditoría…"></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-gold" id="m-confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── BAR CHART ──
+const barData = [
+  {d:'Lun',apro:22,rech:6,pend:4},
+  {d:'Mar',apro:18,rech:5,pend:6},
+  {d:'Mié',apro:25,rech:8,pend:3},
+  {d:'Jue',apro:14,rech:4,pend:5},
+  {d:'Vie',apro:10,rech:3,pend:4,today:true},
+  {d:'Sáb',apro:0,rech:0,pend:0},
+  {d:'Dom',apro:0,rech:0,pend:0},
+];
+const maxVal = Math.max(...barData.map(d=>d.apro+d.rech+d.pend),1);
+
+function buildBarChart(){
+  const c=document.getElementById('bar-chart');
+  c.innerHTML='';
+  barData.forEach(d=>{
+    const total=d.apro+d.rech+d.pend;
+    const col=document.createElement('div');
+    col.className='bar-col';
+    col.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;position:relative;';
+    if(total>0){
+      [
+        {h:(d.apro/maxVal)*95,bg:'#2563EB'},
+        {h:(d.rech/maxVal)*95,bg:'#C0392B'},
+        {h:(d.pend/maxVal)*95,bg:'#D97706'},
+      ].forEach(seg=>{
+        const bar=document.createElement('div');
+        bar.style.cssText=`width:70%;background:${seg.bg};border-radius:3px;height:0;transition:height 1s cubic-bezier(.4,0,.2,1);opacity:${d.today?1:.7}`;
+        col.appendChild(bar);
+        setTimeout(()=>bar.style.height=seg.h+'%',100);
+      });
+    } else {
+      const empty=document.createElement('div');
+      empty.style.cssText='width:70%;height:6px;background:var(--paper2);border-radius:3px;';
+      col.appendChild(empty);
+    }
+    const lbl=document.createElement('div');
+    lbl.style.cssText=`font-size:9px;color:${d.today?'var(--gold)':'var(--slate)'};font-weight:${d.today?700:400};font-family:'JetBrains Mono',monospace;position:absolute;bottom:-16px;`;
+    lbl.textContent=d.d;
+    col.appendChild(lbl);
+    c.appendChild(col);
+  });
+}
+buildBarChart();
+
+// ── DONUT ──
+function buildDonut(){
+  const data=[
+    {pct:.408,color:'#2563EB'},
+    {pct:.218,color:'#0A6B45'},
+    {pct:.155,color:'#B8872A'},
+    {pct:.127,color:'#8B1A1A'},
+    {pct:.092,color:'#5A7099'},
+  ];
+  const svg=document.getElementById('donut-svg');
+  const R=34,CX=45,CY=45,circ=2*Math.PI*R;
+  let offset=0;
+  // clear existing arcs
+  svg.querySelectorAll('.arc').forEach(e=>e.remove());
+  data.forEach(d=>{
+    const dash=d.pct*circ;
+    const gap=circ-dash;
+    const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    arc.className.baseVal='arc';
+    arc.setAttribute('cx',CX);arc.setAttribute('cy',CY);arc.setAttribute('r',R);
+    arc.setAttribute('fill','none');arc.setAttribute('stroke',d.color);arc.setAttribute('stroke-width','14');
+    arc.setAttribute('stroke-dasharray',`0 ${circ}`);
+    arc.setAttribute('stroke-dashoffset',-(offset*circ - circ/4));
+    arc.style.transition='stroke-dasharray 1s ease';
+    svg.appendChild(arc);
+    setTimeout(()=>arc.setAttribute('stroke-dasharray',`${dash} ${gap}`),50);
+    offset+=d.pct;
+  });
+}
+buildDonut();
+
+// ── ANALYSTS ──
+const analysts=[
+  {nm:'María Rodríguez',role:'Analista senior',ini:'MR',col:'#2563EB',pct:94,apro:42,tiempo:'3.8m'},
+  {nm:'Carlos Pérez',role:'Analista junior',ini:'CP',col:'#0A6B45',pct:78,apro:31,tiempo:'5.1m'},
+  {nm:'Laura Gómez',role:'Analista senior',ini:'LG',col:'#B8872A',pct:88,apro:16,tiempo:'4.2m'},
+];
+function buildAnalysts(){
+  const c=document.getElementById('analysts-list');
+  c.innerHTML='';
+  analysts.forEach(a=>{
+    const row=document.createElement('div');
+    row.className='analyst-row';
+    row.innerHTML=`
+      <div class="an-av" style="background:${a.col}20;color:${a.col}">${a.ini}</div>
+      <div style="flex:1"><div class="an-name">${a.nm}</div><div class="an-role">${a.role} · ${a.apro} aprobadas · ${a.tiempo} prom.</div></div>
+      <div class="an-bar-wrap">
+        <div style="font-size:9px;color:var(--slate);margin-bottom:3px;text-align:right">Eficiencia</div>
+        <div class="an-bar-track"><div class="an-bar-fill" id="anb-${a.ini}" style="width:0%;background:${a.col}"></div></div>
+      </div>
+      <div class="an-val" style="color:${a.col}">${a.pct}%</div>`;
+    c.appendChild(row);
+    setTimeout(()=>{const f=document.getElementById('anb-'+a.ini);if(f)f.style.width=a.pct+'%';},200);
+  });
+}
+buildAnalysts();
+
+// ── TABLE ──
+const solsData=[
+  {id:'SOL-0847',nm:'Carlos A. Gil',ini:'CG',col:'#3B82F6',monto:'$8.000.000',tipo:'Consumo',estado:'pendiente',analista:'M. Rodríguez',score:742,rec:'APROBAR'},
+  {id:'SOL-0846',nm:'Valentina Ospina',ini:'VO',col:'#10B981',monto:'$5.000.000',tipo:'Educativo',estado:'pendiente',analista:'C. Pérez',score:811,rec:'APROBAR'},
+  {id:'SOL-0845',nm:'Jhon F. Morales',ini:'JM',col:'#F59E0B',monto:'$15.000.000',tipo:'Consumo',estado:'revision',analista:'M. Rodríguez',score:614,rec:'REVISAR'},
+  {id:'SOL-0844',nm:'Sandra P. Ruiz',ini:'SR',col:'#8B5CF6',monto:'$3.000.000',tipo:'Emergencia',estado:'aprobado',analista:'L. Gómez',score:756,rec:'APROBAR'},
+  {id:'SOL-0843',nm:'Rodrigo A. Ríos',ini:'RR',col:'#EF4444',monto:'$20.000.000',tipo:'Consumo',estado:'rechazado',analista:'M. Rodríguez',score:501,rec:'RECHAZAR'},
+];
+
+function buildTable(){
+  const t=document.getElementById('tbl-sols');
+  const eClass={pendiente:'b-amber',revision:'b-amber',aprobado:'b-green',rechazado:'b-red'};
+  const eTxt={pendiente:'Pendiente',revision:'En revisión',aprobado:'Aprobado',rechazado:'Rechazado'};
+  const rClass={APROBAR:'b-green',REVISAR:'b-amber',RECHAZAR:'b-red'};
+  t.innerHTML=`<thead><tr><th>Asociado</th><th>Monto</th><th>Tipo</th><th>Estado</th><th>Score</th><th>IA</th><th>Analista</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  solsData.forEach(s=>{
+    const sc=s.score>=700?'var(--emerald2)':s.score>=600?'var(--amber2)':'var(--crimson2)';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="av-sm" style="background:${s.col}20;color:${s.col}">${s.ini}</span>${s.nm}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${s.id}</div></td>
+      <td class="mono">${s.monto}</td>
+      <td><span class="badge b-slate">${s.tipo}</span></td>
+      <td><span class="badge ${eClass[s.estado]}">${eTxt[s.estado]}</span></td>
+      <td class="mono" style="color:${sc};font-weight:600">${s.score}</td>
+      <td><span class="badge ${rClass[s.rec]}">${s.rec}</span></td>
+      <td style="color:var(--slate)">${s.analista}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildTable();
+
+// ── REVERSIONES ──
+const reversiones=[
+  {id:'SOL-0831',nm:'Andrés Salcedo',monto:'$12M',analista:'C. Pérez',motivo:'Score mejoró significativamente en nueva consulta. Solicita reconsideración.'},
+  {id:'SOL-0819',nm:'Patricia Muñoz',monto:'$6M',analista:'L. Gómez',motivo:'Error en lectura de nómina por IA. Ingreso real es superior al calculado.'},
+];
+function buildReversiones(){
+  const c=document.getElementById('reversion-list');
+  c.innerHTML='';
+  reversiones.forEach(r=>{
+    const div=document.createElement('div');
+    div.style.cssText='border:1px solid var(--paper3);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;';
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span class="badge b-slate" style="font-family:'JetBrains Mono',monospace">${r.id}</span>
+        <strong style="font-size:12px">${r.nm}</strong>
+        <span style="font-size:11px;color:var(--slate);margin-left:auto">${r.monto}</span>
+      </div>
+      <div style="font-size:11px;color:var(--slate);margin-bottom:10px;line-height:1.5">${r.motivo}</div>
+      <div style="font-size:10px;color:var(--slate);margin-bottom:8px">Analista original: ${r.analista}</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-revert" onclick="openModal('denegar','${r.id}','${r.nm}')"><i class="ti ti-x"></i> Denegar</button>
+        <button class="btn btn-gold" onclick="openModal('revertir','${r.id}','${r.nm}')"><i class="ti ti-rotate-clockwise"></i> Revertir decisión</button>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+buildReversiones();
+
+// ── PERIOD CHANGE ──
+const periods={
+  dia:{sol:'26',apro:'15',des:'$184M',tiempo:'4.2m',mora:'2.1%'},
+  semana:{sol:'142',apro:'89',des:'$612M',tiempo:'4.2m',mora:'2.1%'},
+  mes:{sol:'581',apro:'364',des:'$2.4B',tiempo:'4.1m',mora:'2.1%'},
+  año:{sol:'6.842',apro:'4.281',des:'$28.7B',tiempo:'4.6m',mora:'2.3%'},
+};
+function changePeriod(p){
+  const d=periods[p];
+  document.getElementById('kv-sol').textContent=d.sol;
+  document.getElementById('kv-apro').textContent=d.apro;
+  document.getElementById('kv-des').textContent=d.des;
+  document.getElementById('kv-tiempo').textContent=d.tiempo;
+  document.getElementById('kv-mora').textContent=d.mora;
+}
+
+// ── MODAL ──
+let modalAction=null,modalId=null;
+function openModal(action,id,nm){
+  modalAction=action;modalId=id;
+  document.getElementById('m-nota').value='';
+  document.getElementById('m-nota').style.borderColor='';
+  document.getElementById('m-title').textContent=action==='revertir'?'Revertir decisión del analista':'Denegar solicitud de reversión';
+  document.getElementById('m-body').textContent=`${action==='revertir'?'Esta acción revierte la decisión del analista y cambia el estado de la solicitud. Queda registrada con tu firma de Jefe de Crédito.':'Esta acción deniega la solicitud de reversión. El estado original se mantiene.'} Solicitud: ${id} — ${nm}.`;
+  const cb=document.getElementById('m-confirm');
+  cb.className=action==='revertir'?'btn btn-gold':'btn btn-revert';
+  cb.textContent=action==='revertir'?'Confirmar reversión':'Confirmar denegación';
+  document.getElementById('overlay').style.display='flex';
+}
+function closeModal(){document.getElementById('overlay').style.display='none';}
+document.getElementById('m-confirm').onclick=function(){
+  const nota=document.getElementById('m-nota').value.trim();
+  if(!nota){document.getElementById('m-nota').style.borderColor='var(--crimson2)';document.getElementById('m-nota').focus();return;}
+  closeModal();
+  showToast(
+    modalAction==='revertir'?`Solicitud ${modalId} revertida y actualizada`:`Reversión de ${modalId} denegada`,
+    modalAction==='revertir'?'t-ok':'t-warn',
+    modalAction==='revertir'?'ti-rotate-clockwise':'ti-x'
+  );
+};
+
+// ── TOAST ──
+function showToast(msg,cls,icon){
+  const t=document.createElement('div');
+  t.className=`toast ${cls}`;
+  t.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span><span class="t-close" onclick="this.parentElement.remove()"><i class="ti ti-x" style="font-size:13px"></i></span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t&&t.remove(),5000);
+}
+</script>
+</body>
+</html>

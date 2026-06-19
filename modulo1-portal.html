@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FondoUne — Portal de Crédito Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+  :root {
+    --navy:   #0B2545;
+    --navy2:  #134074;
+    --blue:   #1A6BAD;
+    --sky:    #4DA8DA;
+    --gold:   #C9963B;
+    --gold2:  #F0C060;
+    --cream:  #F7F4EE;
+    --white:  #FFFFFF;
+    --muted:  #8A9BB5;
+    --border: rgba(11,37,69,0.12);
+    --success:#1A7A4A;
+    --sucbg:  #EAF5EE;
+    --danger: #C0392B;
+    --danbg:  #FDECEA;
+    --warn:   #A06000;
+    --warnbg: #FEF6E6;
+    --shadow: 0 4px 32px rgba(11,37,69,0.10);
+    --shadow-lg: 0 12px 60px rgba(11,37,69,0.16);
+    --r: 16px;
+    --r-sm: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND PATTERN ── */
+  body::before {
+    content:'';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 15%, rgba(26,107,173,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(201,150,59,0.06) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .portal { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-block {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--navy); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(11,37,69,0.25);
+    flex-shrink: 0;
+  }
+  .logo-block i { font-size: 24px; color: var(--gold2); }
+  .logo-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--navy); letter-spacing: -0.3px;
+  }
+  .logo-text p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .secure-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--sucbg); color: var(--success);
+    font-size: 11px; font-weight: 500;
+    padding: 5px 10px; border-radius: 20px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-track { display: flex; align-items: center; margin-bottom: 2rem; gap: 0; }
+  .p-step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex: 1; position: relative;
+  }
+  .p-step::after {
+    content: ''; position: absolute;
+    top: 16px; left: 50%; width: 100%;
+    height: 1px; background: var(--border);
+    transition: background 0.4s;
+  }
+  .p-step:last-child::after { display: none; }
+  .p-step.done::after { background: var(--blue); }
+  .p-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--muted);
+    position: relative; z-index: 1;
+    transition: all 0.3s;
+  }
+  .p-step.done .p-dot { background: var(--blue); border-color: var(--blue); color: var(--white); }
+  .p-step.active .p-dot { background: var(--navy); border-color: var(--navy); color: var(--white); box-shadow: 0 0 0 4px rgba(11,37,69,0.12); }
+  .p-label { font-size: 10px; color: var(--muted); text-align: center; white-space: nowrap; }
+  .p-step.active .p-label, .p-step.done .p-label { color: var(--navy); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.35s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--navy);
+    margin-bottom: 6px; line-height: 1.2;
+  }
+  .card-sub { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+  /* ── FORMS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--navy); }
+  .field input, .field select, .field textarea {
+    padding: 11px 14px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    background: var(--cream); color: var(--navy);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,107,173,0.10);
+    background: var(--white);
+  }
+  .field .hint { font-size: 11px; color: var(--muted); }
+
+  /* ── CONSENT ── */
+  .consent-box {
+    background: #EFF4FB; border: 1px solid rgba(26,107,173,0.2);
+    border-radius: var(--r-sm); padding: 14px 16px;
+    font-size: 12.5px; color: var(--navy2); line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+    margin: 1rem 0;
+  }
+  .consent-box input[type=checkbox] { flex-shrink: 0; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--blue); }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+  .btn {
+    padding: 11px 24px; border-radius: var(--r-sm); font-size: 14px;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--white); color: var(--navy);
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--cream); }
+  .btn.primary {
+    background: var(--navy); color: var(--white); border-color: var(--navy);
+  }
+  .btn.primary:hover { background: var(--navy2); }
+  .btn.success { background: var(--success); color: var(--white); border-color: var(--success); }
+  .btn.gold { background: var(--gold); color: var(--white); border-color: var(--gold); }
+
+  /* ── SECURITY LAYERS ── */
+  .sec-layers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.25rem 0; }
+  .sec-item {
+    border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .sec-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sec-icon i { font-size: 17px; }
+  .sec-title { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .sec-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* ── KYC UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed rgba(26,107,173,0.3); border-radius: var(--r-sm);
+    background: #F0F5FB; padding: 2rem; text-align: center;
+    cursor: pointer; transition: all 0.2s; margin: 14px 0;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--blue); background: #E8F2FA; }
+  .upload-zone.done { border-color: var(--success); border-style: solid; background: var(--sucbg); }
+  .upload-zone i { font-size: 32px; color: var(--blue); display: block; margin-bottom: 8px; }
+  .upload-zone.done i { color: var(--success); }
+  .upload-zone p { font-size: 13px; color: var(--muted); }
+  .upload-zone strong { display: block; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+
+  /* ── KYC CAMERA ── */
+  .kyc-cam-wrap {
+    background: var(--navy); border-radius: var(--r-sm);
+    padding: 20px; text-align: center;
+    position: relative; overflow: hidden; margin: 14px 0;
+  }
+  .kyc-video-ring {
+    position: relative; width: 220px; height: 220px;
+    margin: 0 auto 14px; border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,.2);
+    background: #0a0f1a;
+    box-shadow: 0 0 0 0 rgba(240,192,96,0);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .kyc-video-ring.active  { border-color: var(--gold2); box-shadow: 0 0 0 8px rgba(240,192,96,.2); animation: kpulse 1.2s ease infinite; }
+  .kyc-video-ring.success { border-color: #22C55E;      box-shadow: 0 0 0 8px rgba(34,197,94,.2); animation: none; }
+  .kyc-video-ring.error   { border-color: #F87171;      box-shadow: 0 0 0 8px rgba(248,113,113,.2); animation: none; }
+  @keyframes kpulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,192,96,.3)} 50%{box-shadow:0 0 0 14px rgba(240,192,96,0)} }
+  #kyc-video { width:100%; height:100%; object-fit:cover; display:block; transform:scaleX(-1); }
+  #kyc-canvas { display:none; }
+  .kyc-overlay-icon {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:56px; color:rgba(255,255,255,.35); pointer-events:none;
+  }
+  .kyc-instr { font-size:13px; color:rgba(255,255,255,.85); margin-bottom:6px; min-height:18px; }
+  .kyc-action { font-family:'DM Serif Display',serif; font-size:19px; color:var(--gold2); min-height:26px; }
+  .kyc-score-badge {
+    display:inline-block; margin-top:10px; font-size:12px; font-weight:600;
+    padding:4px 14px; border-radius:20px; background:rgba(255,255,255,.08); color:#fff;
+  }
+  /* upload-zone con input file oculto */
+  .upload-zone { cursor:pointer; }
+  .upload-zone input[type=file] { display:none; }
+  /* preview foto cédula */
+  .cedula-preview {
+    width:100%; max-height:110px; object-fit:cover;
+    border-radius:8px; margin-top:8px; display:none;
+  }
+  /* liveness steps */
+  .selfie-box { display:none; }
+  .liveness-instruction { display:none; }
+  .liveness-big { display:none; }
+  .camera-view { display:none; }
+
+  /* ── 2FA OTP ── */
+  .otp-row { display: flex; gap: 8px; justify-content: center; margin: 1.25rem 0; }
+  .otp-box {
+    width: 48px; height: 56px; text-align: center;
+    font-size: 22px; font-family: 'DM Mono', monospace; font-weight: 500;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    background: var(--cream); color: var(--navy); outline: none;
+  }
+  .otp-box:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,107,173,0.12); background: var(--white); }
+
+  /* ── VALIDATION STREAM ── */
+  .val-list { display: flex; flex-direction: column; gap: 8px; margin: 1.25rem 0; }
+  .val-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: var(--r-sm);
+    border: 1px solid var(--border); background: var(--white);
+    transition: all 0.3s;
+  }
+  .val-item.running { border-color: rgba(26,107,173,0.3); background: #F0F5FB; }
+  .val-item.ok { border-color: rgba(26,122,74,0.3); background: var(--sucbg); }
+  .val-item.err { border-color: rgba(192,57,43,0.3); background: var(--danbg); }
+  .val-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .val-icon.idle { background: var(--cream); color: var(--muted); }
+  .val-icon.running { background: #D9EBFA; color: var(--blue); }
+  .val-icon.ok { background: var(--sucbg); color: var(--success); }
+  .val-icon.err { background: var(--danbg); color: var(--danger); }
+  .val-name { font-size: 13px; font-weight: 500; color: var(--navy); flex: 1; }
+  .val-status { font-size: 11px; color: var(--muted); }
+  .val-status.running { color: var(--blue); }
+  .val-status.ok { color: var(--success); font-weight: 500; }
+  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .pb-fill { height: 100%; background: var(--blue); border-radius: 2px; width: 0%; transition: width 0.05s linear; }
+
+  /* ── SUMMARY CARD ── */
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .lbl { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .summary-row .val { font-weight: 500; color: var(--navy); }
+  .summary-row .val.good { color: var(--success); }
+
+  /* ── RESULT ── */
+  .result-hero {
+    text-align: center; padding: 1.5rem 0 1rem;
+  }
+  .result-ring {
+    width: 88px; height: 88px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .result-ring.approved { background: var(--sucbg); border: 2px solid rgba(26,122,74,0.3); }
+  .result-ring i { font-size: 40px; color: var(--success); }
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--navy); margin-bottom: 8px;
+  }
+  .result-sub { font-size: 14px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  .metrics-band {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 1.5rem 0;
+  }
+  .metric {
+    background: var(--cream); border-radius: var(--r-sm); padding: 16px;
+    text-align: center; border: 1px solid var(--border);
+  }
+  .metric .m-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--navy); margin-bottom: 4px;
+  }
+  .metric .m-label { font-size: 11px; color: var(--muted); }
+
+  /* ── SOURCE TAGS ── */
+  .sources-block { margin: 1.25rem 0; }
+  .src-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--r-sm);
+    font-size: 13px; margin-bottom: 6px;
+  }
+  .src-row i { font-size: 16px; }
+  .src-ok { background: var(--sucbg); color: var(--success); }
+  .src-pending { background: var(--warnbg); color: var(--warn); }
+
+  /* ── NOTE ── */
+  .note {
+    border-radius: var(--r-sm); padding: 12px 14px;
+    font-size: 12.5px; line-height: 1.6; display: flex; gap: 10px;
+    align-items: flex-start; margin: 12px 0;
+  }
+  .note i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .note.info { background: #EFF4FB; color: var(--navy2); border: 1px solid rgba(26,107,173,0.15); }
+  .note.warn { background: var(--warnbg); color: var(--warn); }
+  .note.ok { background: var(--sucbg); color: var(--success); }
+  .note.danger { background: var(--danbg); color: var(--danger); }
+
+  /* ── UTILS ── */
+  .hidden { display: none !important; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag-blue { background: #D9EBFA; color: var(--navy2); }
+  .tag-green { background: var(--sucbg); color: var(--success); }
+  .tag-gold { background: #FBF0DA; color: var(--gold); }
+  .tag-red { background: var(--danbg); color: var(--danger); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* ── FOOTER STATUS BAR ── */
+  .status-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--navy); color: rgba(255,255,255,0.7);
+    font-size: 11.5px; padding: 8px 20px;
+    display: flex; align-items: center; gap: 20px;
+    font-family: 'DM Mono', monospace; z-index: 100;
+  }
+  .status-bar .sb-item { display: flex; align-items: center; gap: 5px; }
+  .status-bar .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #4DA; flex-shrink: 0; }
+  .status-bar .sb-dot.warn { background: var(--gold2); }
+  .status-bar .sb-dot.idle { background: var(--muted); }
+
+  /* ── SELECTOR BANCO ── */
+  .bank-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 1rem 0; }
+  .bank-btn {
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    padding: 14px 10px; text-align: center; cursor: pointer;
+    background: var(--cream); transition: all 0.2s;
+  }
+  .bank-btn:hover { border-color: var(--blue); background: var(--white); }
+  .bank-btn.selected { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,37,69,0.08); }
+  .bank-btn .bk-logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .bank-btn .bk-name { font-size: 11px; color: var(--muted); }
+
+  /* Sheets status indicator */
+  #sheets-status { display: none; }
+  #sheets-status.sheets-loading { display:block; background:#EFF4FB; color:#1A5A9A; border:1px solid rgba(26,90,154,.2); }
+  #sheets-status.sheets-ok      { display:block; background:#EAF5EE; color:#1A7A4A; border:1px solid rgba(26,122,74,.2); }
+  #sheets-status.sheets-warn    { display:block; background:#FEF6E6; color:#A06000; border:1px solid rgba(160,96,0,.2); }
+
+  /* Responsive */
+  @media (max-width: 540px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .metrics-band { grid-template-columns: 1fr 1fr; }
+    .sec-layers { grid-template-columns: 1fr; }
+    .bank-grid { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+  <!-- FondoUne: navegacion y sesion compartida -->
+  <script src="navigation.js"></script>
+  <script src="session.js"></script>
+  <script src="fondoune-ui.js"></script>
+  <script src="sheets-connector.js"></script>
+  <script>FondouneNav.init('solicitud');</script>
+</head>
+<body>
+
+<div class="portal">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-block"><i class="ti ti-building-bank"></i></div>
+    <div class="logo-text">
+      <h1>FondoUne</h1>
+      <p>Portal de Crédito Inteligente · FondoUne</p>
+    </div>
+    <div class="header-right">
+      <div class="secure-badge"><i class="ti ti-shield-check" style="font-size:13px;"></i> Sesión segura</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TRACK -->
+  <div class="progress-track" id="prog-track">
+    <div class="p-step active" id="pt1"><div class="p-dot" id="pd1">1</div><div class="p-label">Identificación</div></div>
+    <div class="p-step" id="pt2"><div class="p-dot" id="pd2">2</div><div class="p-label">Solicitud</div></div>
+    <div class="p-step" id="pt3"><div class="p-dot" id="pd3">3</div><div class="p-label">Validación IA</div></div>
+    <div class="p-step" id="pt4"><div class="p-dot" id="pd4"><i class="ti ti-check" style="font-size:14px;"></i></div><div class="p-label">Resultado</div></div>
+  </div>
+
+  <!-- ═══ PASO 1: IDENTIFICACIÓN ═══ -->
+  <div id="s1">
+    <div class="card">
+      <div class="card-eyebrow">Paso 1 de 5</div>
+      <div class="card-title">Acceso al portal</div>
+      <div class="card-sub">Ingresa con tu número de cédula y correo corporativo para verificar que eres un asociado activo.</div>
+
+      <!-- Fila cédula + botón verificar -->
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:0;">
+        <div class="field" style="flex:1;margin-bottom:0;">
+          <label>Número de cédula <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="f-cedula" placeholder="Ej. 1045678901"
+                 oninput="onCedulaInput(this.value)"
+                 style="margin-bottom:0;">
+        </div>
+        <button class="btn" id="btn-verificar" onclick="verificarAsociado()"
+                disabled
+                style="height:42px;padding:0 18px;white-space:nowrap;flex-shrink:0;opacity:.4;transition:opacity .2s;">
+          <i class="ti ti-search" id="btn-verificar-icon"></i>
+          <span id="btn-verificar-txt">Verificar</span>
+        </button>
+      </div>
+
+      <!-- Indicador de estado -->
+      <div id="sheets-status" style="font-size:12px;padding:0;margin-top:0;border-radius:7px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s,margin .3s;"></div>
+
+      <!-- Tarjeta de datos encontrados (oculta hasta verificar) -->
+      <div id="asociado-card" style="display:none;background:#F7F9FC;border:1px solid rgba(26,107,173,.15);border-radius:10px;padding:14px 16px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;" id="asoc-initials">--</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);" id="asoc-nombre">—</div>
+            <div style="font-size:11px;color:#5A6E8C;" id="asoc-empresa">—</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EAF5EE;color:#1A7A4A;border:1px solid rgba(26,122,74,.2);" id="asoc-estado-badge">Activo</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Teléfono</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-tel">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Ciudad</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ciudad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Salario base</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-salario">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Vinculado desde</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-ingreso">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Capacidad de pago</div>
+            <div style="color:#1A7A4A;font-weight:600;" id="asoc-capacidad">—</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#5A6E8C;margin-bottom:2px;">Agencia</div>
+            <div style="color:var(--navy);font-weight:500;" id="asoc-agencia">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid" id="extra-fields" style="display:none;">
+        <div class="field">
+          <label>Correo corporativo</label>
+          <input type="email" id="f-email" placeholder="nombre@empresa.com">
+        </div>
+        <div class="field">
+          <label>Celular registrado</label>
+          <input type="tel" id="f-cel" placeholder="+57 300 000 0000">
+        </div>
+      </div>
+
+      <div class="consent-box" id="consent-box" style="display:none;">
+        <input type="checkbox" id="c1" checked>
+        <span>Autorizo a FondoUne a verificar mis datos en centrales de riesgo (DataCrédito / TransUnion) y a procesar mi información biométrica, conforme a las Leyes 1266/2008 y 1581/2012. Esta autorización es voluntaria y puede ser revocada.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" id="btn-continuar" onclick="goTo(2)" style="display:none;">
+          Continuar <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 3: SOLICITUD ═══ -->
+  <div id="s2" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 2 de 4 — Solicitud de Crédito</div>
+      <div class="card-title">Configura tu crédito</div>
+      <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
+          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
+        </div>
+        <div class="field">
+          <label>Plazo <span style="color:var(--danger)">*</span></label>
+          <select id="f-plazo" onchange="updateSummary()">
+            <option>12 meses</option>
+            <option>18 meses</option>
+            <option selected>24 meses</option>
+            <option>36 meses</option>
+            <option>48 meses</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Tipo de crédito</label>
+          <select>
+            <option selected>Crédito de consumo</option>
+            <option>Educativo</option>
+            <option>Vivienda</option>
+            <option>Emergencia médica</option>
+            <option>Libranza especial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Destino</label>
+          <select>
+            <option>Gastos personales</option>
+            <option>Educación</option>
+            <option>Salud</option>
+            <option>Remodelación hogar</option>
+            <option>Consolidación deudas</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Validación capacidad de pago -->
+      <hr class="divider">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">Fuentes de información para el análisis</div>
+
+      <div class="note info"><i class="ti ti-info-circle"></i> Dado que no tenemos acceso directo a la nómina, puedes adjuntar tu desprendible de pago. La IA lo leerá automáticamente — no necesitas llenar ningún formulario adicional.</div>
+
+      <div class="upload-zone" id="uz-nomina" onclick="simulateNomina()" style="margin:10px 0;">
+        <i class="ti ti-file-invoice" id="uz-nomina-icon"></i>
+        <strong id="uz-nomina-status">Adjuntar desprendible de nómina (PDF)</strong>
+        <p>Opcional pero acelera el proceso · La IA extrae los datos automáticamente</p>
+      </div>
+      <div id="nomina-result" class="hidden">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">BÁSICO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-basico">—</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEVENGADO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';" id="nom-devengado">—</div>
+          </div>
+          <div style="background:var(--cream);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">DEDUCCIONES</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--danger);" id="nom-deducciones">—</div>
+          </div>
+          <div style="background:#EAF5EE;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">NETO</div>
+            <div style="font-size:14px;font-weight:600;font-family:'DM Mono';color:var(--success);" id="nom-neto">—</div>
+          </div>
+        </div>
+        <div class="note ok" style="margin-top:8px;" id="nom-footer"><i class="ti ti-check"></i> Datos cargados desde la base de datos FondoUne</div>
+      </div>
+
+      <hr class="divider">
+      <div style="background:var(--cream);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Resumen preliminar <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span></div>
+        <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
+        <div class="summary-row"><span class="lbl">Plazo</span><span class="val">24 meses</span></div>
+        <div class="summary-row"><span class="lbl">Tasa</span><span class="val">1,1% E.M.</span></div>
+        <div class="summary-row"><span class="lbl">Tipo</span><span class="val">Crédito de consumo</span></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="goTo(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="btn primary" onclick="goTo(3)">Enviar a validación <i class="ti ti-cpu"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 4: VALIDACIÓN IA ═══ -->
+  <div id="s3" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 3 de 4 — Motor de Decisión IA</div>
+      <div class="card-title">Validación automática en curso</div>
+      <div class="card-sub">El sistema está consultando múltiples fuentes en paralelo. Esto toma menos de 60 segundos.</div>
+
+      <div class="val-list" id="val-list">
+        <div class="val-item" id="v1">
+          <div class="val-icon idle" id="vi1"><i class="ti ti-building-bank"></i></div>
+          <div style="flex:1;"><div class="val-name">DataCrédito Experian — Score crediticio</div><div class="progress-bar"><div class="pb-fill" id="pb1"></div></div></div>
+          <div class="val-status" id="vs1">En espera</div>
+        </div>
+        <div class="val-item" id="v3">
+          <div class="val-icon idle" id="vi3"><i class="ti ti-users"></i></div>
+          <div style="flex:1;"><div class="val-name">Historial interno FondoUne</div><div class="progress-bar"><div class="pb-fill" id="pb3"></div></div></div>
+          <div class="val-status" id="vs3">En espera</div>
+        </div>
+        <div class="val-item" id="v4">
+          <div class="val-icon idle" id="vi4"><i class="ti ti-file-invoice"></i></div>
+          <div style="flex:1;"><div class="val-name">Análisis nómina — capacidad de pago</div><div class="progress-bar"><div class="pb-fill" id="pb4"></div></div></div>
+          <div class="val-status" id="vs4">En espera</div>
+        </div>
+        <div class="val-item" id="v5">
+          <div class="val-icon idle" id="vi5"><i class="ti ti-brain"></i></div>
+          <div style="flex:1;"><div class="val-name">Motor IA — Score compuesto y decisión</div><div class="progress-bar"><div class="pb-fill" id="pb5"></div></div></div>
+          <div class="val-status" id="vs5">En espera</div>
+        </div>
+      </div>
+
+      <div id="v-done" class="hidden">
+        <div class="note ok"><i class="ti ti-check"></i> Todas las validaciones completadas exitosamente. Sin alertas. Perfil de riesgo: <strong>BAJO</strong>.</div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="goTo(4)">Ver resultado <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PASO 5: RESULTADO ═══ -->
+  <div id="s4" class="hidden">
+    <div class="card">
+      <div class="card-eyebrow">Paso 4 de 4 — Resultado</div>
+
+      <div class="result-hero">
+        <div class="result-ring approved"><i class="ti ti-circle-check"></i></div>
+        <div class="result-title">¡Solicitud pre-aprobada!</div>
+        <div class="result-sub">Tu perfil crediticio, identidad y capacidad de pago cumplen los requisitos. Un analista del fondo confirmará en las próximas 24 horas.</div>
+      </div>
+
+      <div class="metrics-band">
+        <div class="metric">
+          <div class="m-val">$8.000.000</div>
+          <div class="m-label">Monto aprobado</div>
+        </div>
+        <div class="metric">
+          <div class="m-val">$391.800</div>
+          <div class="m-label">Cuota mensual</div>
+        </div>
+        <div class="metric">
+          <div class="m-val">24 meses</div>
+          <div class="m-label">Plazo</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;">Detalle de la evaluación</div>
+
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-chart-bar" style="font-size:15px;"></i> Score DataCrédito</span>
+        <span class="val good">742 / 900 <span class="tag tag-green">Sin novedad</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-history" style="font-size:15px;"></i> Historial FondoUne</span>
+        <span class="val good">2 créditos previos <span class="tag tag-green">Pagados a tiempo</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago</span>
+        <span class="val good" id="res-capacidad">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-percentage" style="font-size:15px;"></i> % compromiso ingreso</span>
+        <span class="val" id="res-porcentaje">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl"><i class="ti ti-face-id" style="font-size:15px;"></i> Verificación biométrica</span>
+        <span class="val good">99.3% coincidencia <span class="tag tag-green">Aprobada</span></span>
+      </div>
+
+      <hr class="divider">
+      <div class="sources-block">
+        <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> DataCrédito Experian — API REST</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Historial de créditos</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
+        <div class="src-row src-pending"><i class="ti ti-clock"></i> Revisión analista humano — Pendiente ≤ 24 h</div>
+      </div>
+
+      <div class="note info" style="margin-top:1rem;">
+        <i class="ti ti-shield-lock"></i>
+        <span>No se solicitó, imprimió ni archivó ningún documento en papel. Toda la validación se realizó mediante integraciones seguras con consentimiento expreso. Datos cifrados AES-256. Log de auditoría registrado.</span>
+      </div>
+
+      <div class="note ok">
+        <i class="ti ti-mail-check"></i>
+        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong id="res-email-mask">tu correo registrado</strong>. Tienes 48 horas para firmarlo.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
+        <button class="btn gold" onclick="irAFirma()"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
+        <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="sb-item"><div class="sb-dot"></div> Sesión activa</div>
+  <div class="sb-item"><div class="sb-dot"></div> Cifrado TLS 1.3</div>
+  <div class="sb-item"><div class="sb-dot warn"></div> Portal FondoUne</div>
+  <div class="sb-item" style="margin-left:auto;"><div class="sb-dot idle"></div> FondoUne — Portal Crédito Inteligente</div>
+</div>
+
+<script>
+// ── NAVIGATION ──
+let currentStep = 1;
+const steps = [1,2,3,4];
+
+function goTo(n) {
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById('s'+i);
+    if (el) el.classList.add('hidden');
+    const pt = document.getElementById('pt'+i);
+    const pd = document.getElementById('pd'+i);
+    if (pt && pd) {
+      pt.classList.remove('active','done');
+      if (i < n) { pt.classList.add('done'); if(i<=3) pd.innerHTML='<i class="ti ti-check" style="font-size:14px;"></i>'; }
+      else if (i === n) pt.classList.add('active');
+    }
+  });
+  const el = document.getElementById('s'+n);
+  if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  currentStep = n;
+  poblarDatosAsociado(n);
+  if (n === 2) buildLineaGrid();
+  if (n === 3) startValidation();
+  if (n === 4) buildResult();
+}
+
+// ── POBLAR DATOS DEL ASOCIADO EN TODOS LOS PASOS ──
+function poblarDatosAsociado(paso) {
+  if (typeof FondouneSession === 'undefined') return;
+  const user   = FondouneSession.getUser();
+  const nomina = FondouneSession.getNomina();
+  const fmt    = n => (typeof n === 'number' && n > 0) ? '$' + n.toLocaleString('es-CO') : '—';
+
+  // Helpers
+  const set  = (id, val) => { const e = document.getElementById(id); if (e && val) e.textContent = val; };
+  const maskEmail = em => {
+    if (!em || !em.includes('@')) return 'tu correo registrado';
+    const [u, d] = em.split('@');
+    return u.slice(0,3) + '***@' + d;
+  };
+  const maskTel = t => {
+    if (!t) return '+57 *** ****';
+    const d = t.replace(/\D/g,'');
+    return d.length >= 7 ? d.slice(0,3) + ' *** ' + d.slice(-4) : t;
+  };
+
+  const nombre  = user.name  || '—';
+  const cedula  = user.id    || '—';
+  const email   = document.getElementById('f-email')?.value || '';
+  const tel     = user.tel   || document.getElementById('f-cel')?.value || '';
+
+  // Paso 2 — OCR y 2FA
+  if (paso === 2) {
+    // Nombre abreviado: "Julián E. Márquez C."
+    const partes = nombre.split(' ');
+    const nombreCorto = partes.length >= 3
+      ? partes[0] + ' ' + partes[1][0] + '. ' + partes[2] + (partes[3] ? ' ' + partes[3][0] + '.' : '')
+      : nombre;
+    set('ocr-nombre', nombreCorto);
+    const cedFmt = cedula.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    set('ocr-cedula', cedFmt);
+    set('2fa-tel',   maskTel(tel));
+    set('2fa-email', maskEmail(email));
+  }
+
+  // Paso 3 — Nómina desde sesión
+  if (paso === 2 && nomina) {
+    set('nom-basico',      fmt(nomina.basico));
+    set('nom-devengado',   fmt(nomina.devengado || nomina.basico));
+    set('nom-deducciones', fmt(nomina.deducciones || nomina.cuotaAporte));
+    set('nom-neto',        fmt(nomina.neto));
+    const footer = document.getElementById('nom-footer');
+    if (footer && nomina.empresa) {
+      footer.innerHTML = '<i class="ti ti-check"></i> Datos cargados desde FondoUne · Empresa: '
+        + nomina.empresa + ' · Periodo: ' + (nomina.periodo || '—') + ' · Libranzas: '
+        + fmt(nomina.libranzas || 0);
+    }
+    // También actualizar el resumen preliminar con capacidad real
+    const cap = nomina.neto ? Math.round(nomina.neto * 0.35) : 0;
+    const hint = document.querySelector('#f-monto ~ .hint');
+    if (hint && cap > 0) {
+      const maxMonto = cap * 36; // estimado 36 cuotas máximo
+      hint.textContent = 'Máximo aprobable según perfil: ' + fmt(maxMonto);
+    }
+  }
+
+  // Paso 5 — Resultado con datos reales
+  if (paso === 4 && nomina) {
+    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+    const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
+    const plazo  = parseInt(plazoS.replace(' meses',''));
+    const tasa   = 0.011;
+    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+    const neto   = nomina.neto || 0;
+    const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
+    const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
+    const dentro = pct <= 35;
+
+    set('res-capacidad',  fmt(cap) + '/mes disponible');
+    const resEl = document.getElementById('res-porcentaje');
+    if (resEl) resEl.innerHTML = pct + '% <span class="tag ' + (dentro?'tag-blue':'tag-red') + '">'
+      + (dentro ? 'Dentro del límite 35%' : 'Supera el límite 35%') + '</span>';
+    set('res-email-mask', maskEmail(email));
+  }
+}
+
+// ── FOTO CÉDULA — selección real desde cámara/galería ──
+let uploadDone  = { front: false, back: false };
+let cedulaImage = null; // ImageData del frente de la cédula para comparación
+
+function cedulaFotoSeleccionada(lado, input) {
+  if (!input.files || !input.files[0]) return;
+  const file    = input.files[0];
+  const zoneId  = lado === 'front' ? 'uz-front'  : 'uz-back';
+  const iconId  = lado === 'front' ? 'uz-front-icon' : 'uz-back-icon';
+  const statId  = lado === 'front' ? 'uz-front-status' : 'uz-back-status';
+  const prevId  = lado === 'front' ? 'preview-front' : 'preview-back';
+  const zone    = document.getElementById(zoneId);
+  const icon    = document.getElementById(iconId);
+  const stat    = document.getElementById(statId);
+  const preview = document.getElementById(prevId);
+
+  // Mostrar preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src   = e.target.result;
+    preview.style.display = 'block';
+    if (lado === 'front') {
+      // Guardar como referencia para el match biométrico
+      const img = new Image();
+      img.onload = () => { cedulaImage = img; };
+      img.src    = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+
+  icon.className     = 'ti ti-circle-check';
+  icon.style.color   = 'var(--success)';
+  stat.textContent   = lado === 'front' ? '✓ Frente cargado' : '✓ Reverso cargado';
+  zone.classList.add('done');
+  uploadDone[lado]   = true;
+
+  if (uploadDone.front && uploadDone.back) {
+    setTimeout(() => {
+      document.getElementById('ocr-result').classList.remove('hidden');
+      document.getElementById('kyc-next-btn').classList.remove('hidden');
+      poblarDatosAsociado(2); // llenar nombre/cédula en OCR
+    }, 400);
+  }
+}
+
+function simulateNomina() {
+  const zone = document.getElementById('uz-nomina');
+  const status = document.getElementById('uz-nomina-status');
+  const icon = document.getElementById('uz-nomina-icon');
+  if (!zone || zone.classList.contains('done')) return;
+  status.textContent = 'Leyendo nómina...';
+  icon.className = 'ti ti-loader spin';
+  setTimeout(() => {
+    zone.classList.add('done');
+    icon.className = 'ti ti-circle-check';
+    const nomina = (typeof FondouneSession !== 'undefined') ? FondouneSession.getNomina() : null;
+    const emp    = nomina?.empresa || 'empresa registrada';
+    const per    = nomina?.periodo || 'periodo actual';
+    status.textContent = '✓ Nómina procesada — ' + emp + ' · ' + per;
+    document.getElementById('nomina-result').classList.remove('hidden');
+    poblarDatosAsociado(3);
+  }, 1400);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MOTOR KYC — face-api.js
+// ─────────────────────────────────────────────────────────────────
+const KYC = (() => {
+  // URL de los modelos de face-api (CDN jsDelivr)
+  const MODELS_URL  = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+  const MATCH_SCORE = 0.55;  // umbral euclidiano (menor = más parecido). 0.55 es estricto
+  const LIVENESS_MS = 1800;  // tiempo mínimo con cara detectada antes del match
+
+  let stream       = null;
+  let detectionLoop= null;
+  let modelsLoaded = false;
+  let faceStartTs  = null;
+  let matchDone    = false;
+
+  // ── helpers UI ──
+  const lvStep = (n, state, txt) => {
+    const item = document.getElementById('lv'+n);
+    const icon = document.getElementById('lvi'+n);
+    const stat = document.getElementById('lvs'+n);
+    if (!item) return;
+    item.className = 'val-item ' + state;
+    icon.className = 'val-icon ' + state;
+    icon.innerHTML = state === 'running'
+      ? '<i class="ti ti-loader spin"></i>'
+      : state === 'ok'
+        ? '<i class="ti ti-check"></i>'
+        : state === 'error'
+          ? '<i class="ti ti-x"></i>'
+          : icon.innerHTML;
+    stat.textContent = txt;
+    stat.className   = 'val-status ' + (state === 'ok' ? 'ok' : state === 'running' ? 'running' : '');
+  };
+
+  const setInstr  = t => { const e = document.getElementById('kyc-instr');  if(e) e.textContent = t; };
+  const setAction = t => { const e = document.getElementById('kyc-action'); if(e) e.textContent = t; };
+  const setRing   = s => { const e = document.getElementById('kyc-ring');   if(e) { e.className = 'kyc-video-ring ' + s; } };
+
+  const showScore = (pct, ok) => {
+    const wrap  = document.getElementById('kyc-score-wrap');
+    const badge = document.getElementById('kyc-score-badge');
+    if (!wrap || !badge) return;
+    wrap.style.display  = 'block';
+    badge.textContent   = 'Similitud: ' + pct + '%';
+    badge.style.background = ok ? 'rgba(34,197,94,.2)' : 'rgba(248,113,113,.2)';
+    badge.style.color      = ok ? '#22C55E' : '#F87171';
+  };
+
+  async function cargarModelos() {
+    lvStep(1, 'running', 'Cargando…');
+    setInstr('Cargando modelos de reconocimiento facial…');
+    try {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODELS_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URL),
+      ]);
+      modelsLoaded = true;
+      lvStep(1, 'ok', 'Cargados');
+      return true;
+    } catch(err) {
+      console.error('[KYC] Error cargando modelos:', err);
+      lvStep(1, 'error', 'Error');
+      mostrarError('No se pudieron cargar los modelos de IA. Revisa tu conexión.');
+      return false;
+    }
+  }
+
+  async function abrirCamara() {
+    lvStep(2, 'running', 'Solicitando acceso…');
+    setInstr('Solicitando acceso a la cámara…');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false,
+      });
+      const video = document.getElementById('kyc-video');
+      video.srcObject = stream;
+      await new Promise(res => { video.onloadedmetadata = res; });
+      await video.play();
+      // Ocultar icono placeholder cuando la cámara está activa
+      const ov = document.getElementById('kyc-overlay-icon');
+      if (ov) ov.style.display = 'none';
+      lvStep(2, 'ok', 'Activa');
+      return true;
+    } catch(err) {
+      console.error('[KYC] Error cámara:', err);
+      lvStep(2, 'error', 'Sin acceso');
+      mostrarError('No se pudo acceder a la cámara. Verifica los permisos del navegador.');
+      return false;
+    }
+  }
+
+  async function detectarRostroEnCedula() {
+    if (!cedulaImage) return null;
+    try {
+      const det = await faceapi
+        .detectSingleFace(cedulaImage, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks(true)
+        .withFaceDescriptor();
+      return det ? det.descriptor : null;
+    } catch { return null; }
+  }
+
+  function iniciarBucleDeteccion(descriptorCedula) {
+    const video   = document.getElementById('kyc-video');
+    const opts    = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+
+    lvStep(3, 'running', 'Buscando rostro…');
+    setInstr('Coloca tu rostro dentro del óvalo');
+    setAction('Mira directo a la cámara');
+    setRing('active');
+
+    detectionLoop = setInterval(async () => {
+      if (matchDone) return;
+      let det;
+      try {
+        det = await faceapi
+          .detectSingleFace(video, opts)
+          .withFaceLandmarks(true)
+          .withFaceDescriptor();
+      } catch { return; }
+
+      if (!det) {
+        faceStartTs = null;
+        lvStep(3, 'running', 'Buscando…');
+        setInstr('No detecto tu rostro — acércate más');
+        setAction('¿Hay buena iluminación?');
+        return;
+      }
+
+      // Rostro detectado
+      if (!faceStartTs) faceStartTs = Date.now();
+      const elapsed = Date.now() - faceStartTs;
+      lvStep(3, 'ok', 'Detectado ✓');
+      setInstr('Rostro detectado — mantente quieto');
+
+      const pct = Math.round((1 - Math.min(elapsed / LIVENESS_MS, 1)) * 100);
+      setAction(elapsed < LIVENESS_MS ? 'Liveness: ' + (100 - pct) + '%…' : 'Comparando…');
+
+      if (elapsed < LIVENESS_MS) return; // esperar liveness mínimo
+
+      // ── Comparación biométrica ──
+      matchDone = true;
+      clearInterval(detectionLoop);
+      lvStep(4, 'running', 'Comparando…');
+      setInstr('Comparando con la foto de tu cédula…');
+
+      if (!descriptorCedula) {
+        // Sin foto de cédula — aprobar con advertencia (prototipo)
+        terminarOK(null, true);
+        return;
+      }
+
+      const distancia  = faceapi.euclideanDistance(det.descriptor, descriptorCedula);
+      const similitudPct = Math.max(0, Math.round((1 - distancia) * 100));
+      const aprobado   = distancia <= MATCH_SCORE;
+
+      showScore(similitudPct, aprobado);
+
+      if (aprobado) {
+        terminarOK(similitudPct, false);
+      } else {
+        terminarError('No se encontró coincidencia suficiente con la foto de tu cédula (similitud: ' + similitudPct + '%). Intenta con mejor iluminación.');
+      }
+    }, 400);
+  }
+
+  function terminarOK(pct, sinCedula) {
+    lvStep(4, 'ok', 'Verificado ✓');
+    setRing('success');
+    setInstr('¡Verificación completada!');
+    setAction('✓ Identidad confirmada');
+    detenerCamara();
+
+    const msg = sinCedula
+      ? '<i class="ti ti-check"></i> <strong>Rostro detectado.</strong> Verificación de liveness completada. (Sin foto de cédula para comparar — modo demo)'
+      : '<i class="ti ti-check"></i> <strong>Identidad verificada.</strong> Coincidencia facial: ' + pct + '%. Ninguna anomalía detectada.';
+
+    const done = document.getElementById('lv-done');
+    const msg_el = document.getElementById('lv-done-msg');
+    if (msg_el) msg_el.innerHTML = msg;
+    if (done)   done.classList.remove('hidden');
+
+    // Guardar resultado en sesión
+    if (typeof FondouneSession !== 'undefined') {
+      FondouneSession.saveCreditApp({
+        ...FondouneSession.getCreditApp(),
+        kycAprobado:  true,
+        kycScore:     pct,
+        kycTs:        new Date().toISOString(),
+      });
+    }
+  }
+
+  function terminarError(msg) {
+    lvStep(4, 'error', 'No coincide');
+    setRing('error');
+    setAction('✗ No verificado');
+    detenerCamara();
+    mostrarError(msg);
+  }
+
+  function mostrarError(msg) {
+    const err = document.getElementById('lv-error');
+    const errmsg = document.getElementById('lv-error-msg');
+    if (errmsg) errmsg.textContent = msg;
+    if (err)    err.classList.remove('hidden');
+  }
+
+  function detenerCamara() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    if (detectionLoop) { clearInterval(detectionLoop); detectionLoop = null; }
+  }
+
+  // ── API pública ──
+  async function iniciar() {
+    matchDone   = false;
+    faceStartTs = null;
+
+    // Resetear UI
+    ['lv1','lv2','lv3','lv4'].forEach(id => {
+      const item = document.getElementById(id);
+      const icon = document.getElementById('lvi' + id.slice(2));
+      const stat = document.getElementById('lvs' + id.slice(2));
+      if (item) item.className = 'val-item';
+      if (icon) icon.className = 'val-icon idle';
+      if (stat) stat.textContent = 'En espera';
+    });
+    document.getElementById('lv-done')?.classList.add('hidden');
+    document.getElementById('lv-error')?.classList.add('hidden');
+    document.getElementById('kyc-score-wrap').style.display = 'none';
+    setRing('');
+
+    if (!modelsLoaded) {
+      const ok = await cargarModelos();
+      if (!ok) return;
+    } else {
+      lvStep(1, 'ok', 'Cargados');
+    }
+
+    const camOk = await abrirCamara();
+    if (!camOk) return;
+
+    // Intentar extraer descriptor de la foto de cédula en paralelo
+    lvStep(4, 'running', 'Preparando…');
+    const descriptorCedula = await detectarRostroEnCedula();
+    if (descriptorCedula) {
+      lvStep(4, 'ok', 'Listo para comparar');
+    } else {
+      lvStep(4, 'running', 'Sin foto referencia (demo)');
+    }
+
+    iniciarBucleDeteccion(descriptorCedula);
+  }
+
+  return { iniciar, detener: detenerCamara };
+})();
+
+// ── KYC NAVIGATION ──
+function iniciarKYC() {
+  document.getElementById('kyc-doc-card').classList.add('hidden');
+  document.getElementById('kyc-liveness-card').classList.remove('hidden');
+  KYC.iniciar();
+}
+
+function reiniciarKYC() {
+  KYC.detener();
+  KYC.iniciar();
+}
+
+function volverACedula() {
+  KYC.detener();
+  document.getElementById('kyc-liveness-card').classList.add('hidden');
+  document.getElementById('kyc-doc-card').classList.remove('hidden');
+}
+
+function show2FA() {
+  KYC.detener();
+  document.getElementById('kyc-liveness-card').classList.add('hidden');
+  document.getElementById('kyc-2fa-card').classList.remove('hidden');
+  // OTP timer
+  let t = 298;
+  const timer = document.getElementById('otp-timer');
+  const iv = setInterval(() => {
+    t--;
+    const m = Math.floor(t/60);
+    const s = t%60;
+    timer.textContent = m+':'+(s<10?'0':'')+s;
+    if (t<=0) clearInterval(iv);
+  }, 1000);
+}
+
+function otpMove(el, prevId, nextId) {
+  if (el.value && nextId) document.getElementById(nextId).focus();
+}
+
+// ── HELPER PARA ANIMACIÓN DE VALIDACIÓN ──
+function getCapacidadLabel() {
+  if (typeof FondouneSession === 'undefined') return 'Cap. calculada';
+  const nomina = FondouneSession.getNomina();
+  if (!nomina || !nomina.neto) return 'Cap. calculada';
+  const cap = Math.round(nomina.neto * 0.35 - (nomina.libranzas || 0));
+  return 'Cap. $' + Math.round(cap/1000) + 'K/mes';
+}
+
+// ── VALIDATION ENGINE ──
+const validations = [
+  { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
+  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
+  { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
+  { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:getCapacidadLabel(), detail:'Análisis completado' },
+  { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
+];
+
+function startValidation() {
+  let delay = 200;
+  validations.forEach((v, idx) => {
+    setTimeout(() => runValidation(v, idx), delay);
+    delay += v.time + 200;
+  });
+  const total = delay + 200;
+  setTimeout(() => {
+    document.getElementById('v-done').classList.remove('hidden');
+  }, total);
+}
+
+function runValidation(v, idx) {
+  const item = document.getElementById(v.id);
+  const vi = document.getElementById(v.vi);
+  const vs = document.getElementById(v.vs);
+  const pb = document.getElementById(v.pb);
+  item.classList.add('running');
+  vi.className = 'val-icon running';
+  vi.innerHTML = '<i class="ti ti-loader spin"></i>';
+  vs.textContent = 'Consultando...'; vs.className = 'val-status running';
+
+  let w = 0;
+  const iv = setInterval(() => {
+    w = Math.min(w + (100 / (v.time / 50)), 100);
+    pb.style.width = w + '%';
+    if (w >= 100) clearInterval(iv);
+  }, 50);
+
+  setTimeout(() => {
+    item.classList.remove('running'); item.classList.add('ok');
+    vi.className = 'val-icon ok'; vi.innerHTML = '<i class="ti ti-check"></i>';
+    vs.textContent = v.result; vs.className = 'val-status ok';
+    const nameEl = item.querySelector('.val-name');
+    if (nameEl) nameEl.innerHTML += ' <span class="tag tag-green" style="margin-left:6px;">'+v.detail+'</span>';
+  }, v.time);
+}
+
+// ── UPDATE SUMMARY ──
+function updateSummary() {
+  const monto = parseInt(document.getElementById('f-monto').value) || 0;
+  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
+  const tasa = 0.011;
+  const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
+  document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
+  document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
+}
+
+// ── BUILD RESULT (Paso 4) — puebla hero y metrics-band con datos reales ──
+function buildResult() {
+  const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+  const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
+  const plazo  = parseInt(plazoS.replace(' meses','')) || 24;
+  const tasa   = 0.011;
+  const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+
+  const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
+
+  // Metrics-band: monto / cuota / plazo reales en lugar de los valores fijos del HTML
+  const metrics = document.querySelectorAll('#s4 .metric .m-val');
+  if (metrics[0]) metrics[0].textContent = fmt(monto);
+  if (metrics[1]) metrics[1].textContent = fmt(cuota);
+  if (metrics[2]) metrics[2].textContent = plazo + ' meses';
+
+  // poblarDatosAsociado(4) ya calcula capacidad/% compromiso y los escribe
+  // en #res-capacidad / #res-porcentaje / #res-email-mask — solo nos
+  // asegura de que se ejecute con los datos más recientes del formulario.
+  poblarDatosAsociado(4);
+}
+
+function resetPortal() {
+  location.reload();
+}
+
+// ── IR A FIRMA (Módulo 4) ──
+function irAFirma() {
+  // Persistir los datos de la solicitud aprobada en sesión
+  // para que el Módulo 4 los pueda leer con FondouneSession.getCreditApp()
+  if (typeof FondouneSession !== 'undefined') {
+    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
+    const plazoEl = document.getElementById('f-plazo');
+    const plazo  = parseInt((plazoEl?.value || '24 meses').replace(' meses',''));
+    const tasa   = 0.011;
+    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
+
+    FondouneSession.saveCreditApp({
+      monto,
+      plazo,
+      cuota,
+      tasa:         '1.1% E.M.',
+      estado:       'pre-aprobado',
+      solicitudId:  'SOL-2025-0847',
+      score:        742,
+      riesgo:       'BAJO',
+      aprobadoEn:   new Date().toISOString(),
+    });
+
+    FondouneSession.queueNotif(
+      'Solicitud pre-aprobada. Por favor revisa y firma el pagaré electrónico.',
+      'success'
+    );
+  }
+
+  FondouneNav.navigateTo('firma');
+}
+
+// ── CEDULA INPUT — habilita el botón cuando hay suficientes dígitos ──
+function onCedulaInput(val) {
+  const cedula = val.replace(/[.\s]/g, '');
+  const btn    = document.getElementById('btn-verificar');
+  if (!btn) return;
+  const listo  = cedula.length >= 5;
+  btn.disabled = !listo;
+  btn.style.opacity = listo ? '1' : '.4';
+  // Si borraron la cédula, ocultar la tarjeta y el botón continuar
+  if (!listo) resetAsociadoCard();
+}
+
+// ── VERIFICAR ASOCIADO — llamada al Sheets ──
+async function verificarAsociado() {
+  const cedula = (document.getElementById('f-cedula')?.value || '').replace(/[.\s]/g, '');
+  if (!cedula || cedula.length < 5) return;
+
+  // Estado: cargando
+  const btn     = document.getElementById('btn-verificar');
+  const btnIcon = document.getElementById('btn-verificar-icon');
+  const btnTxt  = document.getElementById('btn-verificar-txt');
+  const statusEl = document.getElementById('sheets-status');
+
+  btn.disabled   = true;
+  btnIcon.className = 'ti ti-loader spin';
+  btnTxt.textContent = 'Buscando…';
+  statusEl.className = 'sheets-loading';
+  statusEl.textContent = 'Consultando base de datos FondoUne…';
+  statusEl.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+
+  // Garantizar sesión para que navigation.js no redirija
+  if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
+    FondouneSession.initUser({ id: cedula, role: 'asociado', name: 'Asociado', initials: 'A' });
+  }
+
+  if (typeof SheetsConnector === 'undefined') {
+    mostrarErrorVerificacion('El conector con la base de datos no está disponible.');
+    resetBotonVerificar();
+    return;
+  }
+
+  const datos = await SheetsConnector.obtenerAsociado(cedula);
+
+  // Restaurar botón
+  btn.disabled = false;
+  btnIcon.className = 'ti ti-search';
+  btnTxt.textContent = 'Verificar';
+
+  if (!datos) {
+    mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
+    resetAsociadoCard();
+    return;
+  }
+
+  if (!datos.activo) {
+    mostrarErrorVerificacion('El asociado figura como inactivo en el sistema.');
+    resetAsociadoCard();
+    return;
+  }
+
+  // ── Éxito: mostrar tarjeta con datos reales ──
+  statusEl.className = 'sheets-ok';
+  statusEl.textContent = '✓ Asociado verificado en la base de datos FondoUne';
+
+  // Poblar tarjeta
+  const fmt = n => typeof n === 'number' ? '$' + n.toLocaleString('es-CO') : (n || '—');
+  const ini = datos.nombre.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('asoc-initials').textContent  = ini;
+  document.getElementById('asoc-nombre').textContent    = datos.nombre;
+  document.getElementById('asoc-empresa').textContent   = datos.empresa + ' · ' + datos.ciudad;
+  document.getElementById('asoc-tel').textContent       = datos.telefono || '—';
+  document.getElementById('asoc-ciudad').textContent    = datos.ciudad   || '—';
+  document.getElementById('asoc-salario').textContent   = fmt(datos.salarioBasico);
+  document.getElementById('asoc-capacidad').textContent = fmt(datos.capacidadPago);
+  document.getElementById('asoc-agencia').textContent   = datos.agencia  || '—';
+  document.getElementById('asoc-ingreso').textContent   = datos.fechaIngreso || '—';
+
+  document.getElementById('asociado-card').style.display = 'block';
+  document.getElementById('extra-fields').style.display  = 'grid';
+  document.getElementById('consent-box').style.display   = 'flex';
+  document.getElementById('btn-continuar').style.display = 'inline-flex';
+
+  // Pre-llenar campos extra
+  document.getElementById('f-cel').value = datos.telefono || '';
+
+  // Persistir en sesión
+  if (typeof FondouneSession !== 'undefined') {
+    FondouneSession.initUser({
+      id:       cedula,
+      name:     datos.nombre,
+      empresa:  datos.empresa,
+      ciudad:   datos.ciudad,
+      tel:      datos.telefono || '',
+      role:     'asociado',
+      initials: ini,
+    });
+    FondouneSession.saveNomina({
+      basico:      datos.salarioBasico,
+      devengado:   datos.totalDevengado,
+      deducciones: datos.totalDeducciones,
+      neto:        datos.netoPagado,
+      libranzas:   datos.libranzasActivas || 0,
+      aportes:     datos.aportes,
+      empresa:     datos.empresa,
+      periodo:     datos.periodoNomina,
+      fuente:      'Google Sheets FondoUne',
+    });
+    if (typeof FondouneNav !== 'undefined') FondouneNav.updateUserInfo();
+  }
+}
+
+function mostrarErrorVerificacion(msg) {
+  const el = document.getElementById('sheets-status');
+  el.className = 'sheets-warn';
+  el.textContent = '⚠ ' + msg;
+  el.style.cssText = 'font-size:12px;padding:8px 12px;border-radius:7px;margin-top:8px;max-height:60px;';
+}
+
+function resetBotonVerificar() {
+  const btn = document.getElementById('btn-verificar');
+  if (btn) { btn.disabled = false; }
+  const icon = document.getElementById('btn-verificar-icon');
+  if (icon) icon.className = 'ti ti-search';
+  const txt = document.getElementById('btn-verificar-txt');
+  if (txt) txt.textContent = 'Verificar';
+}
+
+function resetAsociadoCard() {
+  document.getElementById('asociado-card').style.display  = 'none';
+  document.getElementById('extra-fields').style.display   = 'none';
+  document.getElementById('consent-box').style.display    = 'none';
+  document.getElementById('btn-continuar').style.display  = 'none';
+}
+
+// ── INICIALIZACIÓN DEMO ──
+// Sesión base para que navigation.js no redirija al login
+(function initPortalDemo() {
+  if (typeof FondouneSession === 'undefined') return;
+  if (!FondouneSession.isLoggedIn()) {
+    FondouneSession.initUser({ id: 'demo', name: 'Asociado', role: 'asociado', initials: 'A' });
+  }
+})();
+
+// Init summary
+updateSummary();
+
+// Las fotos de cédula se cargan manualmente por el usuario (cámara real)
+</script>
+</body>
+</html>
