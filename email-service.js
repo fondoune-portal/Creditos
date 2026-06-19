@@ -1,16 +1,20 @@
 /**
  * FondoUne — email-service.js
  * ─────────────────────────────────────────────────────────────────
- * Envía correos transaccionales usando la API REST de Resend.
- * No requiere SDK ni npm — funciona directo en HTML estático.
+ * Envía correos transaccionales a través de un proxy seguro en
+ * Google Apps Script (el mismo proyecto que ya usas para Sheets).
  *
- * IMPORTANTE SOBRE LA API KEY:
- * La key está aquí temporalmente para desarrollo. Antes de subir
- * a producción en GitHub Pages (repositorio público), muévela a
- * una Firebase Cloud Function o similar para que no quede expuesta.
- * Para un repositorio PRIVADO en GitHub Pages es aceptable por ahora.
+ * POR QUÉ ASÍ: la API key de Resend NUNCA debe vivir en el HTML/JS
+ * que se sube a GitHub Pages, porque el repo es público y cualquiera
+ * puede leer el código fuente. En vez de llamar a Resend directo
+ * desde el navegador, este archivo le pide a tu Apps Script (que
+ * vive en script.google.com, invisible para el navegador) que envíe
+ * el correo. La key queda guardada solo ahí, en Script Properties.
  *
- * Uso:
+ * Requiere: agregar la función enviarEmailProxy() a tu Code.gs
+ * existente (ver archivo AGREGAR-a-CodeGS.gs).
+ *
+ * Uso (sin cambios desde el resto del portal):
  *   await EmailService.enviarAprobacion({ solicitud, linkFirma });
  *   await EmailService.enviarRechazo({ solicitud, motivo });
  *   await EmailService.enviarConfirmacionFirma({ solicitud });
@@ -19,35 +23,35 @@
 
 const EmailService = (() => {
 
-  const RESEND_API_KEY = 're_LdwajwZu_MiQKRf3V3m3Zr5DV64zQ4966';
-  const RESEND_URL     = 'https://api.resend.com/emails';
+  // URL de tu Web App de Apps Script — LA MISMA que usas en
+  // sheets-connector.js. Si no la tienes a la mano, en el editor
+  // de Apps Script: Implementar → Administrar implementaciones →
+  // copiar la "URL de la app web".
+  const APPS_SCRIPT_URL = 'PEGA_AQUI_LA_MISMA_URL_DE_TU_APPS_SCRIPT_DE_SHEETS';
 
   // Remitente — mientras no tengas dominio verificado en Resend
   // usa onboarding@resend.dev (solo puede enviar a tu propio email)
-  // Cuando verifiques tu dominio cambia esto por:
-  // 'FondoUne <notificaciones@fondoune.com>'
-  const REMITENTE = 'FondoUne <onboarding@resend.dev>';
+  // Cuando verifiques tu dominio, cambia esto en Code.gs (no aquí)
+  // por: 'FondoUne <notificaciones@fondoune.com>'
 
   // URL base del portal (donde viven los módulos)
   const BASE_URL = 'https://fondoune-portal.github.io/Creditos';
 
-  // ── Helper principal ───────────────────────────────────────────
+  // ── Helper principal — ahora llama al proxy, no a Resend directo ─
   async function _enviar({ to, subject, html }) {
     try {
-      const resp = await fetch(RESEND_URL, {
+      const resp = await fetch(APPS_SCRIPT_URL, {
         method:  'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type':  'application/json',
-        },
-        body: JSON.stringify({ from: REMITENTE, to, subject, html }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        // Apps Script doPost(e) lee esto desde e.postData.contents
+        body: JSON.stringify({ action: 'enviarEmail', to, subject, html }),
       });
 
       const data = await resp.json();
 
-      if (!resp.ok) {
-        console.error('[EmailService] ❌ Error Resend:', data);
-        return { ok: false, error: data?.message || `HTTP ${resp.status}` };
+      if (!data.ok) {
+        console.error('[EmailService] ❌ Error vía proxy:', data.error);
+        return { ok: false, error: data.error || 'Error desconocido del proxy.' };
       }
 
       console.log('[EmailService] ✅ Correo enviado a:', to, '| ID:', data.id);
