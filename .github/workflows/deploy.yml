@@ -4,9 +4,12 @@ on:
   push:
     branches: [ main ]
 
-# ← AGREGAR ESTO — declara permisos explícitos
 permissions:
   contents: write
+
+# ← AGREGAR ESTO — fuerza Node 24 y silencia la advertencia
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: false
 
 jobs:
   deploy:
