@@ -44,6 +44,7 @@
 
   // ── 3. INICIALIZACIÓN (espera a que los SDKs estén listos) ─────
   let _db   = null;   // instancia de Firestore
+  let _auth = null;   // instancia de Firebase Auth
   let _ready = false; // flag de inicialización completa
 
   function inicializar() {
@@ -77,6 +78,16 @@
         firebase.initializeApp(FIREBASE_CONFIG);
       }
       _db    = firebase.firestore();
+
+      // Auth — necesario para el puente Stytch → Firebase Auth.
+      // Si el SDK de firebase-auth-compat no está cargado en el HTML,
+      // esto simplemente no estará disponible (no rompe Firestore).
+      if (typeof firebase.auth === 'function') {
+        _auth = firebase.auth();
+      } else {
+        console.warn('[FondoUne Firebase] ⚠️ firebase-auth-compat.js no está cargado — el puente Stytch→Firebase no funcionará hasta agregarlo.');
+      }
+
       _ready = true;
       console.log('[FondoUne Firebase] ✅ Firestore conectado — proyecto:', FIREBASE_CONFIG.projectId);
       resolve(_db);
