@@ -314,10 +314,16 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 /* Divider */
 .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
 </style>
-  <!-- FondoUne: navegacion y sesion compartida -->
+  <!-- FondoUne: seguridad y navegación -->
+  <script src="security-validator.js"></script>
   <script src="navigation.js"></script>
   <script src="session.js"></script>
   <script>FondouneNav.init('analista');</script>
+
+  <!-- Firebase SDK (compat v9 — carga vía CDN, sin npm) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -449,163 +455,237 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────
-const DATA = [];
-  {
-    id:'SOL-2025-0847', nombre:'Carlos Andrés Gil', ced:'1.045.678.901',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Técnico de Redes', tiempo:'Hace 18 min', ts:'09:42',
-    monto:8000000, plazo:24, tipo:'Consumo', destino:'Gastos personales',
-    score:742, sp:82, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:742,estado:'Sin novedad',obli:1,endeuda:1200000,comp:'Paga los primeros 5 días del mes'},
-    nom:{bas:3800000,dev:4250000,ded:1100000,neto:3150000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:945000, cuota:391800, pct:30.4,
-    hist:'2 créditos previos · Pagados a tiempo · Sin moras',
-    rec:'APROBAR', col:'#3B82F6', ini:'CG',
-    log:[
-      {ts:'09:42',txt:'Solicitud recibida y validada por el sistema',dot:'dot-blue'},
-      {ts:'09:42',txt:'KYC completado · Identidad verificada · Liveness OK',dot:'dot-green'},
-      {ts:'09:42',txt:'DataCrédito consultado · Score 742 · Sin novedad',dot:'dot-green'},
-      {ts:'09:43',txt:'Nómina leída por IA · Capacidad $945.000/mes confirmada',dot:'dot-green'},
-      {ts:'09:43',txt:'Motor IA emite recomendación: <strong>APROBAR</strong>',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0846', nombre:'Valentina Ospina', ced:'1.152.445.230',
-    empresa:'Emtelco S.A.', cargo:'Asesora Call Center', tiempo:'Hace 42 min', ts:'09:18',
-    monto:5000000, plazo:18, tipo:'Educativo', destino:'Posgrado EAFIT',
-    score:811, sp:90, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:811,estado:'Sin novedad',obli:0,endeuda:0,comp:'Sin deudas activas · Historia limpia'},
-    nom:{bas:2800000,dev:3100000,ded:650000,neto:2450000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:857500, cuota:317400, pct:36.8,
-    hist:'Primer crédito con el fondo',
-    rec:'APROBAR', col:'#10B981', ini:'VO',
-    log:[
-      {ts:'09:18',txt:'Solicitud recibida · Tipo: Educativo',dot:'dot-blue'},
-      {ts:'09:19',txt:'KYC verificado exitosamente en todos los controles',dot:'dot-green'},
-      {ts:'09:19',txt:'Score 811 · Por encima del percentil 85 de la cartera',dot:'dot-green'},
-      {ts:'09:20',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Sin restricciones',dot:'dot-gold'},
-    ]
-  },
-  {
-    id:'SOL-2025-0845', nombre:'Jhon Fredy Morales', ced:'71.783.990.1',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Supervisor Regional', tiempo:'Hace 1 h', ts:'08:42',
-    monto:15000000, plazo:36, tipo:'Consumo', destino:'Consolidación deudas',
-    score:614, sp:68, riesgo:'medio', estado:'revision',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:614,estado:'Mora resuelta hace 8m',obli:3,endeuda:4800000,comp:'Mora ≤30 días resuelta hace 8 meses'},
-    nom:{bas:5200000,dev:6100000,ded:2900000,neto:3200000,lib:1800000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:320000, cuota:516800, pct:64.2,
-    hist:'1 crédito previo · Mora resuelta hace 8 meses',
-    rec:'REVISAR', col:'#F59E0B', ini:'JM',
-    log:[
-      {ts:'08:42',txt:'Solicitud recibida',dot:'dot-blue'},
-      {ts:'08:43',txt:'KYC verificado · Todos los controles OK',dot:'dot-green'},
-      {ts:'08:43',txt:'DataCrédito: Mora ≤30d resuelta hace 8 meses · Score 614',dot:'dot-amber'},
-      {ts:'08:44',txt:'% compromiso ingreso supera el límite: 64.2% > 35%',dot:'dot-amber'},
-      {ts:'08:44',txt:'Motor IA: <strong>REVISAR</strong> · Requiere validación analista',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0844', nombre:'Sandra Patricia Ruiz', ced:'43.720.881.0',
-    empresa:'Emtelco S.A.', cargo:'Analista de Datos', tiempo:'Hace 2 h', ts:'07:55',
-    monto:3000000, plazo:12, tipo:'Emergencia médica', destino:'Cirugía familiar',
-    score:756, sp:84, riesgo:'bajo', estado:'aprobado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:756,estado:'Sin novedad',obli:1,endeuda:900000,comp:'Excelente historial · Paga antes del vencimiento'},
-    nom:{bas:3200000,dev:3450000,ded:720000,neto:2730000,lib:0,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:955500, cuota:266100, pct:28.0,
-    hist:'3 créditos previos · Todos pagados a tiempo',
-    rec:'APROBAR', col:'#8B5CF6', ini:'SR',
-    log:[
-      {ts:'07:55',txt:'Solicitud recibida · Tipo: Emergencia médica',dot:'dot-blue'},
-      {ts:'07:56',txt:'KYC completado exitosamente',dot:'dot-green'},
-      {ts:'07:56',txt:'Score 756 · Excelente historial interno',dot:'dot-green'},
-      {ts:'07:57',txt:'Motor IA: <strong>APROBAR</strong>',dot:'dot-gold'},
-      {ts:'08:10',txt:'<strong>Aprobado por analista</strong> · María Rodríguez',dot:'dot-green'},
-      {ts:'08:11',txt:'Pagaré electrónico enviado · Pendiente firma asociada',dot:'dot-blue'},
-    ]
-  },
-  {
-    id:'SOL-2025-0843', nombre:'Rodrigo Alberto Ríos', ced:'98.610.441.5',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Ingeniero de Soporte', tiempo:'Hace 3 h', ts:'06:58',
-    monto:20000000, plazo:48, tipo:'Consumo', destino:'Vehículo',
-    score:501, sp:55, riesgo:'alto', estado:'rechazado',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'alerta',uiaf:'ok'},
-    dc:{score:501,estado:'Mora activa',obli:5,endeuda:12000000,comp:'3 reportes negativos activos · No apto'},
-    nom:{bas:4100000,dev:4500000,ded:3100000,neto:1400000,lib:2200000,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:0, cuota:575600, pct:100,
-    hist:'Mora activa en centrales de riesgo · No apto',
-    rec:'RECHAZAR', col:'#EF4444', ini:'RR',
-    log:[
-      {ts:'06:58',txt:'Solicitud recibida',dot:'dot-blue'},
-      {ts:'06:59',txt:'Alerta SARLAFT detectada · Revisión adicional activada',dot:'dot-amber'},
-      {ts:'07:00',txt:'Score 501 · 3 obligaciones en mora activa',dot:'dot-red'},
-      {ts:'07:00',txt:'Capacidad de pago: negativa · Neto insuficiente para cuota',dot:'dot-red'},
-      {ts:'07:01',txt:'Motor IA: <strong>RECHAZAR</strong> automático · Riesgo alto',dot:'dot-red'},
-      {ts:'07:05',txt:'<strong>Rechazado por analista</strong> · Mora activa no superable · Recomendado regularizar primero',dot:'dot-red'},
-    ]
-  },
-  {
-    id:'SOL-2025-0842', nombre:'Luz Marina Cardona', ced:'32.540.117.8',
-    empresa:'Emtelco S.A.', cargo:'Coordinadora RRHH', tiempo:'Hace 4 h', ts:'05:50',
-    monto:10000000, plazo:24, tipo:'Vivienda', destino:'Mejoras del hogar',
-    score:693, sp:77, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:693,estado:'Sin novedad',obli:2,endeuda:2200000,comp:'Buen comportamiento de pago'},
-    nom:{bas:4800000,dev:5200000,ded:1600000,neto:3600000,lib:500000,emp:'Emtelco S.A.',per:'Abril 2025'},
-    cap:760000, cuota:489700, pct:43.3,
-    hist:'1 crédito previo · Al día · Sin novedades',
-    rec:'REVISAR', col:'#06B6D4', ini:'LC',
-    log:[
-      {ts:'05:50',txt:'Solicitud recibida · Tipo: Vivienda',dot:'dot-blue'},
-      {ts:'05:51',txt:'KYC completado · Identidad verificada',dot:'dot-green'},
-      {ts:'05:52',txt:'Score 693 · Dentro del rango aprobable',dot:'dot-green'},
-      {ts:'05:52',txt:'% compromiso: 43.3% · Supera límite estándar del 35%',dot:'dot-amber'},
-      {ts:'05:53',txt:'Motor IA: <strong>REVISAR</strong> · Analista debe evaluar excepciones',dot:'dot-amber'},
-    ]
-  },
-  {
-    id:'SOL-2025-0841', nombre:'Mauricio Estrada', ced:'70.561.228.3',
-    empresa:'Tigo-UNE S.A.S.', cargo:'Director Comercial', tiempo:'Hace 5 h', ts:'04:42',
-    monto:25000000, plazo:48, tipo:'Libranza especial', destino:'Inversión personal',
-    score:878, sp:97, riesgo:'bajo', estado:'pendiente',
-    kyc:{cedula:'ok',rnec:'ok',liveness:'ok',biometria:'ok',sarlaft:'ok',uiaf:'ok'},
-    dc:{score:878,estado:'Excelente',obli:1,endeuda:3000000,comp:'Siempre paga anticipado · Percentil 97'},
-    nom:{bas:9500000,dev:11200000,ded:2800000,neto:8400000,lib:0,emp:'Tigo-UNE S.A.S.',per:'Abril 2025'},
-    cap:2940000, cuota:660100, pct:22.5,
-    hist:'5 créditos previos · Récord impecable',
-    rec:'APROBAR', col:'#D4A843', ini:'ME',
-    log:[
-      {ts:'04:42',txt:'Solicitud recibida · Monto alto: $25.000.000',dot:'dot-blue'},
-      {ts:'04:43',txt:'KYC verificado · Sin anomalías',dot:'dot-green'},
-      {ts:'04:43',txt:'Score 878 · Top 3% de la cartera del fondo',dot:'dot-green'},
-      {ts:'04:44',txt:'Capacidad de pago $2.94M/mes · Amplio margen',dot:'dot-green'},
-      {ts:'04:44',txt:'Motor IA: <strong>APROBAR</strong> · Riesgo bajo · Perfil VIP',dot:'dot-gold'},
-    ]
-  },
-];
+// ══════════════════════════════════════════════════════════════
+// MÓDULO 2 — Dashboard Analista
+// Firebase real + validación de seguridad
+// ══════════════════════════════════════════════════════════════
 
-let currentFilter='todas', currentSearch='', selectedId=null;
-let pendingAction=null, pendingSolId=null;
+// DATA vive en Firebase — este array se llena en tiempo real
+let DATA = [];
 
-const fmt = n => '$'+n.toLocaleString('es-CO');
+let currentFilter  = 'todas';
+let currentSearch  = '';
+let selectedId     = null;
+let pendingAction  = null;
+let pendingSolId   = null;
+let _unsubscribe   = null;   // función para cancelar el listener de Firebase
 
-// ── FILTERS ──────────────────────────────────────────
+const fmt = n => '$' + Number(n || 0).toLocaleString('es-CO');
+
+// ── Analista en sesión ────────────────────────────────────────
+function getAnalistaActual() {
+  if (typeof FondouneSession !== 'undefined') {
+    const u = FondouneSession.getUser();
+    return { id: u?.id || 'analista', nombre: u?.name || 'Analista' };
+  }
+  return { id: 'analista', nombre: 'Analista' };
+}
+
+// ── Mapa de estados Firebase → etiqueta UI ───────────────────
+const ESTADO_MAP = {
+  pendiente_analista: 'pendiente',
+  aprobado:           'aprobado',
+  rechazado:          'rechazado',
+  revision:           'revision',
+  firmado:            'aprobado',
+};
+
+// ── Adaptar documento Firebase al formato que espera la UI ───
+function adaptarDoc(doc) {
+  const s = FondouneValidator.sanitize;
+  const n = v => Number(v) || 0;
+
+  const estadoUI = ESTADO_MAP[doc.estado] || 'pendiente';
+  const nombre   = s(doc.nombre   || '—');
+  const empresa  = s(doc.empresa  || '—');
+  const ced      = s(doc.cedula   || '—');
+
+  // Tiempo relativo desde la solicitud
+  const tiempo = doc.fechaSolicitud
+    ? tiempoRelativo(doc.fechaSolicitud)
+    : 'Fecha desconocida';
+
+  const ts = doc.fechaSolicitud
+    ? new Date(doc.fechaSolicitud).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})
+    : '—';
+
+  // Score: preferir CIFIN si existe, sino scorePropio
+  const score = n(doc.scoreCIFIN || doc.scoreDataCredito || doc.scorePropio || 0);
+  const sp    = n(doc.scorePropio || 0);
+
+  // Color avatar basado en riesgo
+  const colRiesgo = {bajo:'#10B981', medio:'#F59E0B', alto:'#EF4444'}[doc.riesgo] || '#6B7280';
+
+  // Iniciales del nombre
+  const ini = nombre.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  return {
+    // IDs
+    id:      doc.id,
+    fbId:    doc.id,    // ID real de Firestore
+
+    // Persona
+    nombre, empresa, ced,
+    cargo:  s(doc.cargo || ''),
+    email:  s(doc.email || ''),
+
+    // Tiempo
+    tiempo, ts,
+
+    // Crédito
+    monto:  n(doc.monto),
+    plazo:  n(doc.plazo),
+    cuota:  n(doc.cuota),
+    tipo:   s(doc.destinoCredito || doc.tipo || 'Consumo'),
+    destino:s(doc.destinoCredito || ''),
+
+    // Scores
+    score, sp,
+    riesgo: s(doc.riesgo || 'sin_datos'),
+
+    // Estado
+    estado:  estadoUI,
+    estadoFB:doc.estado,
+
+    // KYC (resultado guardado del proceso KYC)
+    kyc: {
+      cedula:   doc.kyc?.cedula    || 'ok',
+      rnec:     doc.kyc?.rnec      || 'ok',
+      liveness: doc.kyc?.liveness  || 'ok',
+      biometria:doc.kyc?.biometria || 'ok',
+      uiaf:     doc.kyc?.uiaf      || 'pendiente',
+    },
+
+    // CIFIN / DataCrédito
+    dc: {
+      score:   score,
+      estado:  s(doc.estadoCIFIN   || doc.dc?.estado   || 'No consultado'),
+      obli:    n(doc.dc?.obli      || 0),
+      endeuda: n(doc.dc?.endeuda   || 0),
+      comp:    s(doc.dc?.comp      || 'Sin datos de centrales'),
+    },
+
+    // Nómina
+    nom: {
+      bas:  n(doc.nomina?.salarioBasico),
+      dev:  n(doc.nomina?.devengado),
+      ded:  n(doc.nomina?.deducciones),
+      neto: n(doc.nomina?.netoPagado),
+      lib:  n(doc.nomina?.libranzasActivas),
+      emp:  s(empresa),
+      per:  s(doc.nomina?.periodo || ''),
+    },
+
+    // Capacidad
+    cap:  n(doc.capacidadPago),
+    pct:  n(doc.porcentajeCompromiso),
+
+    // Historial
+    hist: s(doc.historial || 'Sin historial previo en el fondo'),
+    rec:  doc.recomendacionIA || (doc.riesgo==='bajo'?'APROBAR':doc.riesgo==='alto'?'RECHAZAR':'REVISAR'),
+
+    // Visual
+    col: colRiesgo,
+    ini,
+
+    // Log de auditoría
+    log: Array.isArray(doc.log) ? doc.log.map(l => ({
+      ts:  s(l.ts  || ''),
+      txt: s(l.txt || ''),
+      dot: s(l.dot || 'dot-muted'),
+    })) : [],
+
+    // Token (para mostrar estado firmado)
+    tokenUsado:   doc.tokenUsado   || false,
+    numeroPagare: s(doc.numeroPagare || ''),
+  };
+}
+
+function tiempoRelativo(fecha) {
+  if (!fecha) return '—';
+  const diff = Math.floor((Date.now() - new Date(fecha).getTime()) / 1000);
+  if (diff < 60)       return 'Hace menos de 1 min';
+  if (diff < 3600)     return `Hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400)    return `Hace ${Math.floor(diff/3600)} h`;
+  return `Hace ${Math.floor(diff/86400)} días`;
+}
+
+// ── INICIALIZAR LISTENER FIREBASE ─────────────────────────────
+async function iniciarListenerFirebase() {
+  // Cancelar listener previo si existe
+  if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+
+  try {
+    _unsubscribe = await FondoUneFirebase.escucharSolicitudes(
+      (solicitudes) => {
+        const prevCount = DATA.length;
+        DATA = solicitudes.map(adaptarDoc);
+
+        // Notificar si llegó una solicitud nueva mientras la vista está abierta
+        if (prevCount > 0 && DATA.length > prevCount) {
+          const nueva = DATA[0];
+          showToast(
+            `🔔 Nueva solicitud: ${nueva.nombre} · ${fmt(nueva.monto)}`,
+            'toast-blue', 'ti-bell-ringing'
+          );
+          const pip = document.getElementById('notif-pip');
+          if (pip) pip.style.display = 'block';
+        }
+
+        actualizarStats();
+        applyFilters();
+
+        // Re-seleccionar la solicitud que estaba abierta si sigue existiendo
+        if (selectedId && DATA.find(x => x.id === selectedId)) {
+          selectSol(selectedId);
+        } else if (DATA.length > 0 && !selectedId) {
+          setTimeout(() => selectSol(DATA[0].id), 150);
+        }
+      },
+      {} // sin filtros — carga todas
+    );
+
+    console.log('[Módulo2] ✅ Listener Firebase activo');
+
+  } catch (err) {
+    console.error('[Módulo2] ❌ Error al conectar Firebase:', err);
+    showToast('No se pudo conectar con Firebase. Verifica tu conexión.', 'toast-err', 'ti-alert-circle');
+  }
+}
+
+// ── STATS BAR ────────────────────────────────────────────────
+function actualizarStats() {
+  const total = DATA.length;
+  const pend  = DATA.filter(s => s.estado === 'pendiente').length;
+  const pre   = DATA.filter(s => s.estado === 'aprobado').length;
+  const monto = DATA.reduce((a, s) => a + (s.monto || 0), 0);
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('sv-total', total);
+  set('sv-pend',  pend);
+  set('sv-pre',   pre);
+
+  // Contadores del sidebar
+  set('ct-todas', total);
+  set('ct-pend',  pend);
+  set('ct-rev',   DATA.filter(s => s.estado === 'revision').length);
+  set('ct-apro',  pre);
+  set('ct-rech',  DATA.filter(s => s.estado === 'rechazado').length);
+}
+
+// ── FILTERS ──────────────────────────────────────────────────
 function setFilter(f, el) {
   currentFilter = f;
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  // sync sidebar
-  document.querySelectorAll('.sb-item').forEach(i=>{
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => {
     i.classList.remove('active');
     const txt = i.textContent.trim().toLowerCase();
-    if(f==='todas'&&txt.startsWith('todas')) i.classList.add('active');
-    if(f==='pendiente'&&txt.startsWith('pendiente')) i.classList.add('active');
-    if(f==='revision'&&txt.startsWith('en revisión')) i.classList.add('active');
-    if(f==='aprobado'&&txt.startsWith('aprobadas')) i.classList.add('active');
-    if(f==='rechazado'&&txt.startsWith('rechazadas')) i.classList.add('active');
+    if (f==='todas'    && txt.startsWith('todas'))      i.classList.add('active');
+    if (f==='pendiente'&& txt.startsWith('pendiente'))  i.classList.add('active');
+    if (f==='revision' && txt.startsWith('en revisión'))i.classList.add('active');
+    if (f==='aprobado' && txt.startsWith('aprobadas'))  i.classList.add('active');
+    if (f==='rechazado'&& txt.startsWith('rechazadas')) i.classList.add('active');
   });
   applyFilters();
 }
@@ -613,10 +693,10 @@ function setFilter(f, el) {
 function applyFilters() {
   currentSearch = document.getElementById('search-inp').value.toLowerCase();
   const filtered = DATA.filter(s => {
-    const matchF = currentFilter==='todas' || s.estado===currentFilter;
+    const matchF = currentFilter === 'todas' || s.estado === currentFilter;
     const matchS = !currentSearch ||
-      s.nombre.toLowerCase().includes(currentSearch) ||
-      s.ced.includes(currentSearch) ||
+      s.nombre.toLowerCase().includes(currentSearch)  ||
+      s.ced.toLowerCase().includes(currentSearch)     ||
       s.empresa.toLowerCase().includes(currentSearch) ||
       s.id.toLowerCase().includes(currentSearch);
     return matchF && matchS;
@@ -625,126 +705,125 @@ function applyFilters() {
 }
 
 function clearSearch() {
-  document.getElementById('search-inp').value='';
+  document.getElementById('search-inp').value = '';
   applyFilters();
 }
 
-// ── RENDER LIST ───────────────────────────────────────
+// ── RENDER LIST ───────────────────────────────────────────────
 function renderList(data) {
   const c = document.getElementById('req-list');
   c.innerHTML = '';
   document.getElementById('list-count').textContent =
     `${data.length} solicitud${data.length!==1?'es':''} · ordenadas por reciente`;
 
+  if (data.length === 0) {
+    c.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">No hay solicitudes que coincidan</div>';
+    return;
+  }
+
+  const eB = {
+    pendiente: '<span class="badge b-amber">● Pendiente</span>',
+    revision:  '<span class="badge b-amber">● En revisión</span>',
+    aprobado:  '<span class="badge b-green">✓ Aprobado</span>',
+    rechazado: '<span class="badge b-red">✗ Rechazado</span>',
+  };
+
   data.forEach(s => {
     const card = document.createElement('div');
-    card.className = 'rcard' + (s.id===selectedId?' sel':'');
+    card.className = 'rcard' + (s.id === selectedId ? ' sel' : '');
     card.onclick = () => selectSol(s.id);
 
-    const eB = {
-      pendiente:'<span class="badge b-amber">● Pendiente</span>',
-      revision: '<span class="badge b-amber">⚠ En revisión</span>',
-      aprobado: '<span class="badge b-green">✓ Aprobado</span>',
-      rechazado:'<span class="badge b-red">✗ Rechazado</span>',
-    }[s.estado]||'';
-    const rB = {
-      APROBAR: '<span class="badge b-green">IA: Aprobar</span>',
-      REVISAR: '<span class="badge b-amber">IA: Revisar</span>',
-      RECHAZAR:'<span class="badge b-red">IA: Rechazar</span>',
-    }[s.rec]||'';
-    const sc = s.score>=700?'var(--green2)':s.score>=600?'var(--amber3)':'var(--red2)';
+    const scoreColor = s.score >= 700 ? 'var(--green2)' : s.score >= 600 ? 'var(--amber3)' : 'var(--red2)';
 
     card.innerHTML = `
       <div class="rc-row1">
         <div class="rc-av" style="background:${s.col}20;color:${s.col}">${s.ini}</div>
         <div>
           <div class="rc-nm">${s.nombre}</div>
-          <div class="rc-cc">${s.ced} · ${s.empresa.split(' ')[0]}</div>
+          <div class="rc-cc">${s.ced} · ${s.empresa}</div>
         </div>
         <div class="rc-ago">${s.tiempo}</div>
       </div>
-      <div class="rc-monto">${fmt(s.monto)} <span style="font-size:11px;color:var(--muted);font-weight:400">${s.plazo}m · ${s.tipo}</span></div>
+      <div class="rc-monto">${fmt(s.monto)}</div>
       <div class="rc-tags">
-        ${eB}${rB}
+        ${eB[s.estado] || ''}
+        <span class="badge b-muted">${s.plazo}m</span>
+        <span class="badge b-muted">${s.tipo}</span>
+        ${s.riesgo==='alto'?'<span class="badge b-red">Alto riesgo</span>':
+          s.riesgo==='medio'?'<span class="badge b-amber">Riesgo medio</span>':
+          s.riesgo==='bajo'?'<span class="badge b-green">Riesgo bajo</span>':''}
         <div class="rc-score-chip" style="margin-left:auto">
-          <div class="rc-score-num" style="color:${sc}">${s.score}</div>
-          <div style="color:var(--muted)">score</div>
+          <div class="rc-score-num" style="color:${scoreColor}">${s.score||'—'}</div>
+          <div style="color:var(--muted)">Score</div>
         </div>
       </div>`;
     c.appendChild(card);
   });
-
-  updateCounts();
 }
 
-function updateCounts() {
-  const count = f => DATA.filter(s=>s.estado===f).length;
-  document.getElementById('ct-todas').textContent = DATA.length;
-  document.getElementById('ct-pend').textContent  = count('pendiente');
-  document.getElementById('ct-rev').textContent   = count('revision');
-  document.getElementById('ct-apro').textContent  = count('aprobado');
-  document.getElementById('ct-rech').textContent  = count('rechazado');
-  document.getElementById('sv-pend').textContent  = count('pendiente');
-}
-
-// ── SELECT ────────────────────────────────────────────
+// ── SELECT ────────────────────────────────────────────────────
 function selectSol(id) {
   selectedId = id;
-  const s = DATA.find(x=>x.id===id);
-  if(!s) return;
+  const s = DATA.find(x => x.id === id);
+  if (!s) return;
   applyFilters();
-  document.getElementById('empty-state').style.display='none';
+  document.getElementById('empty-state').style.display = 'none';
   const db = document.getElementById('detail-body');
-  db.style.display='block';
+  db.style.display = 'block';
   db.innerHTML = buildDetail(s);
-  // Animate bars after render
   setTimeout(() => {
-    const gf=document.getElementById('gf-'+id);   if(gf) gf.style.width=s.sp+'%';
-    const cf=document.getElementById('cf-'+id);   if(cf) cf.style.width=Math.min(Math.max((s.cap/s.nom.neto)*100,0),100)+'%';
-    const pf=document.getElementById('pf-'+id);   if(pf) pf.style.width=Math.min(s.pct,100)+'%';
-    const cvf=document.getElementById('cvf-'+id); if(cvf) cvf.style.width=Math.min((s.cuota/s.nom.neto)*100,100)+'%';
+    const gf  = document.getElementById('gf-'+id);  if (gf)  gf.style.width  = s.sp + '%';
+    const cf  = document.getElementById('cf-'+id);  if (cf)  cf.style.width  = Math.min(Math.max((s.cap/Math.max(s.nom.neto,1))*100,0),100) + '%';
+    const pf  = document.getElementById('pf-'+id);  if (pf)  pf.style.width  = Math.min(s.pct,100) + '%';
+    const cvf = document.getElementById('cvf-'+id); if (cvf) cvf.style.width = Math.min((s.cuota/Math.max(s.nom.neto,1))*100,100) + '%';
   }, 100);
 }
 
-// ── BUILD DETAIL ──────────────────────────────────────
+// ── BUILD DETAIL ──────────────────────────────────────────────
 function buildDetail(s) {
-  const canAct = s.estado!=='aprobado' && s.estado!=='rechazado';
-  const rColor = {bajo:'var(--green2)',medio:'var(--amber3)',alto:'var(--red2)'}[s.riesgo];
-  const rLabel = {bajo:'Riesgo bajo',medio:'Riesgo medio',alto:'Riesgo alto'}[s.riesgo];
-  const pcColor = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber3)':'var(--red2)';
-  const pcBarCol = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber2)':'var(--red2)';
-  const capColor = s.cap>0?'var(--green2)':'var(--red2)';
+  const canAct  = s.estado !== 'aprobado' && s.estado !== 'rechazado' && s.estado !== 'firmado';
+  const rColor  = {bajo:'var(--green2)', medio:'var(--amber3)', alto:'var(--red2)'}[s.riesgo] || 'var(--muted)';
+  const rLabel  = {bajo:'Riesgo bajo',   medio:'Riesgo medio',  alto:'Riesgo alto'}[s.riesgo]  || 'Sin datos';
+  const pcColor   = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber3)':'var(--red2)';
+  const pcBarCol  = s.pct<=35?'var(--green2)':s.pct<=50?'var(--amber2)':'var(--red2)';
+  const capColor  = s.cap>0?'var(--green2)':'var(--red2)';
   const capBarCol = s.cap>0?'var(--green2)':'var(--red2)';
 
-  const kycR = (label,field,extra) => {
-    const v=s.kyc[field];
-    const cls=v==='ok'?'ok':v==='alerta'?'warn':'fail';
-    const ic=v==='ok'?'ti-check':v==='alerta'?'ti-alert-triangle':'ti-x';
-    const txt=v==='ok'?'Verificado':v==='alerta'?'Alerta detectada':'Fallo';
-    const rowCls=v==='alerta'?' warn-row':'';
-    return `<div class="krow${rowCls}"><div class="k-ico k-${cls}"><i class="ti ${ic}"></i></div><div class="k-nm">${label}</div><div class="k-res ${cls}">${txt}${extra?` · ${extra}`:''}</div></div>`;
+  const kycR = (label, field) => {
+    const v   = s.kyc[field] || 'pendiente';
+    const cls = v==='ok'?'ok':v==='alerta'?'warn':'fail';
+    const ic  = v==='ok'?'ti-check':v==='alerta'?'ti-alert-triangle':'ti-x';
+    const txt = v==='ok'?'Verificado':v==='alerta'?'Alerta detectada':v==='pendiente'?'Pendiente':'Fallo';
+    return `<div class="krow${v==='alerta'?' warn-row':''}">
+      <div class="k-ico k-${cls}"><i class="ti ${ic}"></i></div>
+      <div class="k-nm">${label}</div>
+      <div class="k-res ${cls}">${txt}</div>
+    </div>`;
   };
 
   const riskSegs = () => {
-    const n=10,f=s.riesgo==='bajo'?3:s.riesgo==='medio'?6:9;
+    const n=10, f=s.riesgo==='bajo'?3:s.riesgo==='medio'?6:9;
     const fc=s.riesgo==='bajo'?'rb-green':s.riesgo==='medio'?'rb-amber':'rb-red';
     return Array.from({length:n},(_,i)=>`<div class="rb-seg ${i<f?fc:''}"></div>`).join('');
   };
 
-  const tlItems = s.log.map(l=>
+  const tlItems = s.log.map(l =>
     `<div class="tl-item"><div class="tl-dot ${l.dot}"></div><div class="tl-time">${l.ts}</div><div class="tl-txt">${l.txt}</div></div>`
-  ).join('');
+  ).join('') || '<div class="tl-item"><div class="tl-dot dot-muted"></div><div class="tl-txt">Sin registro de auditoría previo</div></div>';
 
-  const actionBtns = canAct ? `
-    <button class="btn btn-no" onclick="openModal('rechazar','${s.id}')"><i class="ti ti-x"></i> Rechazar</button>
-    <button class="btn btn-ask" onclick="openModal('info','${s.id}')"><i class="ti ti-send"></i> Pedir info</button>
-    <button class="btn btn-ok" onclick="openModal('aprobar','${s.id}')"><i class="ti ti-check"></i> Aprobar</button>` :
-    `<span class="badge ${s.estado==='aprobado'?'b-green':'b-red'}" style="font-size:11px;padding:5px 11px">${s.estado==='aprobado'?'✓ Aprobado':'✗ Rechazado'}</span>`;
+  const actionBtns = canAct
+    ? `<button class="btn btn-no" onclick="openModal('rechazar','${s.id}')"><i class="ti ti-x"></i> Rechazar</button>
+       <button class="btn btn-ask" onclick="openModal('info','${s.id}')"><i class="ti ti-send"></i> Pedir info</button>
+       <button class="btn btn-ok" onclick="openModal('aprobar','${s.id}')"><i class="ti ti-check"></i> Aprobar</button>`
+    : `<span class="badge ${s.estado==='aprobado'||s.estado==='firmado'?'b-green':'b-red'}" style="font-size:11px;padding:5px 11px">${s.estado==='aprobado'?'✓ Aprobado':s.estado==='firmado'?'✓ Firmado':'✗ Rechazado'}</span>`;
+
+  // Badge CIFIN
+  const cifinBadge = s.dc.estado !== 'No consultado'
+    ? `<span class="badge b-blue" style="margin-left:4px">CIFIN consultado</span>`
+    : `<span class="badge b-muted" style="margin-left:4px">CIFIN pendiente</span>`;
 
   return `
 <div class="detail-body">
-
-  <!-- HEADER -->
   <div class="dhead">
     <div class="d-av" style="background:${s.col}20;color:${s.col}">${s.ini}</div>
     <div style="flex:1;min-width:0">
@@ -752,19 +831,20 @@ function buildDetail(s) {
       <div class="d-meta">
         <span><i class="ti ti-id" style="font-size:12px"></i>${s.ced}</span>
         <span><i class="ti ti-building" style="font-size:12px"></i>${s.empresa}</span>
-        <span><i class="ti ti-briefcase" style="font-size:12px"></i>${s.cargo}</span>
+        ${s.cargo?`<span><i class="ti ti-briefcase" style="font-size:12px"></i>${s.cargo}</span>`:''}
         <span><i class="ti ti-clock" style="font-size:12px"></i>${s.tiempo}</span>
+        ${s.email?`<span><i class="ti ti-mail" style="font-size:12px"></i>${s.email}</span>`:''}
       </div>
       <div class="d-badges">
-        <span class="badge b-muted" style="font-family:'IBM Plex Mono',monospace">${s.id}</span>
+        <span class="badge b-muted" style="font-family:'IBM Plex Mono',monospace">${s.id.slice(0,20)}</span>
         <span class="badge" style="background:${s.col}15;color:${s.col}">${rLabel.toUpperCase()}</span>
         <span class="badge b-muted">${s.ts}</span>
+        ${s.numeroPagare?`<span class="badge b-blue">${s.numeroPagare}</span>`:''}
       </div>
     </div>
     <div class="d-actions">${actionBtns}</div>
   </div>
 
-  <!-- SOLICITUD -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-currency-dollar"></i>Datos de la solicitud</div>
     <div class="grid-4">
@@ -773,17 +853,15 @@ function buildDetail(s) {
       <div class="cell"><div class="cl">Tipo de crédito</div><div class="cv">${s.tipo}</div></div>
       <div class="cell"><div class="cl">Cuota estimada</div><div class="cv mono" style="color:var(--gold2)">${fmt(s.cuota)}</div><div class="cs">Tasa 1.1% E.M.</div></div>
     </div>
-    <div class="cell" style="margin-top:8px"><div class="cl">Destino declarado</div><div class="cv" style="font-size:12px">${s.destino}</div></div>
+    ${s.destino?`<div class="cell" style="margin-top:8px"><div class="cl">Destino declarado</div><div class="cv" style="font-size:12px">${s.destino}</div></div>`:''}
   </div>
 
-  <!-- SCORE + KYC -->
   <div class="grid-2" style="margin-bottom:18px">
-
     <div>
-      <div class="sec-title"><i class="ti ti-chart-bar"></i>Score DataCrédito</div>
+      <div class="sec-title"><i class="ti ti-chart-bar"></i>Score CIFIN / DataCrédito ${cifinBadge}</div>
       <div class="gauge-card">
         <div class="gauge-top">
-          <div><div class="gauge-num">${s.score}</div><div class="gauge-sub">sobre 900 puntos</div></div>
+          <div><div class="gauge-num">${s.score||'—'}</div><div class="gauge-sub">sobre 900 puntos</div></div>
           <div class="gauge-status">
             <div class="badge ${s.score>=700?'b-green':s.score>=600?'b-amber':'b-red'}" style="font-size:11px;padding:4px 9px">${s.dc.estado}</div>
           </div>
@@ -794,26 +872,23 @@ function buildDetail(s) {
           <div class="cell"><div class="cl">Obligaciones activas</div><div class="cv">${s.dc.obli}</div></div>
           <div class="cell"><div class="cl">Endeudamiento actual</div><div class="cv mono">${fmt(s.dc.endeuda)}</div></div>
         </div>
-        <div class="gauge-info"><i class="ti ti-clock" style="font-size:12px"></i> ${s.dc.comp}</div>
+        <div class="gauge-info">${s.dc.comp}</div>
       </div>
     </div>
-
     <div>
-      <div class="sec-title"><i class="ti ti-shield-check"></i>Verificación KYC · 5 controles</div>
+      <div class="sec-title"><i class="ti ti-shield-check"></i>Verificación KYC</div>
       <div class="kyc-list">
         ${kycR('Cédula — OCR & validación','cedula')}
         ${kycR('RNEC — Registraduría Nacional','rnec')}
-        ${kycR('Liveness activo biométrico','liveness','99.3% match')}
+        ${kycR('Liveness activo biométrico','liveness')}
         ${kycR('Match facial vs documento','biometria')}
-        ${/* SARLAFT deshabilitado temporalmente — pendiente presupuesto */''}
         ${kycR('UIAF / OFAC / ONU','uiaf')}
       </div>
     </div>
   </div>
 
-  <!-- NÓMINA -->
   <div class="sec">
-    <div class="sec-title"><i class="ti ti-file-invoice"></i>Análisis de nómina — ${s.nom.emp} · ${s.nom.per} <span class="badge b-green" style="margin-left:4px">Leída por IA</span></div>
+    <div class="sec-title"><i class="ti ti-file-invoice"></i>Análisis de nómina · ${s.nom.emp} · ${s.nom.per} <span class="badge b-green" style="margin-left:4px">Leída por IA</span></div>
     <div class="grid-4" style="margin-bottom:12px">
       <div class="cell"><div class="cl">Salario básico</div><div class="cv mono">${fmt(s.nom.bas)}</div></div>
       <div class="cell"><div class="cl">Total devengado</div><div class="cv mono">${fmt(s.nom.dev)}</div></div>
@@ -825,7 +900,7 @@ function buildDetail(s) {
       <div class="pbar-track"><div class="pbar-fill" id="cf-${s.id}" style="background:${capBarCol}"></div></div>
     </div>
     <div class="pbar-row">
-      <div class="pbar-top"><span class="pbar-lbl">Cuota nueva como % del neto</span><span class="pbar-val" style="color:var(--text2)">${((s.cuota/s.nom.neto)*100).toFixed(1)}%</span></div>
+      <div class="pbar-top"><span class="pbar-lbl">Cuota nueva como % del neto</span><span class="pbar-val">${((s.cuota/Math.max(s.nom.neto,1))*100).toFixed(1)}%</span></div>
       <div class="pbar-track"><div class="pbar-fill" id="cvf-${s.id}" style="background:var(--blue2)"></div></div>
     </div>
     <div class="pbar-row">
@@ -834,13 +909,10 @@ function buildDetail(s) {
     </div>
   </div>
 
-  <!-- HISTORIAL + DECISIÓN IA -->
   <div class="grid-2" style="margin-bottom:18px">
     <div>
       <div class="sec-title"><i class="ti ti-history"></i>Historial FondoUne</div>
-      <div class="cell" style="min-height:90px">
-        <div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div>
-      </div>
+      <div class="cell" style="min-height:90px"><div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div></div>
     </div>
     <div>
       <div class="sec-title"><i class="ti ti-brain"></i>Recomendación motor IA</div>
@@ -858,7 +930,6 @@ function buildDetail(s) {
     </div>
   </div>
 
-  <!-- TIMELINE -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-timeline"></i>Registro de auditoría · trazabilidad completa</div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
@@ -867,128 +938,204 @@ function buildDetail(s) {
   </div>
 
   ${canAct ? `
-  <!-- NOTA + ACCIÓN -->
   <div class="sec">
     <div class="sec-title"><i class="ti ti-pencil"></i>Decisión del analista</div>
     <textarea class="nota-area" id="nota-${s.id}" rows="3" placeholder="Escribe tu observación antes de tomar la decisión (obligatorio para el registro de auditoría)..."></textarea>
   </div>
   <div class="qd-strip">
-    <div class="qd-info">Solicitud <strong>${s.id}</strong> · ${s.nombre} · ${fmt(s.monto)} · ${s.plazo} meses</div>
+    <div class="qd-info">Solicitud <strong>${s.id.slice(0,20)}</strong> · ${s.nombre} · ${fmt(s.monto)} · ${s.plazo} meses</div>
     <button class="btn btn-no" onclick="openModal('rechazar','${s.id}')"><i class="ti ti-x"></i> Rechazar</button>
     <button class="btn btn-ask" onclick="openModal('info','${s.id}')"><i class="ti ti-send"></i> Pedir info</button>
     <button class="btn btn-ok" onclick="openModal('aprobar','${s.id}')"><i class="ti ti-check"></i> Aprobar solicitud</button>
   </div>` : `
   <div class="qd-strip">
     <div class="qd-info">Esta solicitud ya fue <strong>${s.estado}</strong>. Consulta el registro de auditoría arriba.</div>
-    <button class="btn"><i class="ti ti-printer"></i> Imprimir</button>
-    <button class="btn btn-gold"><i class="ti ti-download"></i> Exportar PDF</button>
+    <button class="btn btn-gold" onclick="exportarPDF('${s.id}')"><i class="ti ti-download"></i> Exportar PDF</button>
   </div>`}
-
 </div>`;
 }
 
-// ── MODAL ─────────────────────────────────────────────
+// ── MODAL ─────────────────────────────────────────────────────
 const MDEFS = {
-  aprobar:{
+  aprobar: {
     title:'Aprobar solicitud de crédito',
-    body:'Esta decisión queda registrada de forma permanente con tu firma digital, fecha, hora e IP. El asociado recibirá notificación inmediata y el pagaré para firma electrónica.',
+    body:'Esta decisión queda registrada en Firebase con tu firma digital, fecha, hora e IP. El asociado recibirá un link por email para firmar el pagaré electrónico.',
     ico:'<i class="ti ti-circle-check" style="font-size:22px;color:var(--green2)"></i>',
-    icoBg:'rgba(5,150,105,.15)',
-    warn:null,
+    icoBg:'rgba(5,150,105,.15)', warn:null,
     cc:'btn-ok', cl:'<i class="ti ti-check"></i> Confirmar aprobación', est:'aprobado',
-    logTxt:'<strong>Aprobado por analista</strong>',
-    toast:{msg:'Solicitud aprobada correctamente',cls:'toast-ok',ic:'ti-circle-check'}
+    logTxt:'Aprobado por analista', toast:{msg:'Solicitud aprobada · Email enviado al asociado',cls:'toast-ok',ic:'ti-circle-check'}
   },
-  rechazar:{
+  rechazar: {
     title:'Rechazar solicitud de crédito',
     body:'El asociado será notificado con el motivo del rechazo. La nota que escribas será incluida en la comunicación. Esta acción puede ser revertida por el Jefe de Crédito.',
     ico:'<i class="ti ti-circle-x" style="font-size:22px;color:var(--red2)"></i>',
     icoBg:'rgba(220,38,38,.15)',
     warn:'Verificar que el motivo del rechazo esté claramente redactado antes de confirmar.',
     cc:'btn-no', cl:'<i class="ti ti-x"></i> Confirmar rechazo', est:'rechazado',
-    logTxt:'<strong>Rechazado por analista</strong>',
-    toast:{msg:'Solicitud rechazada. Asociado notificado.',cls:'toast-err',ic:'ti-circle-x'}
+    logTxt:'Rechazado por analista', toast:{msg:'Solicitud rechazada. Asociado notificado.',cls:'toast-err',ic:'ti-circle-x'}
   },
-  info:{
+  info: {
     title:'Solicitar información adicional',
     body:'Se enviará un mensaje al asociado con las observaciones que incluyas. La solicitud quedará en estado "En revisión" hasta recibir la respuesta.',
     ico:'<i class="ti ti-send" style="font-size:22px;color:var(--amber3)"></i>',
-    icoBg:'rgba(217,119,6,.15)',
-    warn:null,
+    icoBg:'rgba(217,119,6,.15)', warn:null,
     cc:'btn-ask', cl:'<i class="ti ti-send"></i> Enviar solicitud', est:'revision',
-    logTxt:'Analista solicitó información adicional',
-    toast:{msg:'Solicitud de información enviada al asociado.',cls:'toast-warn',ic:'ti-send'}
+    logTxt:'Analista solicitó información adicional', toast:{msg:'Solicitud de información enviada al asociado.',cls:'toast-warn',ic:'ti-send'}
   }
 };
 
 function openModal(action, solId) {
-  pendingAction=action; pendingSolId=solId;
-  const d=MDEFS[action];
-  const s=DATA.find(x=>x.id===solId);
-  document.getElementById('modal-ico').innerHTML=d.ico;
-  document.getElementById('modal-ico').style.background=d.icoBg;
-  document.getElementById('modal-title').textContent=d.title;
-  document.getElementById('modal-body-txt').textContent=d.body+` Asociado: ${s.nombre} · ${fmt(s.monto)}.`;
-  const wb=document.getElementById('modal-warn-box');
-  if(d.warn){wb.style.display='flex';document.getElementById('modal-warn-txt').textContent=d.warn;}
+  pendingAction = action; pendingSolId = solId;
+  const d = MDEFS[action];
+  const s = DATA.find(x => x.id === solId);
+  if (!s || !d) return;
+
+  document.getElementById('modal-ico').innerHTML   = d.ico;
+  document.getElementById('modal-ico').style.background = d.icoBg;
+  document.getElementById('modal-title').textContent    = d.title;
+  document.getElementById('modal-body-txt').textContent = d.body + ` Asociado: ${s.nombre} · ${fmt(s.monto)}.`;
+
+  const wb = document.getElementById('modal-warn-box');
+  if (d.warn) { wb.style.display='flex'; document.getElementById('modal-warn-txt').textContent=d.warn; }
   else wb.style.display='none';
-  // Pre-fill from detail textarea if exists
-  const notaEl=document.getElementById('nota-'+solId);
-  document.getElementById('modal-nota').value=notaEl?notaEl.value:'';
-  const cb=document.getElementById('modal-confirm');
-  cb.className='btn '+d.cc; cb.innerHTML=d.cl;
-  document.getElementById('modal-overlay').style.display='flex';
+
+  const notaEl = document.getElementById('nota-'+solId);
+  document.getElementById('modal-nota').value = notaEl ? notaEl.value : '';
+
+  const cb = document.getElementById('modal-confirm');
+  cb.className = 'btn ' + d.cc;
+  cb.innerHTML = d.cl;
+
+  document.getElementById('modal-overlay').style.display = 'flex';
 }
 
-function closeModal(){
-  document.getElementById('modal-overlay').style.display='none';
-  pendingAction=null; pendingSolId=null;
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  pendingAction = null; pendingSolId = null;
 }
 
-function confirmDecision(){
-  const nota=document.getElementById('modal-nota').value.trim();
-  if(!nota){
-    document.getElementById('modal-nota').style.borderColor='var(--red2)';
-    document.getElementById('modal-nota').focus();
-    document.getElementById('modal-nota').placeholder='⚠ La nota es obligatoria para continuar';
+// ── CONFIRMAR DECISIÓN — ahora escribe en Firebase ───────────
+async function confirmDecision() {
+  const nota = document.getElementById('modal-nota').value.trim();
+
+  // 1. Validar nota con el validador de seguridad
+  const minLen = pendingAction === 'rechazar' ? 20 : 10;
+  const vNota = (typeof FondouneValidator !== 'undefined')
+    ? FondouneValidator.validarTextoLibre(nota, minLen, 500)
+    : { ok: nota.length >= minLen, valor: nota, error: nota.length < minLen ? 'Nota muy corta' : null };
+
+  if (!vNota.ok) {
+    const el = document.getElementById('modal-nota');
+    el.style.borderColor = 'var(--red2)';
+    el.focus();
+    el.placeholder = `⚠ ${vNota.error || 'La nota es obligatoria'}`;
     return;
   }
+
+  const notaLimpia = vNota.valor;
   closeModal();
-  const s=DATA.find(x=>x.id===pendingSolId);
-  if(!s)return;
-  const d=MDEFS[pendingAction];
-  s.estado=d.est;
-  // Add to log
-  const now=new Date();
-  const ts=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-  const dotMap={aprobado:'dot-green',rechazado:'dot-red',revision:'dot-amber'};
-  s.log.push({ts,txt:`${d.logTxt} · María Rodríguez · "${nota}"`,dot:dotMap[d.est]||'dot-muted'});
-  if(d.est==='aprobado') s.log.push({ts,txt:'Pagaré electrónico generado · Enviado al correo del asociado',dot:'dot-blue'});
-  // Toast
-  const t=d.toast;
-  showToast(t.msg,t.cls,t.ic);
-  applyFilters();
-  selectSol(s.id);
+
+  const s = DATA.find(x => x.id === pendingSolId);
+  if (!s) return;
+
+  const d        = MDEFS[pendingAction];
+  const analista = getAnalistaActual();
+
+  // 2. Mostrar loading
+  showToast('Procesando decisión...', 'toast-warn', 'ti-loader');
+
+  try {
+    let resultado;
+
+    if (pendingAction === 'aprobar') {
+      // Aprobar en Firebase — genera token y número de pagaré
+      resultado = await FondoUneFirebase.aprobarSolicitud(
+        s.fbId,
+        analista.id,
+        analista.nombre
+      );
+
+      if (resultado.ok && typeof EmailService !== 'undefined' && s.email) {
+        // Construir el link de firma con el token generado
+        const linkFirma = `https://fondoune-portal.github.io/Creditos/modulo4-firma.html?token=${resultado.token}`;
+
+        // Enviar email al asociado
+        await EmailService.enviarAprobacion({
+          solicitud: { ...s, numeroPagare: resultado.numeroPagare, email: s.email },
+          linkFirma,
+        }).catch(e => console.warn('[Módulo2] Email no enviado:', e.message));
+      }
+
+    } else if (pendingAction === 'rechazar') {
+      resultado = await FondoUneFirebase.rechazarSolicitud(
+        s.fbId,
+        analista.id,
+        analista.nombre,
+        notaLimpia
+      );
+
+    } else if (pendingAction === 'info') {
+      // Estado "revision" — actualización directa
+      const db = await FondoUneFirebase.inicializar();
+      await db.collection('solicitudes').doc(s.fbId).update({
+        estado:        'revision',
+        fechaDecision:  firebase.firestore.FieldValue.serverTimestamp(),
+        analistaId:     analista.id,
+        analistaNombre: analista.nombre,
+        log:            firebase.firestore.FieldValue.arrayUnion({
+          ts:  new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+          txt: `Analista solicitó información adicional · ${analista.nombre} · "${notaLimpia}"`,
+          dot: 'dot-amber',
+        }),
+      });
+      resultado = { ok: true };
+    }
+
+    if (resultado?.ok) {
+      const t = d.toast;
+      showToast(t.msg, t.cls, t.ic);
+      // El listener de Firebase actualiza DATA automáticamente
+    } else {
+      showToast('Error al procesar la decisión: ' + (resultado?.error || 'Intenta de nuevo'), 'toast-err', 'ti-alert-circle');
+    }
+
+  } catch (err) {
+    console.error('[Módulo2] Error en confirmDecision:', err);
+    showToast('Error inesperado. Verifica tu conexión e intenta de nuevo.', 'toast-err', 'ti-alert-circle');
+  }
 }
 
-// ── TOAST ─────────────────────────────────────────────
+// ── EXPORTAR PDF ──────────────────────────────────────────────
+function exportarPDF(id) {
+  showToast('Función de exportación disponible próximamente', 'toast-warn', 'ti-clock');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
 function showToast(msg, cls, icon) {
-  const t=document.createElement('div');
-  t.className=`toast ${cls}`;
-  t.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span><span class="toast-close" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></span>`;
+  const t = document.createElement('div');
+  t.className = `toast ${cls}`;
+  // textContent para el mensaje — nunca innerHTML con datos externos
+  const ico  = document.createElement('i');    ico.className = `ti ${icon}`;
+  const span = document.createElement('span'); span.textContent = msg;
+  const cls2 = document.createElement('span'); cls2.className = 'toast-close';
+  cls2.innerHTML = '<i class="ti ti-x"></i>';
+  cls2.onclick   = () => t.remove();
+  t.append(ico, span, cls2);
   document.body.appendChild(t);
-  setTimeout(()=>t&&t.remove(),5000);
+  setTimeout(() => t && t.remove(), 5000);
 }
 
-// ── INIT ──────────────────────────────────────────────
-renderList(DATA);
-setTimeout(()=>selectSol(DATA[0].id),150);
+// ── INIT ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Iniciar conexión Firebase y listener en tiempo real
+  iniciarListenerFirebase();
 
-// Simular nueva solicitud entrante
-setTimeout(()=>{
-  showToast('🔔 Nueva solicitud: Luis F. Gómez · $6.500.000 · Consumo','toast-blue','ti-bell-ringing');
-  document.getElementById('notif-pip').style.display='block';
-},6000);
+  // Limpiar datos CIFIN al salir del módulo
+  window.addEventListener('beforeunload', () => {
+    if (typeof FondouneValidator !== 'undefined') FondouneValidator.limpiarDatosCIFIN();
+    if (_unsubscribe) _unsubscribe();
+  });
+});
 </script>
 </body>
 </html>
