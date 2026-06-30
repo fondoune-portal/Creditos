@@ -273,25 +273,52 @@ function doSendMagic() {
 }
 
 /* ---- STEP 2: verificar OTP ---- */
-function doVerify() {
+async function doVerify() {
   var code = document.getElementById('inp-otp').value.replace(/\s/g, '');
   if (code.length < 6) { showErr('Ingresa el código de 6 dígitos completo.'); return; }
+
   setBtn('btn-verify', true, 'Verificando...');
   hideErr();
-  StytchAuth.verifyOTP(code)
-    .then(function(role) {
-      setStep('ok');
-      var labels = { asociado:'Asociado → Portal de solicitudes',
-                     analista:'Analista → Dashboard de análisis',
-                     gerencia:'Gerencia → Panel ejecutivo',
-                     jefe_credito:'Jefe de Crédito → Panel ejecutivo' };
-      document.getElementById('ok-role').textContent = labels[role] || role;
-      setTimeout(function() { StytchAuth.redirectByRole(role); }, 1800);
-    })
-    .catch(function(e) {
-      showErr(e.message || 'Código incorrecto o expirado.');
-      setBtn('btn-verify', false, '<i class="ti ti-shield-check"></i> Verificar e ingresar');
-    });
+
+  try {
+    var result = await StytchAuth.verifyOTP(code);
+    var role = result.role;
+    var stytchSessionToken = result.stytchSessionToken;
+
+    if (!firebase || typeof firebase.app !== 'function') {
+      throw new Error('Firebase no está disponible en esta página.');
+    }
+
+    var functions = firebase.app().functions('us-central1');
+    var fn = functions.httpsCallable('generarTokenFirebase');
+    var resp = await fn({ stytchSessionToken: stytchSessionToken });
+
+    var customToken = resp && resp.data && resp.data.token;
+    if (!customToken) {
+      throw new Error('La función no devolvió un token de Firebase.');
+    }
+
+    var backendRole = (resp && resp.data && resp.data.role) ? resp.data.role : role;
+
+    await firebase.auth().signInWithCustomToken(customToken);
+
+    setStep('ok');
+    var labels = {
+      asociado: 'Asociado → Portal de solicitudes',
+      analista: 'Analista → Dashboard de análisis',
+      gerencia: 'Gerencia → Panel ejecutivo',
+      jefe_credito: 'Jefe de Crédito → Panel ejecutivo'
+    };
+    document.getElementById('ok-role').textContent = labels[backendRole] || backendRole;
+
+    setTimeout(function() {
+      StytchAuth.redirectByRole(backendRole);
+    }, 1800);
+
+  } catch (e) {
+    showErr(e.message || 'Código incorrecto o expirado.');
+    setBtn('btn-verify', false, '<i class=\'ti ti-shield-check\'></i> Verificar e ingresar');
+  }
 }
 
 /* ---- STEP 2: enviar SMS ---- */
