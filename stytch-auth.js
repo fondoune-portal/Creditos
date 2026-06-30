@@ -170,6 +170,10 @@ function isConfigured() {
   return typeof PUBLIC_TOKEN === 'string' && PUBLIC_TOKEN.startsWith('public-token');
 }
 
+function isConfigured() {
+  return Boolean(PUBLIC_TOKEN && String(PUBLIC_TOKEN).trim());
+}
+
 return {
   isConfigured,
   sendOTP,
