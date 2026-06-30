@@ -289,6 +289,12 @@ async function doVerify() {
       throw new Error('Firebase no está disponible en esta página.');
     }
 
+    if (typeof window.inicializar === 'function') {
+      await window.inicializar();
+    } else if (!firebase.apps.length) {
+      throw new Error('No se encontró la función de inicialización de Firebase.');
+    }
+
     var functions = firebase.app().functions('us-central1');
     var fn = functions.httpsCallable('generarTokenFirebase');
     var resp = await fn({ stytchSessionToken: stytchSessionToken });
