@@ -486,4 +486,8 @@
 
   console.log('[FondoUne Firebase] 📦 firebase-config.js cargado — esperando inicialización.');
 
+
+  // Exponer inicializar globalmente para uso externo
+  window.inicializar = inicializar;
+
 })();
