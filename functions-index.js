@@ -1,224 +1,188 @@
 /**
  * FondoUne — functions/index.js
  * ─────────────────────────────────────────────────────────────────
- * Cloud Function que envía correos via Resend.
- * La API key de Resend vive SOLO aquí, nunca en el navegador.
+ * Cloud Functions que actúan como puente seguro entre el portal
+ * (GitHub Pages) y servicios externos con credenciales privadas.
  *
- * El navegador llama a esta función, esta función llama a Resend.
+ * Funciones:
+ *  - generarTokenFirebase: valida sesión Stytch → emite Custom Token
+ *  - enviarEmail:          proxy hacia Resend (API key nunca en cliente)
  *
- * DEPLOY:
- *   1. firebase init functions   (si no lo has hecho)
- *   2. Configura la key como secreto:
- *      firebase functions:secrets:set RESEND_API_KEY
- *      (te va a pedir pegar el valor: re_LdwajwZu_MiQKRf3V3m3Zr5DV64zQ4966)
- *   3. firebase deploy --only functions
+ * CAMBIOS v2.0:
+ *  - ROL_POR_EMAIL alineado con stytch-auth.js (mismas keys en minúsculas)
+ *  - naramosa@fondoune.com → 'admin'
+ *  - creditosvivienda@fondoune.com → 'analista' (corregido mayúscula)
+ *  - Stytch endpoint apunta a Consumer (/v1/sessions/authenticate)
+ *  - Resend API key referenciada como secret (nunca en código)
+ *
+ * SECRETS REQUERIDOS (configurar en Cloud Shell antes de deploy):
+ *   firebase functions:secrets:set STYTCH_PROJECT_ID
+ *   firebase functions:secrets:set STYTCH_SECRET
+ *   firebase functions:secrets:set RESEND_API_KEY
  * ─────────────────────────────────────────────────────────────────
  */
 
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { defineSecret }       = require("firebase-functions/params");
-const logger                 = require("firebase-functions/logger");
-const admin                  = require("firebase-admin");
+const { onCall, HttpsError }    = require('firebase-functions/v2/https');
+const { onRequest }             = require('firebase-functions/v2/https');
+const { defineSecret }          = require('firebase-functions/params');
+const admin                     = require('firebase-admin');
 
 admin.initializeApp();
 
-// El secreto se define aquí pero el VALOR se configura con la CLI,
-// nunca queda escrito en este archivo ni en el repositorio.
-const RESEND_API_KEY  = defineSecret("RESEND_API_KEY");
-const STYTCH_PROJECT_ID = defineSecret("STYTCH_PROJECT_ID");
-const STYTCH_SECRET     = defineSecret("STYTCH_SECRET");
+// ── Secrets — nunca en código, viven en Secret Manager ───────────
+const STYTCH_PROJECT_ID = defineSecret('STYTCH_PROJECT_ID');
+const STYTCH_SECRET     = defineSecret('STYTCH_SECRET');
+const RESEND_API_KEY    = defineSecret('RESEND_API_KEY');
 
-const RESEND_URL = "https://api.resend.com/emails";
-const REMITENTE  = "FondoUne <onboarding@resend.dev>";
-// Cuando verifiques tu dominio en Resend, cambia por:
-// const REMITENTE = "FondoUne <notificaciones@fondoune.com>";
-
-// ── Whitelist de orígenes permitidos (evita que cualquier sitio
-//    use tu función para mandar correos a través de tu cuenta) ───
-const ORIGENES_PERMITIDOS = [
-  "https://fondoune-portal.github.io",
-  "http://localhost:5500",   // para pruebas locales con Live Server
-  "http://127.0.0.1:5500",
-];
-
-/**
- * Cloud Function callable: enviarCorreo
- *
- * Se invoca desde el navegador con:
- *   const fn = httpsCallable(functions, 'enviarCorreo');
- *   await fn({ to, subject, html });
- *
- * Firebase ya valida automáticamente que la petición venga
- * autenticada con el SDK de Firebase (App Check opcional, ver nota
- * abajo) — no es un endpoint HTTP abierto a cualquiera.
- */
-exports.enviarCorreo = onCall(
-  {
-    secrets: [RESEND_API_KEY],
-    region: "us-central1",
-    cors: ORIGENES_PERMITIDOS,
-  },
-  async (request) => {
-    const { to, subject, html } = request.data || {};
-
-    // ── Validación básica de entrada ──────────────────────────────
-    if (!to || !subject || !html) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Faltan campos requeridos: to, subject, html."
-      );
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
-      throw new HttpsError("invalid-argument", "Email destinatario inválido.");
-    }
-
-    // Límite simple anti-abuso: el HTML no debería ser gigante
-    if (html.length > 100000) {
-      throw new HttpsError("invalid-argument", "Contenido del correo demasiado grande.");
-    }
-
-    // ── Llamada a Resend con la key protegida ─────────────────────
-    try {
-      const resp = await fetch(RESEND_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RESEND_API_KEY.value()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ from: REMITENTE, to, subject, html }),
-      });
-
-      const data = await resp.json();
-
-      if (!resp.ok) {
-        logger.error("Error de Resend:", data);
-        throw new HttpsError(
-          "internal",
-          data?.message || `Resend respondió HTTP ${resp.status}`
-        );
-      }
-
-      logger.info(`Correo enviado a ${to} | ID: ${data.id}`);
-      return { ok: true, id: data.id };
-
-    } catch (err) {
-      if (err instanceof HttpsError) throw err;
-      logger.error("Error inesperado enviando correo:", err);
-      throw new HttpsError("internal", "No se pudo enviar el correo.");
-    }
-  }
-);
-
-// ═══════════════════════════════════════════════════════════════
-// PUENTE STYTCH → FIREBASE AUTH
-// ═══════════════════════════════════════════════════════════════
-
-// Mapa email → rol — MISMA lista que tienes hoy en stytch-auth.js,
-// pero ahora la decisión de rol vive del lado del servidor, no en
-// el navegador, para que nadie pueda falsificar su propio rol.
+// ── Mapa de roles — DEBE coincidir exactamente con stytch-auth.js ─
+// Todas las keys en minúsculas (el lookup hace .toLowerCase())
 const ROL_POR_EMAIL = {
-  "nicolas.ramos@fondoune.com":   "analista",
-  "naramosa@fondoune.com":        "analista",
-  "gerencia@fondoune.com":        "gerencia",
-  "jefe.credito@fondoune.com":    "jefe_credito",
-  "director@fondoune.com":        "gerencia",
+  // Gerencia
+  'mrodriguez@fondoune.com':      'gerencia',
+  'gerencia@fondoune.com':        'gerencia',
+
+  // Jefe de Crédito
+  'jcredito@fondoune.com':        'jefe_credito',
+  'jefecredito@fondoune.com':     'jefe_credito',
+
+  // Analistas
+  'analista@fondoune.com':        'analista',
+  'analista1@fondoune.com':       'analista',
+  'analista2@fondoune.com':       'analista',
+  'creditosvivienda@fondoune.com':'analista',   // ← corregido (antes Creditosvivienda@...)
+  'naramosa@fondoune.com':        'admin',       // ← admin (igual que en stytch-auth.js)
 };
 
-function _rolPorEmail(email) {
-  const e = (email || "").toLowerCase();
-  return ROL_POR_EMAIL[e] || "asociado";
-}
+// ── Remitente de correos ──────────────────────────────────────────
+const RESEND_FROM    = 'FondoUne <onboarding@resend.dev>';
+const RESEND_API_URL = 'https://api.resend.com/emails';
 
-/**
- * Cloud Function callable: generarTokenFirebase
- *
- * Se invoca DESPUÉS de que el navegador ya verificó el OTP con
- * Stytch exitosamente. Esta función vuelve a verificar esa sesión
- * directamente contra la API de Stytch (no confía en el navegador),
- * y si es válida, genera un Custom Token de Firebase con el rol
- * como custom claim.
- *
- * El navegador hace:
- *   const fn = httpsCallable(functions, 'generarTokenFirebase');
- *   const { data } = await fn({ stytchSessionToken });
- *   await firebase.auth().signInWithCustomToken(data.token);
- */
+// ══════════════════════════════════════════════════════════════════
+// generarTokenFirebase
+// Recibe el session_token de Stytch, lo valida contra la API
+// Consumer de Stytch, y emite un Custom Token de Firebase con el
+// claim { role } para que Firestore pueda leer el rol del usuario.
+// ══════════════════════════════════════════════════════════════════
 exports.generarTokenFirebase = onCall(
   {
     secrets: [STYTCH_PROJECT_ID, STYTCH_SECRET],
-    region: "us-central1",
-    cors: ORIGENES_PERMITIDOS,
+    cors:    ['https://fondoune-portal.github.io', 'http://localhost'],
   },
   async (request) => {
-    const { stytchSessionToken } = request.data || {};
 
-    if (!stytchSessionToken) {
-      throw new HttpsError("invalid-argument", "Falta el token de sesión de Stytch.");
+    const sessionToken = request.data?.sessionToken;
+    if (!sessionToken) {
+      throw new HttpsError('invalid-argument', 'Se requiere sessionToken.');
     }
 
-    // ── 1. Verificar la sesión REAL contra Stytch (servidor a servidor) ──
-    const projectId = STYTCH_PROJECT_ID.value();
-    const secret     = STYTCH_SECRET.value();
-    const basicAuth  = Buffer.from(`${projectId}:${secret}`).toString("base64");
-
-    let stytchUser;
+    // ── Validar sesión contra la API Consumer de Stytch ──────────
+    let stytchResp;
     try {
-      const resp = await fetch("https://test.stytch.com/v1/sessions/authenticate", {
-        method: "POST",
+      const resp = await fetch('https://test.stytch.com/v1/sessions/authenticate', {
+        method:  'POST',
         headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type":  "application/json",
+          'Content-Type':  'application/json',
+          'Authorization': 'Basic ' + Buffer.from(
+            `${STYTCH_PROJECT_ID.value()}:${STYTCH_SECRET.value()}`
+          ).toString('base64'),
         },
-        body: JSON.stringify({ session_token: stytchSessionToken }),
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+
+      stytchResp = await resp.json();
+
+      if (!resp.ok) {
+        console.error('[generarTokenFirebase] Stytch error:', stytchResp);
+        throw new HttpsError(
+          'unauthenticated',
+          `Stytch rechazó la sesión: ${stytchResp.error_message || resp.status}`
+        );
+      }
+
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      console.error('[generarTokenFirebase] Error de red a Stytch:', err);
+      throw new HttpsError('internal', 'No se pudo validar la sesión con Stytch.');
+    }
+
+    // ── Extraer email y asignar rol ───────────────────────────────
+    const email  = stytchResp.user?.emails?.[0]?.email?.toLowerCase()?.trim() || '';
+    const userId = stytchResp.user?.user_id || '';
+
+    if (!email || !userId) {
+      throw new HttpsError('internal', 'Stytch no devolvió datos de usuario válidos.');
+    }
+
+    const rol = ROL_POR_EMAIL[email] || 'asociado';
+
+    // ── Emitir Custom Token de Firebase con claim de rol ─────────
+    let firebaseToken;
+    try {
+      firebaseToken = await admin.auth().createCustomToken(userId, { role: rol, email });
+    } catch (err) {
+      console.error('[generarTokenFirebase] Error al crear Custom Token:', err);
+      throw new HttpsError('internal', 'No se pudo generar el token de Firebase.');
+    }
+
+    console.log(`[generarTokenFirebase] ✅ Token generado para ${email} | rol: ${rol}`);
+    return { ok: true, token: firebaseToken, role: rol, email };
+  }
+);
+
+// ══════════════════════════════════════════════════════════════════
+// enviarEmail
+// Proxy seguro hacia Resend. La API key nunca viaja al navegador.
+// Alternativa a la solución Apps Script para entornos con Blaze.
+// ══════════════════════════════════════════════════════════════════
+exports.enviarEmail = onRequest(
+  {
+    secrets: [RESEND_API_KEY],
+    cors:    ['https://fondoune-portal.github.io', 'http://localhost'],
+  },
+  async (req, res) => {
+
+    if (req.method !== 'POST') {
+      res.status(405).json({ ok: false, error: 'Método no permitido.' });
+      return;
+    }
+
+    const { to, subject, html } = req.body || {};
+
+    if (!to || !subject || !html) {
+      res.status(400).json({ ok: false, error: 'Faltan campos: to, subject o html.' });
+      return;
+    }
+
+    // Validación básica del email destino
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      res.status(400).json({ ok: false, error: 'Email destino inválido.' });
+      return;
+    }
+
+    try {
+      const resp = await fetch(RESEND_API_URL, {
+        method:  'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY.value()}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
       });
 
       const data = await resp.json();
 
       if (!resp.ok) {
-        logger.warn("Sesión de Stytch inválida:", data?.error_message);
-        throw new HttpsError("unauthenticated", "Sesión de Stytch inválida o expirada.");
+        console.error('[enviarEmail] Error Resend:', data);
+        res.status(resp.status).json({ ok: false, error: data.message || 'Error de Resend.' });
+        return;
       }
 
-      stytchUser = data.user;
+      console.log(`[enviarEmail] ✅ Correo enviado a ${to} | ID: ${data.id}`);
+      res.status(200).json({ ok: true, id: data.id });
 
     } catch (err) {
-      if (err instanceof HttpsError) throw err;
-      logger.error("Error verificando sesión con Stytch:", err);
-      throw new HttpsError("internal", "No se pudo verificar la sesión.");
-    }
-
-    // ── 2. Determinar el rol — el servidor decide, no el navegador ──
-    const email = stytchUser?.emails?.[0]?.email || "";
-    const role  = _rolPorEmail(email);
-    const uid   = stytchUser?.user_id;
-
-    if (!uid) {
-      throw new HttpsError("internal", "No se pudo obtener el identificador del usuario.");
-    }
-
-    // ── 3. Asignar el rol como custom claim en Firebase Auth ──────
-    try {
-      await admin.auth().setCustomUserClaims(uid, { role });
-    } catch (err) {
-      // Si el usuario no existe todavía en Firebase Auth, créalo primero
-      try {
-        await admin.auth().createUser({ uid, email });
-        await admin.auth().setCustomUserClaims(uid, { role });
-      } catch (createErr) {
-        logger.error("Error creando/asignando rol al usuario:", createErr);
-        throw new HttpsError("internal", "No se pudo asignar el rol.");
-      }
-    }
-
-    // ── 4. Generar el Custom Token que el navegador va a usar ─────
-    try {
-      const customToken = await admin.auth().createCustomToken(uid, { role });
-      logger.info(`Token Firebase generado para ${email} | rol: ${role}`);
-      return { ok: true, token: customToken, role };
-    } catch (err) {
-      logger.error("Error generando custom token:", err);
-      throw new HttpsError("internal", "No se pudo generar el token de Firebase.");
+      console.error('[enviarEmail] Error:', err);
+      res.status(500).json({ ok: false, error: 'Error interno del servidor.' });
     }
   }
 );
