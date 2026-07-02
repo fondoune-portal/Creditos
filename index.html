@@ -249,7 +249,9 @@ function doSendOTP(isResend) {
   setBtn('btn-email', true, 'Enviando...');
   hideErr();
   StytchAuth.sendOTP(email)
-    .then(function() {
+    .then(function(res) {
+      // Guardar methodId para pasarlo al verificar
+      window._otpMethodId = res && res.methodId ? res.methodId : null;
       document.getElementById('otp-email').textContent = email;
       setStep('otp');
       startTimer();
@@ -281,8 +283,9 @@ async function doVerify() {
   hideErr();
 
   try {
-    var result = await StytchAuth.verifyOTP(code);
-    var role = result.role;
+    var result = await StytchAuth.verifyOTP(window._otpMethodId, code);
+    if (!result.ok) throw new Error(result.error || 'Código incorrecto o expirado.');
+    var role = result.rol || result.role;
     var stytchSessionToken = result.stytchSessionToken;
 
     if (!firebase || typeof firebase.app !== 'function') {
@@ -318,7 +321,7 @@ async function doVerify() {
     document.getElementById('ok-role').textContent = labels[backendRole] || backendRole;
 
     setTimeout(function() {
-      StytchAuth.redirectByRole(backendRole);
+      StytchAuth.redirigirPorRol(backendRole);
     }, 1800);
 
   } catch (e) {
@@ -380,15 +383,27 @@ window.addEventListener('load', function() {
   var type   = params.get('stytch_token_type');
   if (token && type === 'magic_links') {
     setStep('ok');
-    StytchAuth.handleMagicLink(token)
+    StytchAuth.handleMagicLink()
+      .then(function(res) {
+        if (res && res.ok) {
+          var rol = res.rol || res.role || 'asociado';
+          sessionStorage.setItem('fu_rol', rol);
+          setTimeout(function() { StytchAuth.redirigirPorRol(rol); }, 1200);
+        } else {
+          showErr('El enlace expiró o ya fue usado. Solicita uno nuevo.');
+          setStep('email');
+        }
+      })
       .catch(function(e) {
         showErr('El enlace expiró o ya fue usado. Solicita uno nuevo.');
         setStep('email');
       });
     return;
   }
-  if (StytchAuth.hasSession()) {
-    StytchAuth.redirectByRole(StytchAuth.getCurrentRole());
+  // Si ya hay rol en sessionStorage (sesión activa), redirigir directo
+  var rolGuardado = sessionStorage.getItem('fu_rol');
+  if (rolGuardado) {
+    StytchAuth.redirigirPorRol(rolGuardado);
   }
   if (!StytchAuth.isConfigured()) {
     showErr('⚙️ Reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');
