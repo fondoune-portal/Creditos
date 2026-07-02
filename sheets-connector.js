@@ -22,7 +22,7 @@ const SheetsConnector = (() => {
   const CACHE_TTL_MS = 5 * 60 * 1000;
 
   // ── Timeout de red ────────────────────────────────────────────
-  const FETCH_TIMEOUT_MS = 10000; // 10 segundos máximo
+  const FETCH_TIMEOUT_MS = 25000; // 25 segundos máximo
 
   // ─────────────────────────────────────────────────────────────
   // OBTENER DATOS DEL ASOCIADO
@@ -99,10 +99,11 @@ const SheetsConnector = (() => {
     } catch (err) {
       if (err.name === 'AbortError') {
         console.error('[SheetsConnector] Timeout: el servidor tardó demasiado');
+        return { encontrado: false, _error: 'timeout' };
       } else {
         console.error('[SheetsConnector] Error de conexión');
+        return { encontrado: false, _error: 'conexion' };
       }
-      return null;
     }
   }
 
