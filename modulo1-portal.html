@@ -1400,6 +1400,24 @@ async function verificarAsociado() {
     return;
   }
 
+  if (datos && datos._error === 'timeout') {
+    mostrarErrorVerificacion('La consulta a la base de datos tardó demasiado. Intenta de nuevo.');
+    resetAsociadoCard();
+    return;
+  }
+
+  if (datos && datos._error === 'conexion') {
+    mostrarErrorVerificacion('No fue posible consultar la base de datos en este momento.');
+    resetAsociadoCard();
+    return;
+  }
+
+  if (datos && datos.encontrado === false) {
+    mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
+    resetAsociadoCard();
+    return;
+  }
+
   if (!datos.activo) {
     mostrarErrorVerificacion('El asociado figura como inactivo en el sistema.');
     resetAsociadoCard();
