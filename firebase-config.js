@@ -19,7 +19,7 @@
 
   // ── 1. CONFIGURACIÓN DEL PROYECTO ──────────────────────────────
   const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyD-kpFWfU0A2CAszogW4ODgCz1pQfYpBms",
+    apiKey:            "AIzaSyBdOboHrnM1O0rI7kbPK6NH2UnUy9Pk2is",
     authDomain:        "fondoune-credito.firebaseapp.com",
     projectId:         "fondoune-credito",
     storageBucket:     "fondoune-credito.firebasestorage.app",
