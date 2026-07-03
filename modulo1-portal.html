@@ -1394,12 +1394,6 @@ async function verificarAsociado() {
   btnIcon.className = 'ti ti-search';
   btnTxt.textContent = 'Verificar';
 
-  if (!datos) {
-    mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
-    resetAsociadoCard();
-    return;
-  }
-
   if (datos && datos._error === 'timeout') {
     mostrarErrorVerificacion('La consulta a la base de datos tardó demasiado. Intenta de nuevo.');
     resetAsociadoCard();
@@ -1412,14 +1406,8 @@ async function verificarAsociado() {
     return;
   }
 
-  if (datos && datos.encontrado === false) {
+  if (!datos || (datos && datos.encontrado === false)) {
     mostrarErrorVerificacion('No se encontró ningún asociado con esa cédula.');
-    resetAsociadoCard();
-    return;
-  }
-
-  if (datos && datos._error === 'timeout') {
-    mostrarErrorVerificacion('La consulta a la base de datos tardó demasiado. Intenta de nuevo.');
     resetAsociadoCard();
     return;
   }
