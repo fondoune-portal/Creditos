@@ -322,6 +322,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 
   <!-- Firebase SDK (compat v9 — carga vía CDN, sin npm) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
 </head>
@@ -1127,8 +1128,53 @@ function showToast(msg, cls, icon) {
 
 // ── INIT ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Iniciar conexión Firebase y listener en tiempo real
-  iniciarListenerFirebase();
+
+  // ── PORTÓN DE ACCESO — espera la sesión REAL de Firebase ──────
+  // onAuthStateChanged solo dispara con el usuario ya resuelto
+  // (Firebase espera a que termine de restaurar la sesión desde
+  // IndexedDB antes de llamar el callback la primera vez), así que
+  // no hace falta reintentar ni poner temporizadores.
+  //
+  // El rol que decide el acceso viene del CUSTOM CLAIM del token
+  // de Firebase (lo asigna generarTokenFirebase en el backend),
+  // no de sessionStorage — así, aunque alguien reescriba
+  // FondouneSession a mano en la consola, no logra entrar a un
+  // módulo que no le corresponde.
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    console.error('[Módulo2] Firebase Auth no está cargado. Verifica el <script> de firebase-auth-compat.js.');
+    window.location.replace('index.html');
+    return;
+  }
+
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+      console.warn('[Módulo2] Sin sesión de Firebase — redirigiendo a login.');
+      window.location.replace('index.html');
+      return;
+    }
+
+    let rolBackend = 'asociado';
+    try {
+      const tokenResult = await user.getIdTokenResult();
+      rolBackend = tokenResult.claims.role || 'asociado';
+    } catch (err) {
+      console.error('[Módulo2] No se pudo leer el rol del token:', err);
+      window.location.replace('index.html');
+      return;
+    }
+
+    const acceso = (typeof FondouneNav !== 'undefined' && FondouneNav.ACCESO_ROL[rolBackend]) || [];
+    if (!acceso.includes('analista')) {
+      if (typeof FondouneSession !== 'undefined') {
+        FondouneSession.queueNotif('No tienes permiso para acceder al módulo de analista.', 'error');
+      }
+      window.location.replace('modulo1-portal.html');
+      return;
+    }
+
+    // Sesión válida y rol autorizado — recién ahora se conecta Firestore
+    iniciarListenerFirebase();
+  });
 
   // Limpiar datos CIFIN al salir del módulo
   window.addEventListener('beforeunload', () => {
