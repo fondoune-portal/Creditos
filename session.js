@@ -208,6 +208,8 @@ const FondouneSession = (() => {
   // ── LIMPIAR SESIÓN ────────────────────────────────────────────────
   function clear() {
     Object.values(KEYS).forEach(k => sessionStorage.removeItem(k));
+    sessionStorage.removeItem('fu_rol');
+    sessionStorage.removeItem('fu_email');
   }
 
   /**
