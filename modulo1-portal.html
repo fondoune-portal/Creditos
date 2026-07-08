@@ -1505,15 +1505,6 @@ function resetAsociadoCard() {
   document.getElementById('btn-continuar').style.display  = 'none';
 }
 
-// ── INICIALIZACIÓN DEMO ──
-// Sesión base para que navigation.js no redirija al login
-(function initPortalDemo() {
-  if (typeof FondouneSession === 'undefined') return;
-  if (!FondouneSession.isLoggedIn()) {
-    FondouneSession.initUser({ id: 'demo', name: 'Asociado', role: 'asociado', initials: 'A' });
-  }
-})();
-
 // Init summary
 updateSummary();
 
