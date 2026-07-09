@@ -207,9 +207,11 @@ const FondouneSession = (() => {
 
   // ── LIMPIAR SESIÓN ────────────────────────────────────────────────
   function clear() {
-    Object.values(KEYS).forEach(k => sessionStorage.removeItem(k));
-    sessionStorage.removeItem('fu_rol');
-    sessionStorage.removeItem('fu_email');
+    // sessionStorage.clear() completo (no solo Object.values(KEYS)):
+    // fu_rol / fu_email los escribe stytch-auth.js por fuera de KEYS, y si
+    // sobreviven al logout, index.html los usa para reautenticar solo
+    // y arma un bucle de redirección con el guard de navigation.js.
+    sessionStorage.clear();
   }
 
   /**
