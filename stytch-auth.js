@@ -100,6 +100,22 @@ const StytchAuth = (() => {
     sessionStorage.setItem('fu_rol',   rol);
     sessionStorage.setItem('fu_email', email.toLowerCase().trim());
 
+    // Además de fu_rol/fu_email: inicializar fu_user (FondouneSession),
+    // que es lo que realmente revisa el guard de navigation.js
+    // (FondouneSession.getUser().role). Sin esto, fu_rol/fu_email quedan
+    // "logueados" para index.html pero navigation.js sigue viendo la
+    // sesión vacía y rebota de vuelta — bucle de redirección.
+    // Los módulos que hacen su propia verificación (ej. cédula en
+    // modulo1) sobreescriben esto después con los datos reales.
+    if (typeof FondouneSession !== 'undefined') {
+      FondouneSession.initUser({
+        id: email.toLowerCase().trim(),
+        role: rol,
+        name: email,
+        initials: (email || '?').charAt(0).toUpperCase(),
+      });
+    }
+
     window.location.href = ruta;
   }
 
