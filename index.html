@@ -55,15 +55,18 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:20px}
 .card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-lg);
   padding:2.5rem 2.25rem 2rem;border:1px solid var(--border)}
-.seal-wrap{display:flex;justify-content:center;margin-bottom:1.25rem}
-.seal{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--copper);
-  display:flex;align-items:center;justify-content:center;position:relative;background:var(--white)}
-.seal::before{content:'';position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(166,99,60,0.3)}
-.seal i{font-size:26px;color:var(--navy)}
+.logo-wrap{
+  display:flex;justify-content:center;align-items:center;
+  margin-bottom:1.5rem;padding:0.5rem 0;
+}
+.logo-img{
+  width:100%;max-width:220px;height:auto;
+  display:block;
+  /* El logo tiene fondo claro — mix-blend-mode lo integra
+     suavemente con el fondo marfil de la card */
+  mix-blend-mode:multiply;
+}
 .head{text-align:center;margin-bottom:1.75rem}
-.wordmark{font-family:'DM Serif Display',serif;font-size:25px;color:var(--navy);
-  letter-spacing:-0.3px;margin-bottom:4px}
-.tagline{font-size:11px;color:var(--slate);letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.5rem}
 .ttl{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:5px}
 .sub{font-size:13px;color:var(--slate);line-height:1.55}
 .step{display:none}.step.active{display:block}
@@ -176,12 +179,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 </div>
 <div class="wrap">
   <div class="card">
-    <div class="seal-wrap">
-      <div class="seal"><i class="ti ti-building-bank"></i></div>
+    <div class="logo-wrap">
+      <img src="logo-fondoune.png" alt="FondoUne — Unidos por nuestros sueños" class="logo-img">
     </div>
     <div class="head">
-      <div class="wordmark">FondoUne</div>
-      <div class="tagline">Fondo de Empleados UNE</div>
       <div class="ttl" id="ttl">Acceso al portal</div>
       <div class="sub" id="sub">Ingresa tu correo corporativo para continuar</div>
     </div>
