@@ -1508,6 +1508,37 @@ function resetAsociadoCard() {
 // Init summary
 updateSummary();
 
+// ── BYPASS PARA ROLES INTERNOS ────────────────────────────────────
+// Si el usuario logueado es admin, analista o gerencia,
+// no necesita verificar cédula — entra directo al paso 2.
+(function bypassInternalRoles() {
+  if (typeof FondouneSession === 'undefined') return;
+
+  const user = FondouneSession.getUser();
+  const rol  = user?.role || '';
+
+  const rolesInternos = ['admin', 'analista', 'gerencia', 'jefe_credito'];
+  if (!rolesInternos.includes(rol)) return;
+
+  // Ya está autenticado con rol interno — saltar paso 1
+  console.log('[Módulo1] Bypass activo para rol:', rol);
+
+  // Rellenar campos del paso 1 con datos de sesión para que
+  // el resto del flujo (poblarDatosAsociado) tenga datos válidos
+  const cedInput = document.getElementById('inp-cedula') || document.getElementById('f-cedula');
+  if (cedInput) cedInput.value = user.id || '';
+
+  // Mostrar aviso visual en el paso 1 antes de saltar
+  const statusEl = document.getElementById('sheets-status');
+  if (statusEl) {
+    statusEl.textContent = `✓ Acceso interno (${rol}) — saltando verificación`;
+    statusEl.style.cssText = 'font-size:11px;color:#1A7A4A;padding:6px 10px;margin-top:6px';
+  }
+
+  // Pequeño delay para que el DOM termine de pintar, luego saltar
+  setTimeout(() => goTo(2), 400);
+})();
+
 // Las fotos de cédula se cargan manualmente por el usuario (cámara real)
 </script>
 </body>
