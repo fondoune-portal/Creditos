@@ -21,16 +21,15 @@ const FondouneNav = (() => {
   // ── Acceso estricto por rol ───────────────────────────────────────
   // El asociado NO tiene acceso a analista ni gerencia — punto.
   const ACCESO_ROL = {
-    admin:        ['home','solicitud','firma','analista','gerencia','jefe_credito','demo'],
     asociado:     ['home','solicitud','firma'],
     analista:     ['home','analista','firma'],
     gerencia:     ['home','analista','gerencia','firma'],
-    jefe_credito: ['home','analista','gerencia','firma','jefe_credito','demo'],
-    director:     ['home','analista','gerencia','firma','director','demo'],
+    jefe_credito: ['home','analista','gerencia','firma'],
+    admin:        ['home','solicitud','analista','gerencia','firma','demo'],
   };
 
   // ── Portales restringidos (los que el asociado nunca debe ver) ────
-  const SOLO_STAFF = ['admin','analista','gerencia','jefe_credito','director'];
+  const SOLO_STAFF = ['analista','gerencia'];
 
   let _portalActual = 'home';
   let _navInyectada = false;
@@ -134,6 +133,7 @@ const FondouneNav = (() => {
       }
       .chip-analista { background:rgba(59,130,246,.2); color:#93BFF9; }
       .chip-gerencia { background:rgba(201,150,59,.2); color:#F0C060; }
+      .chip-admin    { background:rgba(220,38,38,.2);  color:#F87171; }
 
       /* ── Zona derecha (usuario) ── */
       #fu-nav-user {
@@ -219,8 +219,8 @@ const FondouneNav = (() => {
     const initials = user.initials || (user.name ? user.name.split(' ').map(n=>n[0]).join('').slice(0,2) : '?');
 
     // Chip de rol solo para staff
-    const chipMap = { analista: 'chip-analista', gerencia: 'chip-gerencia', jefe_credito: 'chip-gerencia' };
-    const chipLbl = { analista:'Analista', gerencia:'Gerencia', jefe_credito:'Jefe Crédito' };
+    const chipMap = { analista: 'chip-analista', gerencia: 'chip-gerencia', jefe_credito: 'chip-gerencia', admin: 'chip-admin' };
+    const chipLbl = { analista:'Analista', gerencia:'Gerencia', jefe_credito:'Jefe Crédito', admin:'Admin' };
     const rolChip = chipMap[rol]
       ? `<span class="fu-rol-chip ${chipMap[rol]}">${chipLbl[rol]}</span>`
       : '';
@@ -314,7 +314,7 @@ const FondouneNav = (() => {
     if (!_navInyectada) return;
     const user = (typeof FondouneSession !== 'undefined') ? FondouneSession.getUser() : {};
     const initials = user.initials || (user.name ? user.name.split(' ').map(n=>n[0]).join('').slice(0,2) : '?');
-    const chipLbl  = { analista:'Analista', gerencia:'Gerencia', jefe_credito:'Jefe Crédito' };
+    const chipLbl  = { analista:'Analista', gerencia:'Gerencia', jefe_credito:'Jefe Crédito', admin:'Admin' };
     const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
     set('fu-user-name',  user.name  || '');
     set('fu-um-username',user.name  || 'Sin sesión');
