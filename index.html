@@ -395,7 +395,7 @@ async function doVerify() {
     document.getElementById('ok-role').textContent = labels[backendRole] || backendRole;
 
     setTimeout(function() {
-      StytchAuth.redirigirPorRol(backendRole);
+      StytchAuth.redirectByRole(backendRole);
     }, 1800);
 
   } catch (e) {
@@ -462,7 +462,7 @@ window.addEventListener('load', function() {
         if (res && res.ok) {
           var rol = res.rol || res.role || 'asociado';
           sessionStorage.setItem('fu_rol', rol);
-          setTimeout(function() { StytchAuth.redirigirPorRol(rol); }, 1200);
+          setTimeout(function() { StytchAuth.redirectByRole(rol); }, 1200);
         } else {
           showErr('El enlace expiró o ya fue usado. Solicita uno nuevo.');
           setStep('email');
@@ -477,7 +477,7 @@ window.addEventListener('load', function() {
   // Si ya hay rol en sessionStorage (sesión activa), redirigir directo
   var rolGuardado = sessionStorage.getItem('fu_rol');
   if (rolGuardado) {
-    StytchAuth.redirigirPorRol(rolGuardado);
+    StytchAuth.redirectByRole(rolGuardado);
   }
   if (!StytchAuth.isConfigured()) {
     showErr('⚙️ Reemplaza el PUBLIC_TOKEN en stytch-auth.js con tu token de Stytch Dashboard.');

@@ -39,11 +39,18 @@ const StytchAuth = (() => {
     return _client;
   }
 
+  // ── ¿Token configurado? (aviso de desarrollo) ──────────────────
+  function isConfigured() {
+    return typeof PUBLIC_TOKEN === 'string' &&
+      PUBLIC_TOKEN.startsWith('public-token-') &&
+      !PUBLIC_TOKEN.includes('YOUR_TOKEN');
+  }
+
   // ── OTP — ENVIAR ──────────────────────────────────────────────
   async function sendOTP(email) {
     const client = await _getClient();
     _currentEmail = email;
-    const res = await client.otps.email.loginOrCreate({ email });
+    const res = await client.otps.email.loginOrCreate(email);
     _methodId = res.method_id;
     return res;
   }
@@ -63,11 +70,23 @@ const StytchAuth = (() => {
     const client = await _getClient();
     _currentEmail = email;
     const url = redirectUrl || window.location.href.split('?')[0];
-    await client.magicLinks.email.loginOrCreate({
-      email,
+    await client.magicLinks.email.loginOrCreate(email, {
       login_magic_link_url:  url,
       signup_magic_link_url: url,
     });
+  }
+
+  // ── OTP — ENVIAR POR SMS ────────────────────────────────────────
+  async function sendSMSOTP(phone) {
+    const client = await _getClient();
+    // Stytch requiere formato E.164 (+57XXXXXXXXXX). Si el usuario solo
+    // escribió los 10 dígitos colombianos, se le antepone +57.
+    const digits = String(phone).replace(/\D/g, '');
+    const e164 = String(phone).trim().startsWith('+') ? phone.trim() : `+57${digits}`;
+    _currentEmail = _currentEmail || null; // no toca el email en curso
+    const res = await client.otps.sms.loginOrCreate(e164);
+    _methodId = res.method_id;
+    return res;
   }
 
   // ── MAGIC LINK — AUTENTICAR ───────────────────────────────────
@@ -148,11 +167,13 @@ const StytchAuth = (() => {
 
   return {
     sendOTP,
+    sendSMSOTP,
     verifyOTP,
     sendMagicLink,
     handleMagicLink,
     hasSession,
     getCurrentRole,
+    isConfigured,
     logout,
     redirectByRole,
   };
