@@ -36,15 +36,15 @@ const StytchAuth = (() => {
       throw new Error('SDK de Stytch no disponible. Revisa tu conexión e intenta de nuevo.');
     }
 
-    _client = new window.StytchUIClient(PUBLIC_TOKEN);
+    _client = new window.StytchUIClient(STYTCH_PUBLIC_TOKEN);
     return _client;
   }
 
   // ── ¿Token configurado? (aviso de desarrollo) ──────────────────
   function isConfigured() {
-    return typeof PUBLIC_TOKEN === 'string' &&
-      PUBLIC_TOKEN.startsWith('public-token-') &&
-      !PUBLIC_TOKEN.includes('YOUR_TOKEN');
+    return typeof STYTCH_PUBLIC_TOKEN === 'string' &&
+      STYTCH_PUBLIC_TOKEN.startsWith('public-token-') &&
+      !STYTCH_PUBLIC_TOKEN.includes('YOUR_TOKEN');
   }
 
   // ── OTP — ENVIAR ──────────────────────────────────────────────
