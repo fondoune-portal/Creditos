@@ -6,8 +6,8 @@
 
 const StytchAuth = (() => {
 
-  const STYTCH_PUBLIC_TOKEN = 'public-token-test-271a860b-aa52-4105-87ac-d5af1ccab375';
-const stytch = new StytchHeadlessClient(STYTCH_PUBLIC_TOKEN);
+  const STYTCH_PUBLIC_TOKEN =
+  'public-token-test-271a860b-aa52-4105-87ac-d5af1ccab375';
 
   // Mapa email → rol
   const ROL_POR_EMAIL = {
