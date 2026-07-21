@@ -6,8 +6,7 @@
 
 const StytchAuth = (() => {
 
-  const STYTCH_PUBLIC_TOKEN =
-  'public-token-test-271a860b-aa52-4105-87ac-d5af1ccab375';
+  const PUBLIC_TOKEN = 'public-token-test-271a860b-aa52-4105-87ac-d5af1ccab375';
 
   // Mapa email → rol
   const ROL_POR_EMAIL = {
@@ -36,15 +35,15 @@ const StytchAuth = (() => {
       throw new Error('SDK de Stytch no disponible. Revisa tu conexión e intenta de nuevo.');
     }
 
-    _client = new window.StytchUIClient(STYTCH_PUBLIC_TOKEN);
+    _client = new window.StytchUIClient(PUBLIC_TOKEN);
     return _client;
   }
 
   // ── ¿Token configurado? (aviso de desarrollo) ──────────────────
   function isConfigured() {
-    return typeof STYTCH_PUBLIC_TOKEN === 'string' &&
-      STYTCH_PUBLIC_TOKEN.startsWith('public-token-') &&
-      !STYTCH_PUBLIC_TOKEN.includes('YOUR_TOKEN');
+    return typeof PUBLIC_TOKEN === 'string' &&
+      PUBLIC_TOKEN.startsWith('public-token-') &&
+      !PUBLIC_TOKEN.includes('YOUR_TOKEN');
   }
 
   // ── OTP — ENVIAR ──────────────────────────────────────────────
@@ -56,19 +55,15 @@ const StytchAuth = (() => {
     return res;
   }
 
-// ── OTP — VERIFICAR ───────────────────────────────────────────
-async function verifyOTP(code) {
-  const client = await _getClient();
-  if (!_methodId) throw new Error('Primero envía el código OTP.');
-
-  // Asegurarse de que el código es un string
-  const codeStr = String(code).trim();
-
-  const res = await client.otps.authenticate(codeStr, _methodId, {
-    session_duration_minutes: 480,
-  });
-  return _bridgeToSession(res.user);
-}
+  // ── OTP — VERIFICAR ───────────────────────────────────────────
+  async function verifyOTP(code) {
+    const client = await _getClient();
+    if (!_methodId) throw new Error('Primero envía el código OTP.');
+    const res = await client.otps.authenticate(code, _methodId, {
+      session_duration_minutes: 480,
+    });
+    return _bridgeToSession(res.user);
+  }
 
   // ── MAGIC LINK — ENVIAR ───────────────────────────────────────
   async function sendMagicLink(email, redirectUrl) {
