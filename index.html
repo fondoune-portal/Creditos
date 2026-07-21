@@ -357,7 +357,7 @@ async function doVerify() {
   hideErr();
 
   try {
-    var result = await StytchAuth.verifyOTP(window._otpMethodId, code);
+    var result = await StytchAuth.verifyOTP(code);
     if (!result.ok) throw new Error(result.error || 'Código incorrecto o expirado.');
     var role = result.rol || result.role;
     var stytchSessionToken = result.stytchSessionToken;
