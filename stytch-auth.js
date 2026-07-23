@@ -57,12 +57,11 @@ const StytchAuth = (() => {
   
     _methodId = res.method_id || res.email_id;
   
-    console.log('sendOTP res:', res);
-    console.log('methodId guardado:', _methodId);
-  
-    if (!_methodId) {
-      throw new Error('Stytch no devolvió un method_id/email_id válido.');
-    }
+    console.log('Nuevo OTP enviado:', {
+      email,
+      methodId: _methodId,
+      requestId: res.request_id,
+    });
   
     return res;
   }
