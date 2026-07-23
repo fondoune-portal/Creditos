@@ -50,8 +50,20 @@ const StytchAuth = (() => {
   async function sendOTP(email) {
     const client = await _getClient();
     _currentEmail = email;
-    const res = await client.otps.email.loginOrCreate(email, { expiration_minutes: 10 });
-    _methodId = res.method_id;
+  
+    const res = await client.otps.email.loginOrCreate(email, {
+      expiration_minutes: 10,
+    });
+  
+    _methodId = res.method_id || res.email_id;
+  
+    console.log('sendOTP res:', res);
+    console.log('methodId guardado:', _methodId);
+  
+    if (!_methodId) {
+      throw new Error('Stytch no devolvió un method_id/email_id válido.');
+    }
+  
     return res;
   }
 
@@ -59,9 +71,13 @@ const StytchAuth = (() => {
   async function verifyOTP(code) {
     const client = await _getClient();
     if (!_methodId) throw new Error('Primero envía el código OTP.');
-    const res = await client.otps.authenticate(_methodId, String(code).trim(), {
+  
+    const cleanCode = String(code).trim().replace(/\s+/g, '');
+  
+    const res = await client.otps.authenticate(_methodId, cleanCode, {
       session_duration_minutes: 480,
     });
+  
     return _bridgeToSession(res.user);
   }
 
