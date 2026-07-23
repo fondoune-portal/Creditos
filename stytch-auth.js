@@ -78,8 +78,14 @@ const StytchAuth = (() => {
       throw new Error('El código OTP debe tener 6 dígitos.');
     }
   
-    const res = await client.otps.email.authenticate({
-      email_id: _methodId,
+    console.log('verifyOTP payload:', {
+      method_id: _methodId,
+      code: cleanCode,
+      session_duration_minutes: 480,
+    });
+  
+    const res = await client.otps.authenticate({
+      method_id: _methodId,
       code: cleanCode,
       session_duration_minutes: 480,
     });
