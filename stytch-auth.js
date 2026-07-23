@@ -50,7 +50,7 @@ const StytchAuth = (() => {
   async function sendOTP(email) {
     const client = await _getClient();
     _currentEmail = email;
-    const res = await client.otps.email.loginOrCreate(email);
+    const res = await client.otps.email.loginOrCreate(email, { expiration_minutes: 10 });
     _methodId = res.method_id;
     return res;
   }
@@ -84,7 +84,7 @@ const StytchAuth = (() => {
     const digits = String(phone).replace(/\D/g, '');
     const e164 = String(phone).trim().startsWith('+') ? phone.trim() : `+57${digits}`;
     _currentEmail = _currentEmail || null; // no toca el email en curso
-    const res = await client.otps.sms.loginOrCreate(e164);
+    const res = await client.otps.sms.loginOrCreate(e164, { expiration_minutes: 10 });
     _methodId = res.method_id;
     return res;
   }
