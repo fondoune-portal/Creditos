@@ -59,7 +59,7 @@ const StytchAuth = (() => {
   async function verifyOTP(code) {
     const client = await _getClient();
     if (!_methodId) throw new Error('Primero envía el código OTP.');
-    const res = await client.otps.authenticate(code, _methodId, {
+    const res = await client.otps.authenticate(_methodId, String(code).trim(), {
       session_duration_minutes: 480,
     });
     return _bridgeToSession(res.user);
