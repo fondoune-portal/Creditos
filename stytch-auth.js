@@ -1,5 +1,5 @@
 /**
- * FondoUne — stytch-auth.js  v3.0
+ * FondoUne — stytch-auth.js  v3.1
  * Usa StytchUIClient cargado vía ESM desde esm.sh.
  * No depende de UMD ni de CDN de SDK — funciona en GitHub Pages.
  */
@@ -85,7 +85,17 @@ const StytchAuth = (() => {
       { session_duration_minutes: 480 }
     );
   
-    return _bridgeToSession(res.user);
+    const role = _bridgeToSession(res.user);
+
+    // index.html espera un objeto { ok, rol, stytchSessionToken } — antes
+    // esta función devolvía solo el string del rol, por lo que result.ok
+    // siempre era undefined y el login se reportaba como fallido aunque
+    // Stytch respondiera 200.
+    return {
+      ok: true,
+      rol: role,
+      stytchSessionToken: res.session_token,
+    };
   }
 
   // ── MAGIC LINK — ENVIAR ───────────────────────────────────────
@@ -120,8 +130,17 @@ const StytchAuth = (() => {
     });
     const role = _bridgeToSession(res.user);
     window.history.replaceState({}, document.title, window.location.pathname);
-    redirectByRole(role);
-    return role;
+
+    // Mismo fix que verifyOTP: devolver { ok, rol, stytchSessionToken }
+    // en vez de solo el string del rol. Además se quitó el
+    // redirectByRole(role) que estaba aquí adentro, porque index.html ya
+    // redirige por su cuenta después de recibir la respuesta (línea con
+    // setTimeout) — dejarlo en ambos lados causaba doble redirección.
+    return {
+      ok: true,
+      rol: role,
+      stytchSessionToken: res.session_token,
+    };
   }
 
   // ── SESIÓN ────────────────────────────────────────────────────
