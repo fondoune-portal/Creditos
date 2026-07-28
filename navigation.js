@@ -98,9 +98,10 @@ const FondouneNav = (() => {
       }
       .fu-logo-mark {
         width:26px; height:26px; border-radius:7px;
-        background:#C9963B; display:flex; align-items:center; justify-content:center;
+        background:#fff; display:flex; align-items:center; justify-content:center;
+        padding:3px; box-sizing:border-box; flex-shrink:0;
       }
-      .fu-logo-mark i { font-size:14px; color:#0B2545; }
+      .fu-logo-mark img { width:100%; height:100%; object-fit:contain; display:block; }
       .fu-logo-name   { font-size:14px; font-weight:700; color:#fff; letter-spacing:-.2px; }
 
       .fu-vsep { width:1px; height:18px; background:rgba(255,255,255,.12); flex-shrink:0; }
@@ -249,7 +250,7 @@ const FondouneNav = (() => {
     nav.id = 'fu-navbar';
     nav.innerHTML = `
       <a href="index.html" id="fu-nav-logo" title="Inicio">
-        <div class="fu-logo-mark"><i class="ti ti-building-bank"></i></div>
+        <div class="fu-logo-mark"><img src="logo-icon.png" alt="FondoUne"></div>
         <span class="fu-logo-name">FondoUne</span>
       </a>
       <div class="fu-vsep"></div>
