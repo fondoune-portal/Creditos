@@ -313,9 +313,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
           return;
         }
 
-        // Acceso confirmado por el backend — quitar el overlay de verificación
+        // Acceso confirmado por el backend — ocultar el overlay con transición
         const gate = document.getElementById('fu-auth-gate');
-        if (gate) gate.remove();
+        if (gate) { gate.classList.add('fu-gate-hide'); setTimeout(() => gate.remove(), 400); }
       });
     }
 
@@ -324,11 +324,27 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   </script>
 </head>
 <body>
-<div id="fu-auth-gate" style="position:fixed;inset:0;background:#0B2545;z-index:99999;display:flex;align-items:center;justify-content:center;gap:12px;flex-direction:column;color:#fff;font-family:'Outfit','DM Sans',sans-serif;font-size:13px">
-  <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.2);border-top-color:#C9963B;border-radius:50%;animation:fuGateSpin .8s linear infinite"></div>
-  <span>Verificando sesión…</span>
+<div id="fu-auth-gate" class="fu-gate">
+  <div class="fu-gate-inner">
+    <div class="fu-gate-mark"><i class="ti ti-building-bank"></i></div>
+    <div class="fu-gate-name">FondoUne</div>
+    <div class="fu-gate-bar"><div class="fu-gate-bar-fill"></div></div>
+    <div class="fu-gate-txt">Verificando sesión…</div>
+  </div>
 </div>
-<style>@keyframes fuGateSpin{to{transform:rotate(360deg)}}</style>
+<style>
+.fu-gate{position:fixed;inset:0;background:#0B2545;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;font-family:'Outfit','DM Sans',sans-serif}
+.fu-gate.fu-gate-hide{opacity:0;pointer-events:none}
+.fu-gate-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.fu-gate-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#C9963B,#E0B04B);display:flex;align-items:center;justify-content:center;animation:fuGatePulse 1.6s ease-in-out infinite}
+.fu-gate-mark i{font-size:26px;color:#0B2545}
+@keyframes fuGatePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(201,150,59,.35)}50%{transform:scale(1.08);box-shadow:0 0 0 12px rgba(201,150,59,0)}}
+.fu-gate-name{font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff}
+.fu-gate-bar{width:120px;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.fu-gate-bar-fill{width:35%;height:100%;background:linear-gradient(90deg,#C9963B,#E0B04B);border-radius:3px;animation:fuGateSlide 1.1s ease-in-out infinite}
+@keyframes fuGateSlide{0%{transform:translateX(-120%)}100%{transform:translateX(340%)}}
+.fu-gate-txt{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.02em}
+</style>
 
 <div class="layout">
 
@@ -369,7 +385,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     <div class="pg-head">
       <div>
         <div class="pg-title">Panel Ejecutivo</div>
-        <div class="pg-sub">FondoUne — Cartera de crédito · Lunes 12 de mayo, 2025 · 10:04 a.m.</div>
+        <div class="pg-sub" id="fecha-hora-live">FondoUne — Cartera de crédito · Cargando fecha…</div>
       </div>
       <div class="head-r">
         <select class="period-sel" onchange="changePeriod(this.value)">
@@ -1370,6 +1386,27 @@ function buildAccesos(){
   });
 }
 buildAccesos();
+
+// ── FECHA Y HORA EN VIVO (header del Panel Ejecutivo) ──
+const DIAS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function actualizarFechaHora(){
+  const el = document.getElementById('fecha-hora-live');
+  if(!el) return;
+  const now = new Date();
+  const dia = DIAS_ES[now.getDay()];
+  const diaMes = now.getDate();
+  const mes = MESES_ES[now.getMonth()];
+  const anio = now.getFullYear();
+  let h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const ampm = h >= 12 ? 'p.m.' : 'a.m.';
+  h = h % 12; if(h === 0) h = 12;
+  const fechaTxt = `${dia.charAt(0).toUpperCase()+dia.slice(1)} ${diaMes} de ${mes}, ${anio} · ${h}:${m} ${ampm}`;
+  el.textContent = `FondoUne — Cartera de crédito · ${fechaTxt}`;
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora, 1000);
 </script>
 </body>
 </html>

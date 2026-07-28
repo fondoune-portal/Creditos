@@ -331,6 +331,27 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <script src="firebase-config.js"></script>
 </head>
 <body>
+<div id="fu-auth-gate" class="fu-gate">
+  <div class="fu-gate-inner">
+    <div class="fu-gate-mark"><i class="ti ti-building-bank"></i></div>
+    <div class="fu-gate-name">FondoUne</div>
+    <div class="fu-gate-bar"><div class="fu-gate-bar-fill"></div></div>
+    <div class="fu-gate-txt">Verificando sesión…</div>
+  </div>
+</div>
+<style>
+.fu-gate{position:fixed;inset:0;background:#0B2545;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;font-family:'IBM Plex Sans','DM Sans',sans-serif}
+.fu-gate.fu-gate-hide{opacity:0;pointer-events:none}
+.fu-gate-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.fu-gate-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#C9963B,#E0B04B);display:flex;align-items:center;justify-content:center;animation:fuGatePulse 1.6s ease-in-out infinite}
+.fu-gate-mark i{font-size:26px;color:#0B2545}
+@keyframes fuGatePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(201,150,59,.35)}50%{transform:scale(1.08);box-shadow:0 0 0 12px rgba(201,150,59,0)}}
+.fu-gate-name{font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff}
+.fu-gate-bar{width:120px;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.fu-gate-bar-fill{width:35%;height:100%;background:linear-gradient(90deg,#C9963B,#E0B04B);border-radius:3px;animation:fuGateSlide 1.1s ease-in-out infinite}
+@keyframes fuGateSlide{0%{transform:translateX(-120%)}100%{transform:translateX(340%)}}
+.fu-gate-txt{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.02em}
+</style>
 
 <div class="layout">
 
@@ -1198,6 +1219,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Sesión válida y rol autorizado — recién ahora se conecta Firestore
     iniciarListenerFirebase();
+
+    // Acceso confirmado — ocultar el overlay con transición
+    const gate = document.getElementById('fu-auth-gate');
+    if (gate) { gate.classList.add('fu-gate-hide'); setTimeout(() => gate.remove(), 400); }
   });
 
   // Limpiar datos CIFIN al salir del módulo
