@@ -250,8 +250,85 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <script src="navigation.js"></script>
   <script src="session.js"></script>
   <script>FondouneNav.init('gerencia');</script>
+
+  <!-- Firebase — verificación real de sesión y rol (custom claims),
+       mismo patrón que modulo2-analista.html. El guard de arriba
+       (FondouneNav.init) sigue construyendo la barra de navegación
+       y sirve como filtro cosmético rápido; el verdadero control de
+       acceso — el que no se puede falsear editando sessionStorage
+       desde DevTools — es este bloque. -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+  (function () {
+    const PORTAL_KEY = 'gerencia';
+
+    async function verificarAcceso() {
+      if (typeof FondoUneFirebase === 'undefined') {
+        console.error('[Módulo Gerencia] firebase-config.js no cargó. Verifica el <script src="firebase-config.js">.');
+        window.location.replace('index.html');
+        return;
+      }
+
+      try {
+        await FondoUneFirebase.inicializar();
+      } catch (err) {
+        console.error('[Módulo Gerencia] No se pudo inicializar Firebase:', err);
+        window.location.replace('index.html');
+        return;
+      }
+
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        console.error('[Módulo Gerencia] Firebase Auth no está cargado.');
+        window.location.replace('index.html');
+        return;
+      }
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) {
+          console.warn('[Módulo Gerencia] Sin sesión de Firebase — redirigiendo a login.');
+          window.location.replace('index.html');
+          return;
+        }
+
+        let rolBackend = 'asociado';
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          rolBackend = tokenResult.claims.role || 'asociado';
+        } catch (err) {
+          console.error('[Módulo Gerencia] No se pudo leer el rol del token:', err);
+          window.location.replace('index.html');
+          return;
+        }
+
+        const acceso = (typeof FondouneNav !== 'undefined' && FondouneNav.ACCESO_ROL[rolBackend]) || [];
+        if (!acceso.includes(PORTAL_KEY)) {
+          if (typeof FondouneSession !== 'undefined') {
+            FondouneSession.queueNotif('No tienes permiso para acceder a esa sección.', 'error');
+          }
+          const fallback = acceso.find(k => k !== 'home') || 'home';
+          window.location.replace((FondouneNav.PORTALES[fallback] && FondouneNav.PORTALES[fallback].file) || 'index.html');
+          return;
+        }
+
+        // Acceso confirmado por el backend — quitar el overlay de verificación
+        const gate = document.getElementById('fu-auth-gate');
+        if (gate) gate.remove();
+      });
+    }
+
+    verificarAcceso();
+  })();
+  </script>
 </head>
 <body>
+<div id="fu-auth-gate" style="position:fixed;inset:0;background:#0B2545;z-index:99999;display:flex;align-items:center;justify-content:center;gap:12px;flex-direction:column;color:#fff;font-family:'Outfit','DM Sans',sans-serif;font-size:13px">
+  <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.2);border-top-color:#C9963B;border-radius:50%;animation:fuGateSpin .8s linear infinite"></div>
+  <span>Verificando sesión…</span>
+</div>
+<style>@keyframes fuGateSpin{to{transform:rotate(360deg)}}</style>
 
 <div class="layout">
 
@@ -292,7 +369,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     <div class="pg-head">
       <div>
         <div class="pg-title">Panel Ejecutivo</div>
-        <div class="pg-sub">FondoUne — Cartera de crédito · Martes 28 de julio, 2026 · 11:07 a.m.</div>
+        <div class="pg-sub">FondoUne — Cartera de crédito · Lunes 12 de mayo, 2025 · 10:04 a.m.</div>
       </div>
       <div class="head-r">
         <select class="period-sel" onchange="changePeriod(this.value)">
