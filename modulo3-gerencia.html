@@ -203,6 +203,44 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .toast i{font-size:18px;flex-shrink:0}
 .t-ok i{color:var(--emerald2)}.t-warn i{color:var(--amber2)}.t-err i{color:var(--crimson2)}
 .t-close{margin-left:auto;cursor:pointer;color:var(--slate);padding-left:8px}
+
+/* ── PAGE VIEWS (SPA) ── */
+.page-view{display:none}
+.page-view.active{display:block}
+
+/* ── CONFIG FORM (Motor IA / Parámetros crédito) ── */
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--paper2)}
+.cfg-row:last-child{border-bottom:none}
+.cfg-lbl{font-size:12px;color:var(--ink);font-weight:500}
+.cfg-sub{font-size:10px;color:var(--slate);margin-top:2px}
+.cfg-input{width:110px;background:var(--paper);border:1px solid var(--paper3);border-radius:var(--r);padding:7px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--ink);text-align:right;outline:none}
+.cfg-input:focus{border-color:var(--gold2)}
+
+/* Toggle switch */
+.tgl{position:relative;width:38px;height:21px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-slider{position:absolute;cursor:pointer;inset:0;background:var(--paper3);border-radius:20px;transition:.2s}
+.tgl-slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl input:checked + .tgl-slider{background:var(--emerald2)}
+.tgl input:checked + .tgl-slider::before{transform:translateX(17px)}
+
+/* ── STAT TILES (Cartera / Auditoría) ── */
+.stat-tile{display:flex;align-items:center;gap:12px;padding:12px 4px}
+.stat-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat-val{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink);line-height:1.1}
+.stat-lbl{font-size:10px;color:var(--slate);margin-top:2px}
+
+/* ── PILL FILTER TABS ── */
+.pill-tabs{display:flex;gap:6px}
+.pill-tab{padding:6px 13px;border-radius:20px;font-size:11px;font-weight:600;color:var(--slate);background:var(--paper2);cursor:pointer;transition:all .12s;border:1px solid transparent}
+.pill-tab:hover{background:var(--paper3)}
+.pill-tab.active{background:var(--ink);color:#fff}
+
+/* ── ACCESS ROW ── */
+.acc-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);transition:background .12s}
+.acc-row:hover{background:var(--paper)}
+.acc-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 </style>
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
@@ -217,22 +255,22 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <div class="sidebar">
     <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
-      <div class="sb-item active"><i class="ti ti-layout-dashboard"></i> Panel ejecutivo</div>
-      <div class="sb-item"><i class="ti ti-chart-line"></i> Cartera activa</div>
-      <div class="sb-item"><i class="ti ti-report-analytics"></i> Reportes</div>
-      <div class="sb-item"><i class="ti ti-alert-triangle"></i> Alertas de riesgo</div>
+      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> Panel ejecutivo</div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> Cartera activa</div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> Reportes</div>
+      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> Alertas de riesgo</div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Operativo</div>
-      <div class="sb-item"><i class="ti ti-users"></i> Equipo analistas</div>
-      <div class="sb-item"><i class="ti ti-rotate-clockwise"></i> Reversiones</div>
-      <div class="sb-item"><i class="ti ti-brain"></i> Motor IA — config</div>
-      <div class="sb-item"><i class="ti ti-shield-check"></i> Auditoría</div>
+      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> Equipo analistas</div>
+      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> Reversiones</div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> Motor IA — config</div>
+      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> Auditoría</div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Config</div>
-      <div class="sb-item"><i class="ti ti-adjustments-horizontal"></i> Parámetros crédito</div>
-      <div class="sb-item"><i class="ti ti-key"></i> Accesos y roles</div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> Parámetros crédito</div>
+      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> Accesos y roles</div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
@@ -244,6 +282,8 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <!-- MAIN -->
   <div class="main">
 
+  <!-- ══════════════ VISTA: PANEL EJECUTIVO ══════════════ -->
+  <div class="page-view active" id="pv-panel">
     <!-- PAGE HEADER -->
     <div class="pg-head">
       <div>
@@ -440,6 +480,319 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       </div>
 
     </div>
+
+  </div>
+  <!-- ══════════════ /VISTA: PANEL EJECUTIVO ══════════════ -->
+
+  <!-- ══════════════ VISTA: CARTERA ACTIVA ══════════════ -->
+  <div class="page-view" id="pv-cartera">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Cartera Activa</div>
+        <div class="pg-sub">FondoUne — Créditos vigentes en curso de pago</div>
+      </div>
+      <div class="head-r">
+        <button class="btn btn-dark" onclick="showToast('Exportando cartera activa…','t-ok','ti-download')"><i class="ti ti-download"></i> Exportar</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi" style="--kpi-color:#2563EB">
+        <div class="kpi-lbl"><i class="ti ti-wallet"></i> Cartera vigente</div>
+        <div class="kpi-val">$3.842M</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>412 créditos activos</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#0A6B45">
+        <div class="kpi-lbl"><i class="ti ti-checkbox"></i> Al día</div>
+        <div class="kpi-val">361</div>
+        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>87.6% de la cartera</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#D97706">
+        <div class="kpi-lbl"><i class="ti ti-clock-exclamation"></i> Mora leve (1-30d)</div>
+        <div class="kpi-val">39</div>
+        <div class="kpi-delta" style="color:var(--amber2)"><i class="ti ti-minus" style="font-size:11px"></i>9.5% de la cartera</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#8B1A1A">
+        <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora grave (+30d)</div>
+        <div class="kpi-val" style="color:var(--crimson2)">12</div>
+        <div class="kpi-delta" style="color:var(--crimson2)"><i class="ti ti-trending-up" style="font-size:11px"></i>2.9% de la cartera</div>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="ti ti-list-details"></i> Créditos activos</div>
+          <div class="pill-tabs" id="cartera-tabs">
+            <div class="pill-tab active" onclick="filterCartera('todos',this)">Todos</div>
+            <div class="pill-tab" onclick="filterCartera('aldia',this)">Al día</div>
+            <div class="pill-tab" onclick="filterCartera('mora',this)">En mora</div>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-cartera"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: CARTERA ACTIVA ══════════════ -->
+
+  <!-- ══════════════ VISTA: REPORTES ══════════════ -->
+  <div class="page-view" id="pv-reportes">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Reportes</div>
+        <div class="pg-sub">FondoUne — Generación y descarga de informes</div>
+      </div>
+    </div>
+
+    <div class="row row-3">
+      <div class="card" style="padding:16px">
+        <div class="stat-tile" style="padding:0 0 12px">
+          <div class="stat-ico" style="background:rgba(37,99,235,.1);color:var(--sapphire2)"><i class="ti ti-file-text"></i></div>
+          <div><div class="stat-val" style="font-size:14px">Informe ejecutivo</div><div class="stat-lbl">Resumen semanal de cartera y KPIs</div></div>
+        </div>
+        <button class="btn btn-dark" style="width:100%;justify-content:center" onclick="showToast('Generando informe ejecutivo PDF…','t-ok','ti-file-text')"><i class="ti ti-download"></i> Generar PDF</button>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="stat-tile" style="padding:0 0 12px">
+          <div class="stat-ico" style="background:rgba(10,107,69,.1);color:var(--emerald2)"><i class="ti ti-report-money"></i></div>
+          <div><div class="stat-val" style="font-size:14px">Desembolsos</div><div class="stat-lbl">Detalle de giros por periodo</div></div>
+        </div>
+        <button class="btn btn-dark" style="width:100%;justify-content:center" onclick="showToast('Generando reporte de desembolsos…','t-ok','ti-report-money')"><i class="ti ti-download"></i> Generar Excel</button>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="stat-tile" style="padding:0 0 12px">
+          <div class="stat-ico" style="background:rgba(139,26,26,.1);color:var(--crimson2)"><i class="ti ti-shield-exclamation"></i></div>
+          <div><div class="stat-val" style="font-size:14px">Mora y cartera en riesgo</div><div class="stat-lbl">Créditos vencidos y en seguimiento</div></div>
+        </div>
+        <button class="btn btn-dark" style="width:100%;justify-content:center" onclick="showToast('Generando reporte de mora…','t-ok','ti-shield-exclamation')"><i class="ti ti-download"></i> Generar Excel</button>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-history"></i> Historial de reportes generados</div></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-reportes"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: REPORTES ══════════════ -->
+
+  <!-- ══════════════ VISTA: ALERTAS DE RIESGO ══════════════ -->
+  <div class="page-view" id="pv-alertas">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Alertas de Riesgo</div>
+        <div class="pg-sub">FondoUne — Monitoreo de cumplimiento y concentración de cartera</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi" style="--kpi-color:#8B1A1A">
+        <div class="kpi-lbl"><i class="ti ti-alert-octagon"></i> Críticas</div>
+        <div class="kpi-val" style="color:var(--crimson2)">3</div>
+        <div class="kpi-delta" style="color:var(--crimson2)">Requieren acción inmediata</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#D97706">
+        <div class="kpi-lbl"><i class="ti ti-trending-up"></i> Informativas</div>
+        <div class="kpi-val" style="color:var(--amber2)">5</div>
+        <div class="kpi-delta" style="color:var(--slate)">Seguimiento recomendado</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#2563EB">
+        <div class="kpi-lbl"><i class="ti ti-clock"></i> Sin resolver +24h</div>
+        <div class="kpi-val" style="color:var(--sapphire2)">1</div>
+        <div class="kpi-delta" style="color:var(--slate)">Vencido plazo interno</div>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-alert-triangle"></i> Todas las alertas activas</div></div>
+        <div class="card-body">
+          <div class="alert-list" id="alertas-full-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: ALERTAS DE RIESGO ══════════════ -->
+
+  <!-- ══════════════ VISTA: EQUIPO ANALISTAS ══════════════ -->
+  <div class="page-view" id="pv-equipo">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Equipo de Analistas</div>
+        <div class="pg-sub">FondoUne — Desempeño y carga de trabajo por analista</div>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-users"></i> Analistas de crédito</div></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-equipo"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: EQUIPO ANALISTAS ══════════════ -->
+
+  <!-- ══════════════ VISTA: REVERSIONES (completa) ══════════════ -->
+  <div class="page-view" id="pv-reversiones">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Reversiones</div>
+        <div class="pg-sub">FondoUne — Solicitudes de reversión de decisiones de analista</div>
+      </div>
+    </div>
+
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-rotate-clockwise"></i> Pendientes</div><span class="badge b-amber">2 pendientes</span></div>
+        <div class="card-body">
+          <div id="reversion-list-full"></div>
+        </div>
+        <div class="card-foot">
+          <span style="font-size:11px;color:var(--slate)">Solo el Jefe de Crédito puede revertir decisiones del analista</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-history"></i> Historial resuelto</div></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-reversiones-hist"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: REVERSIONES ══════════════ -->
+
+  <!-- ══════════════ VISTA: MOTOR IA — CONFIG ══════════════ -->
+  <div class="page-view" id="pv-motor-ia">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Motor IA — Configuración</div>
+        <div class="pg-sub">FondoUne — Parámetros del motor de evaluación automática</div>
+      </div>
+      <div class="head-r">
+        <button class="btn btn-gold" onclick="showToast('Configuración del motor IA guardada','t-ok','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
+      </div>
+    </div>
+
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-brain"></i> Umbrales de decisión automática</div></div>
+        <div class="card-body">
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Score mínimo — aprobación automática</div><div class="cfg-sub">Solicitudes con score igual o mayor se aprueban sin analista</div></div>
+            <input class="cfg-input" type="number" value="720">
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Score máximo — rechazo automático</div><div class="cfg-sub">Solicitudes con score igual o menor se rechazan sin analista</div></div>
+            <input class="cfg-input" type="number" value="520">
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Monto máximo para auto-aprobación</div><div class="cfg-sub">Por encima de este monto, siempre pasa a revisión manual</div></div>
+            <input class="cfg-input" type="text" value="$10.000.000">
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Revisión SARLAFT obligatoria</div><div class="cfg-sub">Fuerza revisión manual si hay coincidencia en listas</div></div>
+            <label class="tgl"><input type="checkbox" checked><span class="tgl-slider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-adjustments"></i> Comportamiento del modelo</div></div>
+        <div class="card-body">
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Reentrenamiento automático</div><div class="cfg-sub">Actualiza el modelo con datos del último trimestre</div></div>
+            <label class="tgl"><input type="checkbox" checked><span class="tgl-slider"></span></label>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Explicabilidad de decisiones</div><div class="cfg-sub">Genera justificación legible para cada decisión IA</div></div>
+            <label class="tgl"><input type="checkbox" checked><span class="tgl-slider"></span></label>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Alertas de concentración por empresa</div><div class="cfg-sub">Notifica si una empresa supera el 60% de solicitudes</div></div>
+            <label class="tgl"><input type="checkbox" checked><span class="tgl-slider"></span></label>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Modo conservador</div><div class="cfg-sub">Prioriza revisión manual ante ambigüedad del score</div></div>
+            <label class="tgl"><input type="checkbox"><span class="tgl-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: MOTOR IA ══════════════ -->
+
+  <!-- ══════════════ VISTA: AUDITORÍA ══════════════ -->
+  <div class="page-view" id="pv-auditoria">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Auditoría</div>
+        <div class="pg-sub">FondoUne — Registro de acciones sobre solicitudes y sesiones</div>
+      </div>
+      <div class="head-r">
+        <button class="btn btn-dark" onclick="showToast('Exportando registro de auditoría…','t-ok','ti-download')"><i class="ti ti-download"></i> Exportar log</button>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-shield-check"></i> Registro de actividad</div></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-auditoria"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: AUDITORÍA ══════════════ -->
+
+  <!-- ══════════════ VISTA: PARÁMETROS DE CRÉDITO ══════════════ -->
+  <div class="page-view" id="pv-parametros">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Parámetros de Crédito</div>
+        <div class="pg-sub">FondoUne — Límites y condiciones por tipo de crédito</div>
+      </div>
+      <div class="head-r">
+        <button class="btn btn-gold" onclick="showToast('Parámetros de crédito guardados','t-ok','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-adjustments-horizontal"></i> Límites por tipo de crédito</div></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="tbl-parametros"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: PARÁMETROS DE CRÉDITO ══════════════ -->
+
+  <!-- ══════════════ VISTA: ACCESOS Y ROLES ══════════════ -->
+  <div class="page-view" id="pv-accesos">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Accesos y Roles</div>
+        <div class="pg-sub">FondoUne — Usuarios del portal y sus permisos</div>
+      </div>
+      <div class="head-r">
+        <button class="btn btn-dark" onclick="showToast('Invitación enviada','t-ok','ti-user-plus')"><i class="ti ti-user-plus"></i> Invitar usuario</button>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-key"></i> Usuarios con acceso al portal</div></div>
+        <div class="card-body" id="accesos-list"></div>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: ACCESOS Y ROLES ══════════════ -->
 
   </div>
 </div>
@@ -669,6 +1022,273 @@ function showToast(msg,cls,icon){
   document.body.appendChild(t);
   setTimeout(()=>t&&t.remove(),5000);
 }
+
+// ══════════════════════════════════════════════════════════════
+// ── NAVEGACIÓN ENTRE SECCIONES (SPA) ──
+// ══════════════════════════════════════════════════════════════
+const pageTitles = {
+  panel:       {t:'Panel Ejecutivo',        s:'FondoUne — Cartera de crédito · Lunes 12 de mayo, 2025 · 10:04 a.m.'},
+  cartera:     {t:'Cartera Activa',         s:'FondoUne — Créditos vigentes en curso de pago'},
+  reportes:    {t:'Reportes',               s:'FondoUne — Generación y descarga de informes'},
+  alertas:     {t:'Alertas de Riesgo',      s:'FondoUne — Monitoreo de cumplimiento y concentración de cartera'},
+  equipo:      {t:'Equipo de Analistas',    s:'FondoUne — Desempeño y carga de trabajo por analista'},
+  reversiones: {t:'Reversiones',            s:'FondoUne — Solicitudes de reversión de decisiones de analista'},
+  'motor-ia':  {t:'Motor IA — Configuración',s:'FondoUne — Parámetros del motor de evaluación automática'},
+  auditoria:   {t:'Auditoría',              s:'FondoUne — Registro de acciones sobre solicitudes y sesiones'},
+  parametros:  {t:'Parámetros de Crédito',  s:'FondoUne — Límites y condiciones por tipo de crédito'},
+  accesos:     {t:'Accesos y Roles',        s:'FondoUne — Usuarios del portal y sus permisos'},
+};
+
+function switchPage(view){
+  document.querySelectorAll('.page-view').forEach(pv=>pv.classList.remove('active'));
+  const target=document.getElementById('pv-'+view);
+  if(target) target.classList.add('active');
+
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const btn=document.querySelector(`.sb-item[data-view="${view}"]`);
+  if(btn) btn.classList.add('active');
+
+  document.querySelector('.main').scrollTop=0;
+}
+
+// ── CARTERA ACTIVA ──
+const carteraData=[
+  {id:'CR-1042',nm:'Laura Jiménez',ini:'LJ',col:'#2563EB',monto:'$8.500.000',tipo:'Consumo',cuotas:'8/24',estado:'aldia',prox:'02 ago'},
+  {id:'CR-1038',nm:'Andrés Salcedo',ini:'AS',col:'#0A6B45',monto:'$12.000.000',tipo:'Educativo',cuotas:'14/36',estado:'aldia',prox:'05 ago'},
+  {id:'CR-1029',nm:'Patricia Muñoz',ini:'PM',col:'#B8872A',monto:'$6.000.000',tipo:'Vivienda',cuotas:'3/60',estado:'mora_leve',prox:'Vencida hace 12d'},
+  {id:'CR-1017',nm:'Julián Restrepo',ini:'JR',col:'#8B5CF6',monto:'$4.200.000',tipo:'Emergencia',estado:'aldia',cuotas:'6/12',prox:'30 jul'},
+  {id:'CR-0998',nm:'Marcela Torres',ini:'MT',col:'#EF4444',monto:'$15.000.000',tipo:'Consumo',cuotas:'21/24',estado:'mora_grave',prox:'Vencida hace 41d'},
+  {id:'CR-0981',nm:'Felipe Cuartas',ini:'FC',col:'#10B981',monto:'$3.800.000',tipo:'Libranza',cuotas:'2/18',estado:'aldia',prox:'01 ago'},
+];
+function buildCartera(filter='todos'){
+  const t=document.getElementById('tbl-cartera');
+  const eClass={aldia:'b-green',mora_leve:'b-amber',mora_grave:'b-red'};
+  const eTxt={aldia:'Al día',mora_leve:'Mora leve',mora_grave:'Mora grave'};
+  const rows=carteraData.filter(c=>filter==='todos'||(filter==='aldia'&&c.estado==='aldia')||(filter==='mora'&&c.estado!=='aldia'));
+  t.innerHTML=`<thead><tr><th>Cliente</th><th>Monto</th><th>Tipo</th><th>Cuotas</th><th>Estado</th><th>Próximo pago</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  rows.forEach(c=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="av-sm" style="background:${c.col}20;color:${c.col}">${c.ini}</span>${c.nm}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${c.id}</div></td>
+      <td class="mono">${c.monto}</td>
+      <td><span class="badge b-slate">${c.tipo}</span></td>
+      <td class="mono">${c.cuotas}</td>
+      <td><span class="badge ${eClass[c.estado]}">${eTxt[c.estado]}</span></td>
+      <td style="color:${c.estado==='aldia'?'var(--slate)':'var(--crimson2)'}">${c.prox}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filterCartera(f,el){
+  document.querySelectorAll('#cartera-tabs .pill-tab').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  buildCartera(f);
+}
+buildCartera();
+
+// ── REPORTES ──
+const reportesData=[
+  {nm:'Informe ejecutivo — Semana 20',fecha:'26 jul 2026',tipo:'PDF',autor:'Diego Montoya'},
+  {nm:'Desembolsos — Julio 2026',fecha:'24 jul 2026',tipo:'Excel',autor:'Diego Montoya'},
+  {nm:'Mora y cartera en riesgo',fecha:'20 jul 2026',tipo:'Excel',autor:'María Rodríguez'},
+  {nm:'Informe ejecutivo — Semana 19',fecha:'19 jul 2026',tipo:'PDF',autor:'Diego Montoya'},
+];
+function buildReportes(){
+  const t=document.getElementById('tbl-reportes');
+  t.innerHTML=`<thead><tr><th>Reporte</th><th>Fecha</th><th>Formato</th><th>Generado por</th><th></th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  reportesData.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${r.nm}</td>
+      <td class="mono" style="color:var(--slate)">${r.fecha}</td>
+      <td><span class="badge b-slate">${r.tipo}</span></td>
+      <td style="color:var(--slate)">${r.autor}</td>
+      <td><button class="btn" style="padding:5px 10px" onclick="showToast('Descargando ${r.nm}…','t-ok','ti-download')"><i class="ti ti-download"></i></button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildReportes();
+
+// ── ALERTAS (vista completa) ──
+const alertasFull=[
+  {cls:'al-red',ico:'ti-alert-octagon',t:'Alerta SARLAFT — Sol. SOL-2025-0843',b:'Rodrigo A. Ríos · Señal en listas de cumplimiento · Requiere revisión manual urgente por Jefe de Crédito',time:'Hoy 06:59 · Sin resolver',btn:true},
+  {cls:'al-amber',ico:'ti-trending-up',t:'Concentración de cartera — Tigo-UNE',b:'68% de solicitudes provienen de Tigo-UNE S.A.S. Diversificación recomendada entre empresas.',time:'Hoy 08:00 · Informativo'},
+  {cls:'al-blue',ico:'ti-clock',t:'4 solicitudes pendientes +2h sin acción',b:'SOL-2025-0842, 0845, 0846, 0847 esperan decisión del analista.',time:'Actualizado hace 12 min'},
+  {cls:'al-red',ico:'ti-alert-octagon',t:'Documento de identidad inconsistente — Sol. SOL-2025-0839',b:'La cédula cargada no coincide con los datos KYC. Requiere validación manual.',time:'Ayer 17:22 · Sin resolver',btn:true},
+  {cls:'al-amber',ico:'ti-cash',t:'Aumento de solicitudes tipo Emergencia',b:'32% más solicitudes de crédito de emergencia que la semana anterior.',time:'Ayer 09:10 · Informativo'},
+  {cls:'al-red',ico:'ti-alert-octagon',t:'Score deteriorado post-desembolso — CR-0998',b:'Marcela Torres · Score bajó de 680 a 501 tras el desembolso. Cartera en mora grave.',time:'Hace 2 días · Sin resolver',btn:true},
+  {cls:'al-blue',ico:'ti-refresh',t:'Reentrenamiento del modelo completado',b:'El motor IA se actualizó con datos del segundo trimestre. Precisión: 91.4%.',time:'Hace 3 días · Informativo'},
+];
+function buildAlertasFull(){
+  const c=document.getElementById('alertas-full-list');
+  c.innerHTML='';
+  alertasFull.forEach(a=>{
+    const div=document.createElement('div');
+    div.className=`alert-item ${a.cls}`;
+    div.innerHTML=`
+      <div class="alert-ico"><i class="ti ${a.ico}"></i></div>
+      <div>
+        <div class="alert-title">${a.t}</div>
+        <div class="alert-body">${a.b}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+      ${a.btn?`<button class="btn btn-revert" style="flex-shrink:0;margin-top:2px" onclick="showToast('Revisando alerta…','t-warn','ti-alert-triangle')">Ver</button>`:''}`;
+    c.appendChild(div);
+  });
+}
+buildAlertasFull();
+
+// ── EQUIPO ANALISTAS (tabla completa) ──
+const equipoData=[
+  {nm:'María Rodríguez',ini:'MR',col:'#2563EB',role:'Analista senior',activas:14,apro:42,rech:5,tiempo:'3.8m',pct:94},
+  {nm:'Carlos Pérez',ini:'CP',col:'#0A6B45',role:'Analista junior',activas:9,apro:31,rech:11,tiempo:'5.1m',pct:78},
+  {nm:'Laura Gómez',ini:'LG',col:'#B8872A',role:'Analista senior',activas:6,apro:16,rech:2,tiempo:'4.2m',pct:88},
+  {nm:'Sebastián Ortiz',ini:'SO',col:'#8B5CF6',role:'Analista junior',activas:11,apro:22,rech:8,tiempo:'4.9m',pct:81},
+];
+function buildEquipo(){
+  const t=document.getElementById('tbl-equipo');
+  t.innerHTML=`<thead><tr><th>Analista</th><th>Solicitudes activas</th><th>Aprobadas</th><th>Rechazadas</th><th>Tiempo prom.</th><th>Eficiencia</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  equipoData.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="av-sm" style="background:${a.col}20;color:${a.col}">${a.ini}</span>${a.nm}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${a.role}</div></td>
+      <td class="mono">${a.activas}</td>
+      <td class="mono" style="color:var(--emerald2)">${a.apro}</td>
+      <td class="mono" style="color:var(--crimson2)">${a.rech}</td>
+      <td class="mono">${a.tiempo}</td>
+      <td><span class="badge ${a.pct>=90?'b-green':a.pct>=80?'b-blue':'b-amber'}">${a.pct}%</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildEquipo();
+
+// ── REVERSIONES (vista completa: pendientes + historial) ──
+function buildReversionesFull(){
+  const c=document.getElementById('reversion-list-full');
+  c.innerHTML='';
+  reversiones.forEach(r=>{
+    const div=document.createElement('div');
+    div.style.cssText='border:1px solid var(--paper3);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;';
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span class="badge b-slate" style="font-family:'JetBrains Mono',monospace">${r.id}</span>
+        <strong style="font-size:12px">${r.nm}</strong>
+        <span style="font-size:11px;color:var(--slate);margin-left:auto">${r.monto}</span>
+      </div>
+      <div style="font-size:11px;color:var(--slate);margin-bottom:10px;line-height:1.5">${r.motivo}</div>
+      <div style="font-size:10px;color:var(--slate);margin-bottom:8px">Analista original: ${r.analista}</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-revert" onclick="openModal('denegar','${r.id}','${r.nm}')"><i class="ti ti-x"></i> Denegar</button>
+        <button class="btn btn-gold" onclick="openModal('revertir','${r.id}','${r.nm}')"><i class="ti ti-rotate-clockwise"></i> Revertir decisión</button>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+buildReversionesFull();
+
+const reversionesHist=[
+  {id:'SOL-0801',nm:'Camila Herrera',fecha:'15 jul 2026',resultado:'revertido',analista:'M. Rodríguez'},
+  {id:'SOL-0788',nm:'Esteban Castaño',fecha:'11 jul 2026',resultado:'denegado',analista:'C. Pérez'},
+  {id:'SOL-0774',nm:'Natalia Vargas',fecha:'05 jul 2026',resultado:'revertido',analista:'L. Gómez'},
+];
+function buildReversionesHist(){
+  const t=document.getElementById('tbl-reversiones-hist');
+  const eClass={revertido:'b-green',denegado:'b-red'};
+  const eTxt={revertido:'Revertido',denegado:'Denegado'};
+  t.innerHTML=`<thead><tr><th>Solicitud</th><th>Cliente</th><th>Fecha</th><th>Resultado</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  reversionesHist.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="mono">${r.id}</td>
+      <td>${r.nm}</td>
+      <td class="mono" style="color:var(--slate)">${r.fecha}</td>
+      <td><span class="badge ${eClass[r.resultado]}">${eTxt[r.resultado]}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildReversionesHist();
+
+// ── AUDITORÍA ──
+const auditoriaData=[
+  {ts:'27 jul 2026 · 15:51',usr:'naramosa@fondoune.com',accion:'Inicio de sesión',detalle:'Login OTP exitoso · rol admin'},
+  {ts:'27 jul 2026 · 14:20',usr:'Diego Montoya',accion:'Revirtió decisión',detalle:'SOL-0831 · Andrés Salcedo · reconsideración por score'},
+  {ts:'26 jul 2026 · 18:03',usr:'María Rodríguez',accion:'Aprobó solicitud',detalle:'SOL-0846 · Valentina Ospina · $5.000.000'},
+  {ts:'26 jul 2026 · 17:40',usr:'María Rodríguez',accion:'Rechazó solicitud',detalle:'SOL-0843 · Rodrigo A. Ríos · alerta SARLAFT'},
+  {ts:'26 jul 2026 · 10:12',usr:'Diego Montoya',accion:'Editó parámetro',detalle:'Score mínimo auto-aprobación: 700 → 720'},
+  {ts:'25 jul 2026 · 09:55',usr:'Carlos Pérez',accion:'Aprobó solicitud',detalle:'SOL-0820 · Julián Restrepo · $4.200.000'},
+];
+function buildAuditoria(){
+  const t=document.getElementById('tbl-auditoria');
+  t.innerHTML=`<thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  auditoriaData.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="mono" style="color:var(--slate);white-space:nowrap">${a.ts}</td>
+      <td>${a.usr}</td>
+      <td><span class="badge b-slate">${a.accion}</span></td>
+      <td style="color:var(--slate)">${a.detalle}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildAuditoria();
+
+// ── PARÁMETROS DE CRÉDITO ──
+const parametrosData=[
+  {tipo:'Consumo',min:'$500.000',max:'$20.000.000',tasa:'1.8% mensual',plazo:'6-36 meses'},
+  {tipo:'Educativo',min:'$1.000.000',max:'$30.000.000',tasa:'1.2% mensual',plazo:'12-60 meses'},
+  {tipo:'Vivienda',min:'$5.000.000',max:'$80.000.000',tasa:'1.0% mensual',plazo:'24-120 meses'},
+  {tipo:'Emergencia',min:'$300.000',max:'$6.000.000',tasa:'2.0% mensual',plazo:'3-12 meses'},
+  {tipo:'Libranza',min:'$500.000',max:'$25.000.000',tasa:'1.4% mensual',plazo:'6-48 meses'},
+];
+function buildParametros(){
+  const t=document.getElementById('tbl-parametros');
+  t.innerHTML=`<thead><tr><th>Tipo de crédito</th><th>Monto mínimo</th><th>Monto máximo</th><th>Tasa</th><th>Plazo</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+  parametrosData.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="badge b-slate">${p.tipo}</span></td>
+      <td class="mono" contenteditable="true">${p.min}</td>
+      <td class="mono" contenteditable="true">${p.max}</td>
+      <td class="mono" contenteditable="true">${p.tasa}</td>
+      <td class="mono" contenteditable="true">${p.plazo}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+buildParametros();
+
+// ── ACCESOS Y ROLES ──
+const accesosData=[
+  {nm:'Diego Montoya',email:'director@fondoune.com',role:'Jefe de Crédito',col:'#B8872A',estado:true,ultimo:'Hace 2 min'},
+  {nm:'Naramosa',email:'naramosa@fondoune.com',role:'Admin',col:'#8B5CF6',estado:true,ultimo:'Hace 12 min'},
+  {nm:'María Rodríguez',email:'analista.mr@fondoune.com',role:'Analista senior',col:'#2563EB',estado:true,ultimo:'Hoy 08:15'},
+  {nm:'Carlos Pérez',email:'analista.cp@fondoune.com',role:'Analista junior',col:'#0A6B45',estado:true,ultimo:'Ayer 17:40'},
+  {nm:'Gerencia FondoUne',email:'gerencia@fondoune.com',role:'Gerencia',col:'#D97706',estado:false,ultimo:'Hace 5 días'},
+];
+function buildAccesos(){
+  const c=document.getElementById('accesos-list');
+  c.innerHTML='';
+  accesosData.forEach(u=>{
+    const row=document.createElement('div');
+    row.className='acc-row';
+    row.innerHTML=`
+      <div class="acc-status" style="background:${u.estado?'var(--emerald2)':'var(--slate3)'}"></div>
+      <div class="an-av" style="background:${u.col}20;color:${u.col}">${u.nm.split(' ').slice(0,2).map(n=>n[0]).join('')}</div>
+      <div style="flex:1">
+        <div class="an-name">${u.nm}</div>
+        <div class="an-role">${u.email}</div>
+      </div>
+      <span class="badge b-slate">${u.role}</span>
+      <span style="font-size:10px;color:var(--slate);width:80px;text-align:right">${u.ultimo}</span>
+      <button class="btn" style="padding:5px 10px" onclick="showToast('Editando permisos de ${u.nm}…','t-ok','ti-key')"><i class="ti ti-dots"></i></button>`;
+    c.appendChild(row);
+  });
+}
+buildAccesos();
 </script>
 </body>
 </html>
