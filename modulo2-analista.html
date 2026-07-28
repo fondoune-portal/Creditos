@@ -215,6 +215,31 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .btn-gold{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
 .btn-gold:hover{background:var(--gold2);border-color:var(--gold2);color:#fff}
 
+/* ── Vistas SPA del sidebar (Reportes/Asociados/Auditoría/Motor IA/Cartera/Parámetros/Seguridad) ── */
+.page-view{display:none}
+.page-view.active{display:block}
+.pg-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.pg-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.pg-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.head-r{display:flex;gap:8px;align-items:center}
+.row{display:grid;gap:14px;margin-bottom:14px}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:0 2px 14px rgba(22,35,53,.05);overflow:hidden}
+.card-head{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-title i{font-size:16px;color:var(--muted)}
+.card-body{padding:14px 18px}
+.stat-mini-l{font-size:11px;color:var(--muted);margin-bottom:4px}
+.stat-mini-v{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 12px;text-align:left;background:var(--bg4);border-bottom:1px solid var(--border);font-weight:500;font-family:'IBM Plex Mono',monospace}
+.data-table td{font-size:12px;color:var(--text2);padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg4)}
+.data-table td .mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
+.bar-track{background:var(--bg4);border-radius:20px;height:7px;overflow:hidden;width:100%}
+.bar-fill{height:100%;border-radius:20px}
+.empty-mini{padding:26px;text-align:center;color:var(--muted);font-size:12px}
+
 /* Sections */
 .sec{margin-bottom:18px}
 .sec-title{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
@@ -367,16 +392,16 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Análisis</div>
-      <div class="sb-item"><i class="ti ti-chart-bar"></i> Reportes</div>
-      <div class="sb-item"><i class="ti ti-users"></i> Asociados</div>
-      <div class="sb-item"><i class="ti ti-shield-check"></i> Auditoría KYC</div>
-      <div class="sb-item"><i class="ti ti-brain"></i> Motor IA</div>
-      <div class="sb-item"><i class="ti ti-coin"></i> Cartera activa</div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-chart-bar"></i> Reportes</div>
+      <div class="sb-item" data-view="asociados" onclick="switchPage('asociados')"><i class="ti ti-users"></i> Asociados</div>
+      <div class="sb-item" data-view="kyc" onclick="switchPage('kyc')"><i class="ti ti-shield-check"></i> Auditoría KYC</div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> Motor IA</div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-coin"></i> Cartera activa</div>
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Config.</div>
-      <div class="sb-item"><i class="ti ti-adjustments"></i> Parámetros</div>
-      <div class="sb-item"><i class="ti ti-lock"></i> Seguridad</div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments"></i> Parámetros</div>
+      <div class="sb-item" data-view="seguridad" onclick="switchPage('seguridad')"><i class="ti ti-lock"></i> Seguridad</div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
@@ -388,6 +413,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <!-- MAIN -->
   <div class="main">
 
+  <div class="page-view active" id="pv-solicitudes">
 <!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stat active">
@@ -462,6 +488,115 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
       </div>
 
     </div>
+  </div> <!-- /pv-solicitudes -->
+
+  <!-- ══════ VISTA: REPORTES ══════ -->
+  <div class="page-view" id="pv-reportes">
+    <div class="pg-head">
+      <div><div class="pg-title">Reportes</div><div class="pg-sub">FondoUne — Resumen de solicitudes procesadas por este analista</div></div>
+      <div class="head-r"><button class="btn" onclick="showToast('La exportación a Excel/PDF está en construcción.','toast-blue','ti-info-circle')"><i class="ti ti-download"></i> Exportar</button></div>
+    </div>
+    <div class="row" style="grid-template-columns:repeat(4,1fr)" id="rp-stats"></div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-chart-pie"></i> Por tipo de crédito</div></div>
+        <div class="card-body" id="rp-por-tipo"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-shield-half-filled"></i> Por nivel de riesgo</div></div>
+        <div class="card-body" id="rp-por-riesgo"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ VISTA: ASOCIADOS ══════ -->
+  <div class="page-view" id="pv-asociados">
+    <div class="pg-head">
+      <div><div class="pg-title">Asociados</div><div class="pg-sub">FondoUne — Asociados con solicitudes registradas en este módulo</div></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-users"></i> Listado</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-asociados"></table></div>
+      </div>
+    </div>
+    <div class="pg-sub" style="margin-top:8px">Derivado de las solicitudes recibidas — aún no existe una colección independiente de asociados en Firestore.</div>
+  </div>
+
+  <!-- ══════ VISTA: AUDITORÍA KYC ══════ -->
+  <div class="page-view" id="pv-kyc">
+    <div class="pg-head">
+      <div><div class="pg-title">Auditoría KYC</div><div class="pg-sub">FondoUne — Resultado de verificación de identidad por solicitud</div></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-shield-check"></i> Resultados KYC</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-kyc"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ VISTA: MOTOR IA ══════ -->
+  <div class="page-view" id="pv-motor-ia">
+    <div class="pg-head">
+      <div><div class="pg-title">Motor IA</div><div class="pg-sub">FondoUne — Umbrales del motor de validación automática</div></div>
+      <div class="head-r"><button class="btn btn-gold" onclick="showToast('Los umbrales se guardan de forma local por ahora — falta conectar esta pantalla a Firestore.','toast-warn','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-brain"></i> Umbrales de score</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-motor-ia"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ VISTA: CARTERA ACTIVA ══════ -->
+  <div class="page-view" id="pv-cartera">
+    <div class="pg-head">
+      <div><div class="pg-title">Cartera activa</div><div class="pg-sub">FondoUne — Créditos aprobados por este analista</div></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-coin"></i> Créditos aprobados</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-cartera"></table></div>
+      </div>
+    </div>
+    <div class="pg-sub" style="margin-top:8px">Muestra las solicitudes ya aprobadas. El seguimiento de cuotas y mora todavía no está conectado.</div>
+  </div>
+
+  <!-- ══════ VISTA: PARÁMETROS ══════ -->
+  <div class="page-view" id="pv-parametros">
+    <div class="pg-head">
+      <div><div class="pg-title">Parámetros</div><div class="pg-sub">FondoUne — Límites de referencia por tipo de crédito</div></div>
+      <div class="head-r"><button class="btn btn-gold" onclick="showToast('Los parámetros se guardan de forma local por ahora — falta conectar esta pantalla a Firestore.','toast-warn','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-adjustments"></i> Límites por tipo de crédito</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-parametros"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ VISTA: SEGURIDAD ══════ -->
+  <div class="page-view" id="pv-seguridad">
+    <div class="pg-head">
+      <div><div class="pg-title">Seguridad</div><div class="pg-sub">FondoUne — Solicitudes con alertas de cumplimiento pendientes</div></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-lock"></i> Requieren atención (UIAF / KYC)</div></div>
+        <div class="card-body" style="padding:0"><table class="data-table" id="tbl-seguridad"></table></div>
+      </div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-key"></i> Sesión actual</div></div>
+        <div class="card-body" id="sec-sesion"></div>
+      </div>
+    </div>
+  </div>
+
   </div>
 </div>
 
@@ -701,6 +836,7 @@ function actualizarStats() {
 
 // ── FILTERS ──────────────────────────────────────────────────
 function setFilter(f, el) {
+  if (typeof switchPage === 'function') switchPage('solicitudes');
   currentFilter = f;
   document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -714,6 +850,184 @@ function setFilter(f, el) {
     if (f==='rechazado'&& txt.startsWith('rechazadas')) i.classList.add('active');
   });
   applyFilters();
+}
+
+// ── Navegación entre secciones del sidebar ─────────────────────
+function switchPage(view) {
+  document.querySelectorAll('.page-view').forEach(pv => pv.classList.remove('active'));
+  const target = document.getElementById('pv-' + view);
+  if (target) target.classList.add('active');
+
+  if (view !== 'solicitudes') {
+    document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+    const btn = document.querySelector(`.sb-item[data-view="${view}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  document.querySelector('.main').scrollTop = 0;
+
+  const renderers = {
+    reportes:   renderReportes,
+    asociados:  renderAsociados,
+    kyc:        renderAuditoriaKYC,
+    'motor-ia': renderMotorIA,
+    cartera:    renderCartera,
+    parametros: renderParametros,
+    seguridad:  renderSeguridad,
+  };
+  if (renderers[view]) renderers[view]();
+}
+
+function fmtMonto(n) {
+  return '$' + (Number(n) || 0).toLocaleString('es-CO');
+}
+
+// ── REPORTES: agregados reales sobre DATA ──────────────────────
+function renderReportes() {
+  const el = document.getElementById('rp-stats');
+  if (!DATA.length) { el.innerHTML = '<div class="empty-mini">Aún no hay solicitudes para calcular reportes.</div>'; document.getElementById('rp-por-tipo').innerHTML=''; document.getElementById('rp-por-riesgo').innerHTML=''; return; }
+
+  const total     = DATA.length;
+  const aprobadas = DATA.filter(s => s.estado === 'aprobado').length;
+  const montoTot  = DATA.reduce((a, s) => a + (s.monto || 0), 0);
+  const tasaApro  = total ? Math.round(aprobadas / total * 100) : 0;
+
+  el.innerHTML = `
+    <div class="card"><div class="card-body"><div class="stat-mini-l">Solicitudes totales</div><div class="stat-mini-v">${total}</div></div></div>
+    <div class="card"><div class="card-body"><div class="stat-mini-l">Aprobadas</div><div class="stat-mini-v" style="color:var(--green2)">${aprobadas}</div></div></div>
+    <div class="card"><div class="card-body"><div class="stat-mini-l">Tasa de aprobación</div><div class="stat-mini-v">${tasaApro}%</div></div></div>
+    <div class="card"><div class="card-body"><div class="stat-mini-l">Monto total solicitado</div><div class="stat-mini-v" style="font-size:16px">${fmtMonto(montoTot)}</div></div></div>
+  `;
+
+  const porGrupo = (campo, colores) => {
+    const grupos = {};
+    DATA.forEach(s => { const k = s[campo] || 'sin_datos'; grupos[k] = (grupos[k]||0) + 1; });
+    return Object.entries(grupos).sort((a,b) => b[1]-a[1]).map(([k,v]) => {
+      const pct = Math.round(v/total*100);
+      const color = colores[k] || 'var(--muted)';
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+          <span style="color:var(--text2);text-transform:capitalize">${k.replace(/_/g,' ')}</span><span style="color:var(--muted)">${v} · ${pct}%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    }).join('');
+  };
+
+  document.getElementById('rp-por-tipo').innerHTML = porGrupo('tipo', {});
+  document.getElementById('rp-por-riesgo').innerHTML = porGrupo('riesgo', {bajo:'var(--green2)', medio:'var(--amber2)', alto:'var(--red2)'});
+}
+
+// ── ASOCIADOS: lista única derivada de DATA ────────────────────
+function renderAsociados() {
+  const tbl = document.getElementById('tbl-asociados');
+  if (!DATA.length) { tbl.innerHTML = '<tr><td class="empty-mini">Aún no hay solicitudes registradas.</td></tr>'; return; }
+
+  const porCedula = {};
+  DATA.forEach(s => {
+    if (!porCedula[s.ced]) porCedula[s.ced] = { nombre: s.nombre, empresa: s.empresa, ced: s.ced, n: 0, ultimoEstado: s.estado, ultimoTiempo: s.tiempo };
+    porCedula[s.ced].n++;
+  });
+
+  const filas = Object.values(porCedula).map(a => `
+    <tr>
+      <td>${a.nombre}</td>
+      <td class="mono">${a.ced}</td>
+      <td>${a.empresa}</td>
+      <td>${a.n}</td>
+      <td>${a.ultimoEstado} · ${a.ultimoTiempo}</td>
+    </tr>`).join('');
+
+  tbl.innerHTML = `<thead><tr><th>Asociado</th><th>Cédula</th><th>Empresa</th><th>Solicitudes</th><th>Última actividad</th></tr></thead><tbody>${filas}</tbody>`;
+}
+
+// ── AUDITORÍA KYC: resultado real por solicitud ────────────────
+function renderAuditoriaKYC() {
+  const tbl = document.getElementById('tbl-kyc');
+  if (!DATA.length) { tbl.innerHTML = '<tr><td class="empty-mini">Aún no hay solicitudes registradas.</td></tr>'; return; }
+
+  const chip = v => {
+    const cls = v === 'ok' ? 'var(--green2)' : v === 'pendiente' ? 'var(--amber2)' : 'var(--red2)';
+    return `<span class="mono" style="color:${cls};text-transform:capitalize">${v}</span>`;
+  };
+
+  const filas = DATA.map(s => `
+    <tr>
+      <td>${s.nombre}</td>
+      <td class="mono">${s.ced}</td>
+      <td>${chip(s.kyc.cedula)}</td>
+      <td>${chip(s.kyc.rnec)}</td>
+      <td>${chip(s.kyc.liveness)}</td>
+      <td>${chip(s.kyc.biometria)}</td>
+      <td>${chip(s.kyc.uiaf)}</td>
+    </tr>`).join('');
+
+  tbl.innerHTML = `<thead><tr><th>Asociado</th><th>Cédula</th><th>Cédula OK</th><th>RNEC</th><th>Liveness</th><th>Biometría</th><th>UIAF</th></tr></thead><tbody>${filas}</tbody>`;
+}
+
+// ── SEGURIDAD: solicitudes con alertas de cumplimiento ─────────
+function renderSeguridad() {
+  const tbl = document.getElementById('tbl-seguridad');
+  const alertas = DATA.filter(s => s.kyc.uiaf !== 'ok' || s.kyc.liveness !== 'ok' || s.kyc.biometria !== 'ok');
+
+  if (!alertas.length) {
+    tbl.innerHTML = `<tr><td class="empty-mini"><i class="ti ti-shield-check" style="color:var(--green2)"></i> Sin alertas pendientes en las solicitudes actuales.</td></tr>`;
+  } else {
+    const filas = alertas.map(s => {
+      const motivos = [];
+      if (s.kyc.uiaf !== 'ok') motivos.push('UIAF: ' + s.kyc.uiaf);
+      if (s.kyc.liveness !== 'ok') motivos.push('Liveness: ' + s.kyc.liveness);
+      if (s.kyc.biometria !== 'ok') motivos.push('Biometría: ' + s.kyc.biometria);
+      return `<tr><td>${s.nombre}</td><td class="mono">${s.ced}</td><td style="color:var(--red2)">${motivos.join(' · ')}</td><td>${s.estado}</td></tr>`;
+    }).join('');
+    tbl.innerHTML = `<thead><tr><th>Asociado</th><th>Cédula</th><th>Motivo</th><th>Estado solicitud</th></tr></thead><tbody>${filas}</tbody>`;
+  }
+
+  document.getElementById('sec-sesion').innerHTML = `
+    <div class="stat-mini-l">Rol activo</div>
+    <div class="stat-mini-v" style="font-size:14px;margin-bottom:10px">Analista de crédito · autenticado por Firebase (custom claims)</div>
+    <div class="pg-sub">El acceso a este módulo se valida contra el token de Firebase en cada carga, no contra datos guardados en el navegador.</div>
+  `;
+}
+
+// ── CARTERA ACTIVA: solicitudes aprobadas como punto de partida ─
+function renderCartera() {
+  const tbl = document.getElementById('tbl-cartera');
+  const aprobadas = DATA.filter(s => s.estado === 'aprobado');
+  if (!aprobadas.length) { tbl.innerHTML = '<tr><td class="empty-mini">Todavía no hay solicitudes aprobadas.</td></tr>'; return; }
+
+  const filas = aprobadas.map(s => `
+    <tr>
+      <td>${s.nombre}</td>
+      <td class="mono">${s.ced}</td>
+      <td>${s.tipo}</td>
+      <td>${fmtMonto(s.monto)}</td>
+      <td>${s.plazo || '—'} meses</td>
+    </tr>`).join('');
+
+  tbl.innerHTML = `<thead><tr><th>Asociado</th><th>Cédula</th><th>Tipo</th><th>Monto</th><th>Plazo</th></tr></thead><tbody>${filas}</tbody>`;
+}
+
+// ── MOTOR IA / PARÁMETROS: configuración de referencia ─────────
+function renderMotorIA() {
+  document.getElementById('tbl-motor-ia').innerHTML = `
+    <thead><tr><th>Umbral</th><th>Valor actual</th><th>Efecto</th></tr></thead>
+    <tbody>
+      <tr><td>Score mínimo — aprobación automática</td><td class="mono">700</td><td>Por encima de este score, el motor sugiere aprobar</td></tr>
+      <tr><td>Score mínimo — revisión manual</td><td class="mono">550</td><td>Entre 550 y 699 pasa a revisión de un analista</td></tr>
+      <tr><td>Score bajo — rechazo automático</td><td class="mono">&lt;550</td><td>Por debajo de este score, el motor sugiere rechazar</td></tr>
+    </tbody>`;
+}
+
+function renderParametros() {
+  document.getElementById('tbl-parametros').innerHTML = `
+    <thead><tr><th>Tipo de crédito</th><th>Monto máximo</th><th>Plazo máximo</th></tr></thead>
+    <tbody>
+      <tr><td>Consumo</td><td class="mono">$15.000.000</td><td class="mono">24 meses</td></tr>
+      <tr><td>Educativo</td><td class="mono">$20.000.000</td><td class="mono">36 meses</td></tr>
+      <tr><td>Vivienda</td><td class="mono">$40.000.000</td><td class="mono">60 meses</td></tr>
+      <tr><td>Emergencia</td><td class="mono">$5.000.000</td><td class="mono">12 meses</td></tr>
+    </tbody>`;
 }
 
 function applyFilters() {
