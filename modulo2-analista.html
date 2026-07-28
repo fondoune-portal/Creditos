@@ -218,6 +218,11 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 /* ── Vistas SPA del sidebar (Reportes/Asociados/Auditoría/Motor IA/Cartera/Parámetros/Seguridad) ── */
 .page-view{display:none}
 .page-view.active{display:block}
+/* Vistas secundarias del sidebar (Reportes, Asociados, Auditoría, Motor IA,
+   Cartera, Parámetros, Seguridad) — necesitan padding propio y scroll
+   independiente, a diferencia de pv-solicitudes que maneja su propio
+   layout interno (list-panel + detail-panel). */
+.page-sub{padding:20px 24px 40px;overflow-y:auto;height:100%}
 .pg-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
 .pg-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;color:var(--text);letter-spacing:-.3px}
 .pg-sub{font-size:12px;color:var(--muted);margin-top:3px}
@@ -491,7 +496,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div> <!-- /pv-solicitudes -->
 
   <!-- ══════ VISTA: REPORTES ══════ -->
-  <div class="page-view" id="pv-reportes">
+  <div class="page-view page-sub" id="pv-reportes">
     <div class="pg-head">
       <div><div class="pg-title">Reportes</div><div class="pg-sub">FondoUne — Resumen de solicitudes procesadas por este analista</div></div>
       <div class="head-r"><button class="btn" onclick="showToast('La exportación a Excel/PDF está en construcción.','toast-blue','ti-info-circle')"><i class="ti ti-download"></i> Exportar</button></div>
@@ -510,7 +515,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: ASOCIADOS ══════ -->
-  <div class="page-view" id="pv-asociados">
+  <div class="page-view page-sub" id="pv-asociados">
     <div class="pg-head">
       <div><div class="pg-title">Asociados</div><div class="pg-sub">FondoUne — Asociados con solicitudes registradas en este módulo</div></div>
     </div>
@@ -524,7 +529,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: AUDITORÍA KYC ══════ -->
-  <div class="page-view" id="pv-kyc">
+  <div class="page-view page-sub" id="pv-kyc">
     <div class="pg-head">
       <div><div class="pg-title">Auditoría KYC</div><div class="pg-sub">FondoUne — Resultado de verificación de identidad por solicitud</div></div>
     </div>
@@ -537,7 +542,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: MOTOR IA ══════ -->
-  <div class="page-view" id="pv-motor-ia">
+  <div class="page-view page-sub" id="pv-motor-ia">
     <div class="pg-head">
       <div><div class="pg-title">Motor IA</div><div class="pg-sub">FondoUne — Umbrales del motor de validación automática</div></div>
       <div class="head-r"><button class="btn btn-gold" onclick="showToast('Los umbrales se guardan de forma local por ahora — falta conectar esta pantalla a Firestore.','toast-warn','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button></div>
@@ -551,7 +556,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: CARTERA ACTIVA ══════ -->
-  <div class="page-view" id="pv-cartera">
+  <div class="page-view page-sub" id="pv-cartera">
     <div class="pg-head">
       <div><div class="pg-title">Cartera activa</div><div class="pg-sub">FondoUne — Créditos aprobados por este analista</div></div>
     </div>
@@ -565,12 +570,12 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: PARÁMETROS ══════ -->
-  <div class="page-view" id="pv-parametros">
+  <div class="page-view page-sub" id="pv-parametros">
     <div class="pg-head">
       <div><div class="pg-title">Parámetros</div><div class="pg-sub">FondoUne — Límites de referencia por tipo de crédito</div></div>
       <div class="head-r"><button class="btn btn-gold" onclick="showToast('Los parámetros se guardan de forma local por ahora — falta conectar esta pantalla a Firestore.','toast-warn','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button></div>
     </div>
-    <div class="row" style="grid-template-columns:1fr">
+    <div class="row" style="grid-template-columns:1fr;max-width:640px">
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-adjustments"></i> Límites por tipo de crédito</div></div>
         <div class="card-body" style="padding:0"><table class="data-table" id="tbl-parametros"></table></div>
@@ -579,7 +584,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   </div>
 
   <!-- ══════ VISTA: SEGURIDAD ══════ -->
-  <div class="page-view" id="pv-seguridad">
+  <div class="page-view page-sub" id="pv-seguridad">
     <div class="pg-head">
       <div><div class="pg-title">Seguridad</div><div class="pg-sub">FondoUne — Solicitudes con alertas de cumplimiento pendientes</div></div>
     </div>
