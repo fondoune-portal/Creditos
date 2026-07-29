@@ -1634,5 +1634,34 @@ updateSummary();
 
 // Las fotos de cédula se cargan manualmente por el usuario (cámara real)
 </script>
+
+<!-- FOOTER -->
+<style>
+.fu-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  height:38px;padding:0 20px;margin-top:20px;
+  background:var(--white);border-top:1px solid var(--border);
+  font-size:10.5px;color:var(--muted);gap:16px;flex-wrap:wrap;
+}
+.fu-footer-l{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.fu-footer-logo{height:20px;width:auto;mix-blend-mode:multiply}
+.fu-footer-r{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.fu-footer-r a{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .12s}
+.fu-footer-r a:hover{color:var(--gold)}
+.fu-footer-r a i{font-size:12px}
+@media(max-width:760px){.fu-footer{font-size:9.5px;padding:10px 12px;gap:8px;height:auto}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
+</style>
+<div class="fu-footer">
+  <div class="fu-footer-l">
+    <img src="logo-fondoune.png" alt="FondoUne" class="fu-footer-logo">
+    <span>Unidos por nuestros sueños</span>
+  </div>
+  <div class="fu-footer-r">
+    <a href="mailto:fondoune@fondoune.com"><i class="ti ti-mail"></i> <span>fondoune@fondoune.com</span></a>
+    <a href="tel:3022287890"><i class="ti ti-phone"></i> <span>302 228 7890</span></a>
+    <span>© <span id="fu-footer-year"></span> FondoUne. Todos los derechos reservados.</span>
+  </div>
+</div>
+<script>document.getElementById('fu-footer-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
