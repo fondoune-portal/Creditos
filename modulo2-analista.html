@@ -102,10 +102,50 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 /* ── LAYOUT ── */
 .layout{display:flex;flex:1;overflow:hidden}
 
+/* FOOTER */
+.fu-footer{
+  flex-shrink:0;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:var(--bg3);border-top:1px solid var(--border);
+  font-size:10.5px;color:var(--muted);gap:16px;
+}
+.fu-footer-l{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.fu-footer-l i{font-size:13px;color:var(--gold)}
+.fu-footer-l strong{color:var(--text2);font-weight:600}
+.fu-footer-r{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.fu-footer-r a{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .12s}
+.fu-footer-r a:hover{color:var(--gold)}
+.fu-footer-r a i{font-size:12px}
+@media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
+
 /* ── SIDEBAR ── */
-.sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;padding:12px 8px;overflow-y:auto}
+.sidebar{width:56px;flex-shrink:0;position:relative}
+.sidebar-inner{
+  position:absolute;top:0;left:0;bottom:0;width:56px;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:12px 8px;
+  overflow-x:hidden;overflow-y:auto;
+  transition:width .16s ease,box-shadow .16s ease;
+  z-index:50;
+}
+.sidebar:hover .sidebar-inner{width:200px;box-shadow:6px 0 28px rgba(0,0,0,.4)}
 .sb-grp{margin-bottom:4px}
-.sb-grp-label{font-size:9px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:6px 8px 3px}
+.sb-grp-label{font-size:9px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:6px 8px 3px;white-space:nowrap;display:none}
+/* Colapsado (por defecto): solo ícono, centrado, sin texto ni badges.
+   Selectores compuestos (.sidebar .sb-item) para ganar especificidad
+   sin depender del orden de las reglas base más abajo en el archivo. */
+.sidebar .sb-item{justify-content:center;padding:9px 0}
+.sb-label{display:none}
+.sb-ct{display:none}
+.sidebar .sb-user{justify-content:center}
+.sb-user .sb-label{display:none}
+/* Expandido (al hacer hover sobre el sidebar): todo visible, alineado a la izquierda */
+.sidebar:hover .sb-grp-label{display:block}
+.sidebar:hover .sb-item{justify-content:flex-start;padding:7px 9px}
+.sidebar:hover .sb-label{display:inline;white-space:nowrap}
+.sidebar:hover .sb-ct{display:flex}
+.sidebar:hover .sb-user{justify-content:flex-start}
+.sidebar:hover .sb-user .sb-label{display:block}
 .sb-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);font-size:12px;color:var(--text2);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
 .sb-item:hover{background:var(--bg3);color:var(--text)}
 .sb-item.active{background:var(--bg3);color:var(--text)}
@@ -386,32 +426,34 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+   <div class="sidebar-inner">
     <div class="sb-grp">
       <div class="sb-grp-label">Solicitudes</div>
-      <div class="sb-item active" onclick="setFilter('todas')"><i class="ti ti-layout-list"></i> Todas <div class="sb-ct ct-muted" id="ct-todas">7</div></div>
-      <div class="sb-item" onclick="setFilter('pendiente')"><i class="ti ti-clock"></i> Pendientes <div class="sb-ct ct-amber" id="ct-pend">4</div></div>
-      <div class="sb-item" onclick="setFilter('revision')"><i class="ti ti-alert-circle"></i> En revisión <div class="sb-ct ct-amber" id="ct-rev">1</div></div>
-      <div class="sb-item" onclick="setFilter('aprobado')"><i class="ti ti-circle-check"></i> Aprobadas <div class="sb-ct ct-green" id="ct-apro">1</div></div>
-      <div class="sb-item" onclick="setFilter('rechazado')"><i class="ti ti-circle-x"></i> Rechazadas <div class="sb-ct ct-red" id="ct-rech">1</div></div>
+      <div class="sb-item active" onclick="setFilter('todas')"><i class="ti ti-layout-list"></i> <span class="sb-label">Todas</span> <div class="sb-ct ct-muted" id="ct-todas">7</div></div>
+      <div class="sb-item" onclick="setFilter('pendiente')"><i class="ti ti-clock"></i> <span class="sb-label">Pendientes</span> <div class="sb-ct ct-amber" id="ct-pend">4</div></div>
+      <div class="sb-item" onclick="setFilter('revision')"><i class="ti ti-alert-circle"></i> <span class="sb-label">En revisión</span> <div class="sb-ct ct-amber" id="ct-rev">1</div></div>
+      <div class="sb-item" onclick="setFilter('aprobado')"><i class="ti ti-circle-check"></i> <span class="sb-label">Aprobadas</span> <div class="sb-ct ct-green" id="ct-apro">1</div></div>
+      <div class="sb-item" onclick="setFilter('rechazado')"><i class="ti ti-circle-x"></i> <span class="sb-label">Rechazadas</span> <div class="sb-ct ct-red" id="ct-rech">1</div></div>
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Análisis</div>
-      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-chart-bar"></i> Reportes</div>
-      <div class="sb-item" data-view="asociados" onclick="switchPage('asociados')"><i class="ti ti-users"></i> Asociados</div>
-      <div class="sb-item" data-view="kyc" onclick="switchPage('kyc')"><i class="ti ti-shield-check"></i> Auditoría KYC</div>
-      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> Motor IA</div>
-      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-coin"></i> Cartera activa</div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-chart-bar"></i> <span class="sb-label">Reportes</span></div>
+      <div class="sb-item" data-view="asociados" onclick="switchPage('asociados')"><i class="ti ti-users"></i> <span class="sb-label">Asociados</span></div>
+      <div class="sb-item" data-view="kyc" onclick="switchPage('kyc')"><i class="ti ti-shield-check"></i> <span class="sb-label">Auditoría KYC</span></div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> <span class="sb-label">Motor IA</span></div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-coin"></i> <span class="sb-label">Cartera activa</span></div>
     </div>
     <div class="sb-grp">
       <div class="sb-grp-label">Config.</div>
-      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments"></i> Parámetros</div>
-      <div class="sb-item" data-view="seguridad" onclick="switchPage('seguridad')"><i class="ti ti-lock"></i> Seguridad</div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments"></i> <span class="sb-label">Parámetros</span></div>
+      <div class="sb-item" data-view="seguridad" onclick="switchPage('seguridad')"><i class="ti ti-lock"></i> <span class="sb-label">Seguridad</span></div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
       <div class="av">MR</div>
-      <div><div class="uname">María Rodríguez</div><div class="urole">Analista de crédito</div></div>
+      <div class="sb-label"><div class="uname">María Rodríguez</div><div class="urole">Analista de crédito</div></div>
     </div>
+   </div>
   </div>
 
   <!-- MAIN -->
@@ -1579,5 +1621,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 </script>
+
+<!-- FOOTER -->
+<div class="fu-footer">
+  <div class="fu-footer-l">
+    <i class="ti ti-building-bank"></i>
+    <span><strong>FondoUne</strong> · Unidos por nuestros sueños</span>
+  </div>
+  <div class="fu-footer-r">
+    <a href="mailto:fondoune@fondoune.com"><i class="ti ti-mail"></i> <span>fondoune@fondoune.com</span></a>
+    <a href="tel:3022287890"><i class="ti ti-phone"></i> <span>302 228 7890</span></a>
+    <span>© <span id="fu-footer-year"></span> FondoUne. Todos los derechos reservados.</span>
+  </div>
+</div>
+<script>document.getElementById('fu-footer-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
