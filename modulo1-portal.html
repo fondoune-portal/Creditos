@@ -766,9 +766,9 @@
       <div class="card-eyebrow">Paso 4 de 4 — Resultado</div>
 
       <div class="result-hero">
-        <div class="result-ring approved"><i class="ti ti-circle-check"></i></div>
-        <div class="result-title">¡Solicitud pre-aprobada!</div>
-        <div class="result-sub">Tu perfil crediticio, identidad y capacidad de pago cumplen los requisitos. Un analista del fondo confirmará en las próximas 24 horas.</div>
+        <div class="result-ring approved"><i class="ti ti-clock"></i></div>
+        <div class="result-title">Enviando tu solicitud…</div>
+        <div class="result-sub">Estamos registrando tu solicitud de forma segura.</div>
       </div>
 
       <div class="metrics-band">
@@ -790,15 +790,7 @@
       <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;">Detalle de la evaluación</div>
 
       <div class="summary-row">
-        <span class="lbl"><i class="ti ti-chart-bar" style="font-size:15px;"></i> Score DataCrédito</span>
-        <span class="val good">742 / 900 <span class="tag tag-green">Sin novedad</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="lbl"><i class="ti ti-history" style="font-size:15px;"></i> Historial FondoUne</span>
-        <span class="val good">2 créditos previos <span class="tag tag-green">Pagados a tiempo</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago</span>
+        <span class="lbl"><i class="ti ti-coin" style="font-size:15px;"></i> Capacidad de pago estimada</span>
         <span class="val good" id="res-capacidad">—</span>
       </div>
       <div class="summary-row">
@@ -813,11 +805,10 @@
       <hr class="divider">
       <div class="sources-block">
         <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
-        <div class="src-row src-ok"><i class="ti ti-check"></i> DataCrédito Experian — API REST</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
-        <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Historial de créditos</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Datos del asociado</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
-        <div class="src-row src-pending"><i class="ti ti-clock"></i> Revisión analista humano — Pendiente ≤ 24 h</div>
+        <div class="src-row src-pending"><i class="ti ti-clock"></i> Score DataCrédito y decisión — Revisión analista humano, ≤ 24 h</div>
       </div>
 
       <div class="note info" style="margin-top:1rem;">
@@ -825,20 +816,28 @@
         <span>No se solicitó, imprimió ni archivó ningún documento en papel. Toda la validación se realizó mediante integraciones seguras con consentimiento expreso. Datos cifrados AES-256. Log de auditoría registrado.</span>
       </div>
 
-      <div class="note ok">
+      <div class="note ok" id="res-nota-envio" style="display:none;">
         <i class="ti ti-mail-check"></i>
-        <span>Se ha enviado un resumen y el pagaré electrónico para firma a <strong id="res-email-mask">tu correo registrado</strong>. Tienes 48 horas para firmarlo.</span>
+        <span>Te avisaremos por correo y dentro del portal en cuanto haya una decisión.</span>
       </div>
 
       <div class="btn-row">
         <button class="btn" onclick="resetPortal()"><i class="ti ti-refresh"></i> Nueva solicitud</button>
-        <button class="btn gold" onclick="irAFirma()"><i class="ti ti-writing"></i> Firmar pagaré electrónico</button>
         <button class="btn primary"><i class="ti ti-download"></i> Descargar resumen</button>
       </div>
     </div>
   </div>
 
 </div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="sb-item"><div class="sb-dot"></div> Sesión activa</div>
+  <div class="sb-item"><div class="sb-dot"></div> Cifrado TLS 1.3</div>
+  <div class="sb-item"><div class="sb-dot warn"></div> Portal FondoUne</div>
+  <div class="sb-item" style="margin-left:auto;"><div class="sb-dot idle"></div> FondoUne — Portal Crédito Inteligente</div>
+</div>
+
 <script>
 // ── NAVIGATION ──
 let currentStep = 1;
@@ -1372,8 +1371,13 @@ function updateSummary() {
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
-// ── BUILD RESULT (Paso 4) — puebla hero y metrics-band con datos reales ──
-function buildResult() {
+// ── BUILD RESULT (Paso 4) — crea la solicitud REAL en Firestore ──
+// Ya no simula una aprobación: envía la solicitud con estado
+// "pendiente_analista" y el acceso a firma queda del lado del
+// analista/gerencia cuando la aprueben de verdad (ver Módulo 2/3).
+let _solicitudEnvioEnCurso = false;
+
+async function buildResult() {
   const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
   const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
   const plazo  = parseInt(plazoS.replace(' meses','')) || 24;
@@ -1389,45 +1393,101 @@ function buildResult() {
   if (metrics[2]) metrics[2].textContent = plazo + ' meses';
 
   // poblarDatosAsociado(4) ya calcula capacidad/% compromiso y los escribe
-  // en #res-capacidad / #res-porcentaje / #res-email-mask — solo nos
-  // asegura de que se ejecute con los datos más recientes del formulario.
+  // en #res-capacidad / #res-porcentaje — solo nos asegura de que se
+  // ejecute con los datos más recientes del formulario.
   poblarDatosAsociado(4);
+
+  // Mostrar el estado "en espera" mientras se envía a Firestore
+  actualizarResultadoUI('enviando');
+
+  // Evitar doble envío si el usuario vuelve a este paso
+  if (_solicitudEnvioEnCurso) return;
+  _solicitudEnvioEnCurso = true;
+
+  if (typeof FondoUneFirebase === 'undefined') {
+    console.error('[Módulo1] firebase-config.js no está cargado — no se puede enviar la solicitud.');
+    actualizarResultadoUI('error', 'No fue posible enviar tu solicitud. Intenta de nuevo o contacta a FondoUne.');
+    _solicitudEnvioEnCurso = false;
+    return;
+  }
+
+  const user   = (typeof FondouneSession !== 'undefined') ? FondouneSession.getUser()   : {};
+  const nomina = (typeof FondouneSession !== 'undefined') ? FondouneSession.getNomina() : {};
+  const email  = document.getElementById('f-email')?.value || '';
+  const tel    = document.getElementById('f-cel')?.value   || user.tel || '';
+  const capacidadPago = nomina?.neto ? Math.round(nomina.neto * 0.35) : 0;
+  const porcentajeCompromiso = (nomina?.neto && cuota) ? Math.round((cuota / nomina.neto) * 100) : 0;
+
+  const resultado = await FondoUneFirebase.crearSolicitud({
+    cedula:   user.id     || '',
+    nombre:   user.name   || '',
+    email,
+    telefono: tel,
+    empresa:  user.empresa|| '',
+    ciudad:   user.ciudad || 'Medellín',
+    monto, plazo, cuota,
+    periodicidad: 'mensuales',
+    scorePropio: 0,          // el score real de DataCrédito lo asigna el analista en Módulo 2
+    riesgo: 'sin_datos',     // idem — no lo decide el cliente
+    capacidadPago,
+    porcentajeCompromiso,
+    nomina: {
+      salarioBasico:    nomina?.basico       || 0,
+      devengado:        nomina?.devengado    || nomina?.basico || 0,
+      deducciones:      nomina?.deducciones  || 0,
+      netoPagado:       nomina?.neto         || 0,
+      libranzasActivas: nomina?.libranzas    || 0,
+      aportesFondo:     nomina?.aportes      || 0,
+    },
+  });
+
+  _solicitudEnvioEnCurso = false;
+
+  if (!resultado.ok) {
+    actualizarResultadoUI('error', resultado.error || 'No fue posible enviar tu solicitud.');
+    return;
+  }
+
+  // Guardar el ID para poder consultar el estado más adelante
+  if (typeof FondouneSession !== 'undefined') {
+    FondouneSession.setSolicitudId(resultado.id);
+    FondouneSession.queueNotif('Tu solicitud fue enviada y está en revisión.', 'success');
+  }
+
+  actualizarResultadoUI('enviada', null, resultado.id);
+}
+
+// ── Estado visual del Paso 4 según el resultado real del envío ──
+// enviando | enviada | error
+function actualizarResultadoUI(estado, mensajeError, solicitudId) {
+  const titulo = document.querySelector('#s4 .result-title');
+  const sub    = document.querySelector('#s4 .result-sub');
+  const notaMail = document.getElementById('res-nota-envio');
+
+  if (estado === 'enviando') {
+    if (titulo) titulo.textContent = 'Enviando tu solicitud…';
+    if (sub) sub.textContent = 'Estamos registrando tu solicitud de forma segura.';
+    return;
+  }
+
+  if (estado === 'error') {
+    if (titulo) titulo.textContent = 'No pudimos enviar tu solicitud';
+    if (sub) sub.textContent = mensajeError || 'Ocurrió un error. Por favor intenta de nuevo.';
+    if (notaMail) notaMail.style.display = 'none';
+    return;
+  }
+
+  // estado === 'enviada'
+  if (titulo) titulo.textContent = 'Solicitud enviada';
+  if (sub) sub.textContent = 'Tu perfil crediticio, identidad y capacidad de pago fueron registrados. Un analista del fondo revisará tu solicitud' + (solicitudId ? ' (N.º ' + solicitudId.slice(0,8).toUpperCase() + ')' : '') + ' en las próximas 24 horas.';
+  if (notaMail) {
+    notaMail.style.display = 'flex';
+    notaMail.innerHTML = '<i class="ti ti-mail-check"></i><span>Te avisaremos por correo y dentro del portal en cuanto haya una decisión. El pagaré electrónico solo se habilita para firma una vez tu solicitud sea <strong>aprobada</strong>.</span>';
+  }
 }
 
 function resetPortal() {
   location.reload();
-}
-
-// ── IR A FIRMA (Módulo 4) ──
-function irAFirma() {
-  // Persistir los datos de la solicitud aprobada en sesión
-  // para que el Módulo 4 los pueda leer con FondouneSession.getCreditApp()
-  if (typeof FondouneSession !== 'undefined') {
-    const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
-    const plazoEl = document.getElementById('f-plazo');
-    const plazo  = parseInt((plazoEl?.value || '24 meses').replace(' meses',''));
-    const tasa   = 0.011;
-    const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
-
-    FondouneSession.saveCreditApp({
-      monto,
-      plazo,
-      cuota,
-      tasa:         '1.1% E.M.',
-      estado:       'pre-aprobado',
-      solicitudId:  'SOL-2025-0847',
-      score:        742,
-      riesgo:       'BAJO',
-      aprobadoEn:   new Date().toISOString(),
-    });
-
-    FondouneSession.queueNotif(
-      'Solicitud pre-aprobada. Por favor revisa y firma el pagaré electrónico.',
-      'success'
-    );
-  }
-
-  FondouneNav.navigateTo('firma');
 }
 
 // ── CEDULA INPUT — habilita el botón cuando hay suficientes dígitos ──
@@ -1629,21 +1689,11 @@ updateSummary();
 <!-- FOOTER -->
 <style>
 .fu-footer{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  z-index:99;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:36px;
-  padding:0 20px;
-  background:var(--white);
-  border-top:1px solid var(--border);
-  font-size:10.5px;
-  color:var(--muted);
-  gap:16px;
+  position:fixed;bottom:34px;left:0;right:0;z-index:99;
+  display:flex;align-items:center;justify-content:space-between;
+  height:36px;padding:0 20px;
+  background:var(--white);border-top:1px solid var(--border);
+  font-size:10.5px;color:var(--muted);gap:16px;
 }
 .fu-footer-l{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .fu-footer-logo{height:20px;width:auto;mix-blend-mode:multiply}
@@ -1652,7 +1702,7 @@ updateSummary();
 .fu-footer-r a:hover{color:var(--gold)}
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
-body{padding-bottom:40px}
+body{padding-bottom:74px}
 </style>
 <div class="fu-footer">
   <div class="fu-footer-l">
