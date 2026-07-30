@@ -147,7 +147,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dc-row .dv.good{color:var(--success)}
 
 /* FOOTER STATUS */
-.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:8px 20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.5);display:flex;gap:20px;z-index:100}
 .sb-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
 .sb-green{background:#4DA}
 .sb-gold{background:var(--gold2)}
@@ -472,14 +471,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
-</div>
-
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <span><span class="sb-dot sb-green"></span>Sesión segura</span>
-  <span><span class="sb-dot sb-green"></span>TLS 1.3</span>
-  <span><span class="sb-dot sb-gold"></span>Módulo 4 — Prototipo v1.0</span>
-  <span style="margin-left:auto"><span class="sb-dot sb-green"></span>FondoUne</span>
 </div>
 
 <script>
@@ -899,7 +890,7 @@ function showToast(msg,type='ok'){
 <!-- FOOTER -->
 <style>
 .fu-footer{
-  position:fixed;bottom:34px;left:0;right:0;z-index:99;
+  position:fixed;bottom:0;left:0;right:0;z-index:99;
   display:flex;align-items:center;justify-content:space-between;
   height:36px;padding:0 20px;
   background:var(--white);border-top:1px solid var(--border);
@@ -912,7 +903,7 @@ function showToast(msg,type='ok'){
 .fu-footer-r a:hover{color:var(--gold)}
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
-body{padding-bottom:74px}
+body{padding-bottom:40px}
 </style>
 <div class="fu-footer">
   <div class="fu-footer-l">
