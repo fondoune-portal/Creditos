@@ -68,22 +68,153 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
 
 /* ── SIDEBAR ── */
-.sidebar{width:210px;background:var(--ink2);display:flex;flex-direction:column;flex-shrink:0;padding:14px 8px;overflow-y:auto}
-.sb-grp{margin-bottom:6px}
-.sb-lbl{font-size:9px;font-weight:600;color:var(--slate2);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px 3px}
-.sb-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
-.sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
-.sb-item.active{background:rgba(212,168,67,.1);color:var(--gold3)}
-.sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--gold2)}
-.sb-item i{font-size:16px;flex-shrink:0;opacity:.7}
-.sb-item.active i{opacity:1}
-.sb-badge{margin-left:auto;background:var(--crimson2,#C0392B);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;line-height:1.5}
-.sb-spacer{flex:1}
-.sb-user{padding:10px;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;align-items:center;gap:8px;margin-top:8px}
-.sb-user .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Playfair Display',serif}
-.sb-user .uname{font-size:11px;color:#fff;font-weight:600}
-.sb-user .urole{font-size:9px;color:var(--slate2)}
+.sidebar{
+  width:56px; /* colapsado por defecto */
+  background:var(--ink2);
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  padding:14px 8px;
+  overflow:hidden;
+  transition:width .18s cubic-bezier(0.16,1,0.3,1);
+}
 
+/* contenido interno scrolleable */
+.sidebar-inner{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  overflow-y:auto;
+}
+
+/* expandir al pasar el mouse o tener foco dentro */
+.sidebar:hover,
+.sidebar:focus-within{
+  width:210px;
+}
+
+/* grupos y etiquetas */
+.sb-grp{margin-bottom:6px}
+
+.sb-lbl{
+  font-size:9px;
+  font-weight:600;
+  color:var(--slate2);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:7px 10px 3px;
+  opacity:0;                     /* casi invisible colapsado */
+  transition:opacity .18s;
+}
+
+.sidebar:hover .sb-lbl,
+.sidebar:focus-within .sb-lbl{
+  opacity:.7;                    /* se muestran al expandir */
+}
+
+/* texto de cada item: oculto en modo íconos */
+.sb-label{
+  display:none;
+}
+
+.sidebar:hover .sb-label,
+.sidebar:focus-within .sb-label{
+  display:inline;
+}
+
+/* items del menú (igual que tenías) */
+.sb-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:var(--r);
+  font-size:12px;
+  color:var(--slate3);
+  cursor:pointer;
+  transition:all .12s;
+  position:relative;
+  white-space:nowrap;
+}
+
+.sb-item:hover{
+  background:rgba(255,255,255,.05);
+  color:#fff;
+}
+
+.sb-item.active{
+  background:rgba(212,168,67,.1);
+  color:var(--gold3);
+}
+
+.sb-item.active::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:5px;
+  bottom:5px;
+  width:2px;
+  border-radius:0 2px 2px 0;
+  background:var(--gold2);
+}
+
+.sb-item i{
+  font-size:16px;
+  flex-shrink:0;
+  opacity:.7;
+}
+
+.sb-item.active i{
+  opacity:1;
+}
+
+.sb-badge{
+  margin-left:auto;
+  background:var(--crimson2,#C0392B);
+  color:#fff;
+  font-size:9.5px;
+  font-weight:700;
+  padding:1px 6px;
+  border-radius:20px;
+  line-height:1.5;
+}
+
+.sb-spacer{flex:1}
+
+.sb-user{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+}
+
+.sb-user .uav{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--sapphire2),var(--gold2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  font-weight:700;
+  color:#fff;
+  font-family:'Playfair Display',serif;
+}
+
+.sb-user .uname{
+  font-size:11px;
+  color:#fff;
+  font-weight:600;
+}
+
+.sb-user .urole{
+  font-size:9px;
+  color:var(--slate2);
+}
 /* ── MAIN ── */
 .main{flex:1;overflow-y:auto;padding:20px 24px 40px}
 
