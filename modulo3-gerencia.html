@@ -506,35 +506,88 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
 <div class="layout">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-inner">
     <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
-      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> Panel ejecutivo</div>
-      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> Aprobaciones de alto monto <span class="sb-badge" id="sb-badge-aprob" style="display:none">0</span></div>
-      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> Cartera activa</div>
-      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> Reportes</div>
-      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> Alertas de riesgo</div>
+
+      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')">
+        <i class="ti ti-layout-dashboard"></i>
+        <span class="sb-label">Panel ejecutivo</span>
+      </div>
+
+      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')">
+        <i class="ti ti-stamp"></i>
+        <span class="sb-label">Aprobaciones de alto monto</span>
+        <span class="sb-badge" id="sb-badge-aprob" style="display:none">0</span>
+      </div>
+
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')">
+        <i class="ti ti-chart-line"></i>
+        <span class="sb-label">Cartera activa</span>
+      </div>
+
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')">
+        <i class="ti ti-report-analytics"></i>
+        <span class="sb-label">Reportes</span>
+      </div>
+
+      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')">
+        <i class="ti ti-alert-triangle"></i>
+        <span class="sb-label">Alertas de riesgo</span>
+      </div>
     </div>
+
     <div class="sb-grp">
       <div class="sb-lbl">Operativo</div>
-      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> Equipo analistas</div>
-      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> Reversiones</div>
-      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> Motor IA — config</div>
-      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> Auditoría</div>
+
+      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')">
+        <i class="ti ti-users"></i>
+        <span class="sb-label">Equipo analistas</span>
+      </div>
+
+      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')">
+        <i class="ti ti-rotate-clockwise"></i>
+        <span class="sb-label">Reversiones</span>
+      </div>
+
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')">
+        <i class="ti ti-brain"></i>
+        <span class="sb-label">Motor IA — config</span>
+      </div>
+
+      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')">
+        <i class="ti ti-shield-check"></i>
+        <span class="sb-label">Auditoría</span>
+      </div>
     </div>
+
     <div class="sb-grp">
       <div class="sb-lbl">Config</div>
-      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> Parámetros crédito</div>
-      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> Accesos y roles</div>
+
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')">
+        <i class="ti ti-adjustments-horizontal"></i>
+        <span class="sb-label">Parámetros crédito</span>
+      </div>
+
+      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')">
+        <i class="ti ti-key"></i>
+        <span class="sb-label">Accesos y roles</span>
+      </div>
     </div>
+
     <div class="sb-spacer"></div>
+
     <div class="sb-user">
       <div class="uav">DM</div>
-      <div><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
+      <div>
+        <div class="uname">Diego Montoya</div>
+        <div class="urole">Jefe de Crédito</div>
+      </div>
     </div>
   </div>
-
+</div>
   <!-- MAIN -->
   <div class="main">
 
