@@ -367,6 +367,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
         // Recién ahora se conectan los datos reales (aprobaciones de
         // alto monto + KPIs) — nunca antes de confirmar el acceso.
+        //
+        // OJO: este bloque corre en el <head>, pero la función que
+        // arranca esas conexiones se define muy al final del <body>.
+        // onAuthStateChanged puede resolver ANTES de que ese script
+        // final se haya ejecutado (p. ej. con sesión ya cacheada),
+        // así que no basta con comprobar si la función ya existe —
+        // dejamos una bandera para que el script del body la revise
+        // apenas se defina, sin importar cuál corrió primero.
+        window._accesoGerenciaConfirmado = true;
         if (typeof window._iniciarConexionesGerencia === 'function') {
           window._iniciarConexionesGerencia();
         }
@@ -406,15 +415,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <div class="sidebar">
    <div class="sidebar-inner">
     <div class="sb-grp">
-      <div class="sb-lbl">Solicitudes</div>
-      <div class="sb-item" data-aprob-filter="todas" onclick="switchPage('aprobaciones');setAprobFilter('todas',this)"><i class="ti ti-layout-list"></i> <span class="sb-txt">Todas</span> <div class="sb-ct ct-muted" id="ct-aprob-todas">0</div></div>
-      <div class="sb-item" data-aprob-filter="pendiente" onclick="switchPage('aprobaciones');setAprobFilter('pendiente',this)"><i class="ti ti-clock"></i> <span class="sb-txt">Pendientes</span> <div class="sb-ct ct-amber" id="ct-aprob-pend">0</div></div>
-      <div class="sb-item" data-aprob-filter="aprobado" onclick="switchPage('aprobaciones');setAprobFilter('aprobado',this)"><i class="ti ti-circle-check"></i> <span class="sb-txt">Aprobadas</span> <div class="sb-ct ct-green" id="ct-aprob-apro">0</div></div>
-      <div class="sb-item" data-aprob-filter="rechazado" onclick="switchPage('aprobaciones');setAprobFilter('rechazado',this)"><i class="ti ti-circle-x"></i> <span class="sb-txt">Rechazadas</span> <div class="sb-ct ct-red" id="ct-aprob-rech">0</div></div>
-    </div>
-    <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
       <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> <span class="sb-txt">Panel ejecutivo</span></div>
+      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> <span class="sb-txt">Aprobaciones de alto monto</span></div>
       <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> <span class="sb-txt">Cartera activa</span></div>
       <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> <span class="sb-txt">Reportes</span></div>
       <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> <span class="sb-txt">Alertas de riesgo</span></div>
@@ -1505,9 +1508,7 @@ setInterval(actualizarFechaHora, 1000);
 const UMBRAL_GERENCIA = 20000000; // COP — placeholder, confirmar con Nico
 
 let _aprobUnsubscribe = null;
-let _aprobDataBase = [];      // TODAS las solicitudes de alto monto, cualquier estado
-let _aprobFiltroActivo = 'pendiente'; // filtro de UI activo: todas | pendiente | aprobado | rechazado
-let _aprobData = [];          // subconjunto ya filtrado, lo que se pinta en pantalla
+let _aprobData = [];          // solicitudes de alto monto pendientes de decisión de gerencia
 
 const fmtCOPGer = n => '$' + Number(n || 0).toLocaleString('es-CO');
 
@@ -1533,6 +1534,14 @@ async function iniciarListenerAprobaciones() {
   if (umbralTxt) umbralTxt.textContent = fmtCOPGer(UMBRAL_GERENCIA);
 
   if (typeof FondoUneFirebase === 'undefined') {
+    console.error('[Módulo Gerencia] FondoUneFirebase no está definido — revisa que <script src="firebase-config.js"> esté cargando correctamente.');
+    const nota = document.getElementById('aprob-conexion-nota');
+    if (nota) nota.style.display = 'flex';
+    return;
+  }
+
+  if (typeof FondoUneFirebase.escucharSolicitudes !== 'function') {
+    console.error('[Módulo Gerencia] FondoUneFirebase.escucharSolicitudes no existe en esta versión de firebase-config.js.');
     const nota = document.getElementById('aprob-conexion-nota');
     if (nota) nota.style.display = 'flex';
     return;
@@ -1540,60 +1549,32 @@ async function iniciarListenerAprobaciones() {
 
   if (_aprobUnsubscribe) { _aprobUnsubscribe(); _aprobUnsubscribe = null; }
 
+  console.log('[Módulo Gerencia] Conectando listener de aprobaciones… umbral =', UMBRAL_GERENCIA);
+
   try {
     _aprobUnsubscribe = await FondoUneFirebase.escucharSolicitudes(
       (solicitudes) => {
-        // Universo de gerencia: cualquier solicitud por encima del
-        // umbral, sin importar el estado — los contadores del
-        // sidebar (Todas/Pendientes/Aprobadas/Rechazadas) se derivan
-        // de aquí, igual que el filtro que ve el usuario.
-        _aprobDataBase = solicitudes.filter(s => Number(s.monto || 0) >= UMBRAL_GERENCIA);
-        aplicarFiltroAprobaciones();
+        console.log('[Módulo Gerencia] escucharSolicitudes devolvió', solicitudes.length, 'documento(s) en total.');
+        // Solo lo que realmente compete a gerencia: pendientes de
+        // decisión del analista y por encima del umbral. Lo demás
+        // (ya aprobado, rechazado, firmado) no aparece aquí.
+        _aprobData = solicitudes.filter(s =>
+          s.estado === 'pendiente_analista' && Number(s.monto || 0) >= UMBRAL_GERENCIA
+        );
+        console.log('[Módulo Gerencia]', _aprobData.length, 'solicitud(es) de alto monto pendientes tras filtrar.');
+        renderAprobaciones();
       },
       {} // sin filtro de servidor por monto — se filtra en cliente arriba
     );
+
+    if (!_aprobUnsubscribe) {
+      console.warn('[Módulo Gerencia] escucharSolicitudes no devolvió una función de unsubscribe — puede indicar que la conexión no quedó activa.');
+    }
   } catch (err) {
     console.error('[Módulo Gerencia] Error conectando aprobaciones:', err);
     const nota = document.getElementById('aprob-conexion-nota');
     if (nota) nota.style.display = 'flex';
   }
-}
-
-// Mapea el estado real de Firestore al filtro de UI (Módulo 2 usa
-// esta misma idea: 'pendiente_analista' se ve como "Pendientes").
-function estadoAFiltro(estado) {
-  if (estado === 'pendiente_analista') return 'pendiente';
-  if (estado === 'aprobado' || estado === 'firmado') return 'aprobado';
-  if (estado === 'rechazado') return 'rechazado';
-  return 'pendiente';
-}
-
-function setAprobFilter(filtro, el) {
-  _aprobFiltroActivo = filtro;
-  document.querySelectorAll('.sb-item[data-aprob-filter]').forEach(i => i.classList.remove('active'));
-  if (el) el.classList.add('active');
-  aplicarFiltroAprobaciones();
-}
-
-function aplicarFiltroAprobaciones() {
-  // Contadores del sidebar — siempre sobre el universo completo,
-  // no sobre el subconjunto ya filtrado.
-  const cTodas = _aprobDataBase.length;
-  const cPend  = _aprobDataBase.filter(s => estadoAFiltro(s.estado) === 'pendiente').length;
-  const cApro  = _aprobDataBase.filter(s => estadoAFiltro(s.estado) === 'aprobado').length;
-  const cRech  = _aprobDataBase.filter(s => estadoAFiltro(s.estado) === 'rechazado').length;
-
-  const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
-  set('ct-aprob-todas', cTodas);
-  set('ct-aprob-pend',  cPend);
-  set('ct-aprob-apro',  cApro);
-  set('ct-aprob-rech',  cRech);
-
-  _aprobData = (_aprobFiltroActivo === 'todas')
-    ? _aprobDataBase
-    : _aprobDataBase.filter(s => estadoAFiltro(s.estado) === _aprobFiltroActivo);
-
-  renderAprobaciones();
 }
 
 function renderAprobaciones() {
@@ -1663,27 +1644,17 @@ function renderAprobaciones() {
     foot.className = 'card-foot';
     foot.style.cssText = 'display:flex;gap:8px;justify-content:flex-end';
 
-    const filtroDoc = estadoAFiltro(doc.estado);
-    if (filtroDoc === 'pendiente') {
-      const btnRechazar = document.createElement('button');
-      btnRechazar.className = 'btn btn-red';
-      btnRechazar.innerHTML = '<i class="ti ti-x"></i> Rechazar';
-      btnRechazar.onclick = () => abrirDecisionGerencia('rechazar', doc.id, nombre);
+    const btnRechazar = document.createElement('button');
+    btnRechazar.className = 'btn btn-red';
+    btnRechazar.innerHTML = '<i class="ti ti-x"></i> Rechazar';
+    btnRechazar.onclick = () => abrirDecisionGerencia('rechazar', doc.id, nombre);
 
-      const btnAprobar = document.createElement('button');
-      btnAprobar.className = 'btn btn-green';
-      btnAprobar.innerHTML = '<i class="ti ti-stamp"></i> Aprobar (Jefe de Crédito)';
-      btnAprobar.onclick = () => abrirDecisionGerencia('aprobar', doc.id, nombre);
+    const btnAprobar = document.createElement('button');
+    btnAprobar.className = 'btn btn-green';
+    btnAprobar.innerHTML = '<i class="ti ti-stamp"></i> Aprobar (Jefe de Crédito)';
+    btnAprobar.onclick = () => abrirDecisionGerencia('aprobar', doc.id, nombre);
 
-      foot.append(btnRechazar, btnAprobar);
-    } else {
-      const estadoTxt = document.createElement('span');
-      estadoTxt.className = 'badge ' + (filtroDoc === 'aprobado' ? 'b-green' : 'b-red');
-      estadoTxt.textContent = filtroDoc === 'aprobado'
-        ? 'Ya decidida — Aprobada' + (doc.estado === 'firmado' ? ' y firmada' : '')
-        : 'Ya decidida — Rechazada';
-      foot.appendChild(estadoTxt);
-    }
+    foot.append(btnRechazar, btnAprobar);
 
     card.append(head, body, foot);
     cont.appendChild(card);
@@ -1789,6 +1760,14 @@ window._iniciarConexionesGerencia = function () {
   iniciarListenerAprobaciones();
   iniciarKPIsReales();
 };
+
+// Si el gate del <head> ya confirmó el acceso ANTES de que este
+// script se ejecutara (onAuthStateChanged resolvió muy rápido),
+// la bandera ya está en true — arrancamos de inmediato en vez de
+// esperar una llamada que ya ocurrió y se perdió.
+if (window._accesoGerenciaConfirmado === true) {
+  window._iniciarConexionesGerencia();
+}
 </script>
 
 <!-- FOOTER -->
