@@ -68,80 +68,19 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
 
 /* ── SIDEBAR ── */
-.sidebar{
-  width:56px;
-  background:var(--ink2);
-  flex-shrink:0;
-  position:relative;
-}
-.sidebar-inner{
-  position:absolute;
-  top:0;left:0;bottom:0;
-  width:56px;
-  background:var(--ink2);
-  display:flex;
-  flex-direction:column;
-  padding:14px 8px;
-  overflow-x:hidden;
-  overflow-y:auto;
-  transition:width .16s ease, box-shadow .16s ease;
-  z-index:50;
-}
-.sidebar:hover .sidebar-inner{
-  width:210px;
-  box-shadow:6px 0 28px rgba(0,0,0,.4);
-}
-
+.sidebar{width:210px;background:var(--ink2);display:flex;flex-direction:column;flex-shrink:0;padding:14px 8px;overflow-y:auto}
 .sb-grp{margin-bottom:6px}
-.sb-lbl{
-  font-size:9px;font-weight:600;color:var(--slate2);
-  letter-spacing:.12em;text-transform:uppercase;
-  padding:7px 10px 3px;white-space:nowrap;
-  display:none;
-}
-
-/* Colapsado por defecto: solo ícono, centrado, sin texto */
-.sidebar .sb-item{justify-content:center;padding:8px 0}
-.sb-label{display:none}
-.sidebar .sb-user{justify-content:center;padding:8px 0}
-.sb-user .uname,.sb-user .urole{display:none}
-
-/* Expandido al hacer hover: todo visible, alineado a la izquierda */
-.sidebar:hover .sb-lbl{display:block}
-.sidebar:hover .sb-item{justify-content:flex-start;padding:8px 10px}
-.sidebar:hover .sb-label{display:inline;white-space:nowrap}
-.sidebar:hover .sb-user{justify-content:flex-start;padding:10px}
-.sidebar:hover .sb-user .uname,
-.sidebar:hover .sb-user .urole{display:block}
-
-.sb-item{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 10px;border-radius:var(--r);
-  font-size:12px;color:var(--slate3);
-  cursor:pointer;transition:all .12s;
-  position:relative;white-space:nowrap;
-}
+.sb-lbl{font-size:9px;font-weight:600;color:var(--slate2);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px 3px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
 .sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
 .sb-item.active{background:rgba(212,168,67,.1);color:var(--gold3)}
-.sb-item.active::before{
-  content:'';position:absolute;left:0;top:5px;bottom:5px;
-  width:2px;border-radius:0 2px 2px 0;background:var(--gold2);
-}
+.sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--gold2)}
 .sb-item i{font-size:16px;flex-shrink:0;opacity:.7}
 .sb-item.active i{opacity:1}
+.sb-badge{margin-left:auto;background:var(--crimson2,#C0392B);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;line-height:1.5}
 .sb-spacer{flex:1}
-.sb-user{
-  padding:10px;border:1px solid rgba(255,255,255,.06);
-  border-radius:var(--r);display:flex;align-items:center;
-  gap:8px;margin-top:8px;
-}
-.sb-user .uav{
-  width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,var(--sapphire2),var(--gold2));
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;color:#fff;
-  font-family:'Playfair Display',serif;flex-shrink:0;
-}
+.sb-user{padding:10px;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;align-items:center;gap:8px;margin-top:8px}
+.sb-user .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Playfair Display',serif}
 .sb-user .uname{font-size:11px;color:#fff;font-weight:600}
 .sb-user .urole{font-size:9px;color:var(--slate2)}
 
@@ -265,6 +204,11 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .btn-gold:hover{background:var(--gold)}
 .btn-dark{background:var(--ink);color:#fff;border-color:var(--ink)}
 .btn-dark:hover{background:var(--ink2)}
+.btn-green{background:var(--emerald2,#0A6B45);color:#fff;border-color:var(--emerald2,#0A6B45)}
+.btn-green:hover{opacity:.9}
+.btn-red{background:var(--crimson2,#8B1A1A);color:#fff;border-color:var(--crimson2,#8B1A1A)}
+.btn-red:hover{opacity:.9}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-revert{background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.2);color:var(--crimson2)}
 .btn-revert:hover{background:rgba(192,57,43,.15)}
 
@@ -393,6 +337,12 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
         // Acceso confirmado por el backend — ocultar el overlay con transición
         const gate = document.getElementById('fu-auth-gate');
         if (gate) { gate.classList.add('fu-gate-hide'); setTimeout(() => gate.remove(), 400); }
+
+        // Recién ahora se conectan los datos reales (aprobaciones de
+        // alto monto + KPIs) — nunca antes de confirmar el acceso.
+        if (typeof window._iniciarConexionesGerencia === 'function') {
+          window._iniciarConexionesGerencia();
+        }
       });
     }
 
@@ -425,27 +375,27 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
 <div class="layout">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-inner">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
     <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
-      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i><span class="sb-label">Panel ejecutivo</span></div>
-      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i><span class="sb-label">Cartera activa</span></div>
-      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i><span class="sb-label">Reportes</span></div>
-      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i><span class="sb-label">Alertas de riesgo</span></div>
+      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> Panel ejecutivo</div>
+      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> Aprobaciones de alto monto <span class="sb-badge" id="sb-badge-aprob" style="display:none">0</span></div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> Cartera activa</div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> Reportes</div>
+      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> Alertas de riesgo</div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Operativo</div>
-      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i><span class="sb-label">Equipo analistas</span></div>
-      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i><span class="sb-label">Reversiones</span></div>
-      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i><span class="sb-label">Motor IA config</span></div>
-      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i><span class="sb-label">Auditoría</span></div>
+      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> Equipo analistas</div>
+      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> Reversiones</div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> Motor IA — config</div>
+      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> Auditoría</div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Config</div>
-      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i><span class="sb-label">Parámetros crédito</span></div>
-      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i><span class="sb-label">Accesos y roles</span></div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> Parámetros crédito</div>
+      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> Accesos y roles</div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
@@ -453,7 +403,6 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
     </div>
   </div>
-</div>
 
   <!-- MAIN -->
   <div class="main">
@@ -659,6 +608,29 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
   </div>
   <!-- ══════════════ /VISTA: PANEL EJECUTIVO ══════════════ -->
+
+  <!-- ══════════════ VISTA: APROBACIONES DE ALTO MONTO ══════════════ -->
+  <div class="page-view" id="pv-aprobaciones">
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Aprobaciones de alto monto</div>
+        <div class="pg-sub">Solicitudes que superan el umbral de gerencia (<span id="aprob-umbral-txt">—</span>) y requieren decisión del Jefe de Crédito, además del análisis ya hecho por el analista.</div>
+      </div>
+    </div>
+
+    <div class="note" id="aprob-conexion-nota" style="display:none;background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#8B1A1A;font-size:12px;padding:12px 14px;border-radius:10px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+      <i class="ti ti-alert-circle" style="flex-shrink:0"></i>
+      <span>No fue posible conectar con la base de datos en tiempo real. Verifica tu conexión y recarga la página.</span>
+    </div>
+
+    <div id="aprob-lista"></div>
+
+    <div id="aprob-vacio" style="display:none;text-align:center;padding:48px 20px;color:var(--slate)">
+      <i class="ti ti-circle-check" style="font-size:32px;opacity:.4;display:block;margin-bottom:10px"></i>
+      No hay solicitudes de alto monto pendientes de tu decisión en este momento.
+    </div>
+  </div>
+  <!-- ══════════════ /VISTA: APROBACIONES DE ALTO MONTO ══════════════ -->
 
   <!-- ══════════════ VISTA: CARTERA ACTIVA ══════════════ -->
   <div class="page-view" id="pv-cartera">
@@ -1486,6 +1458,260 @@ function actualizarFechaHora(){
 }
 actualizarFechaHora();
 setInterval(actualizarFechaHora, 1000);
+
+// ══════════════════════════════════════════════════════════════
+// APROBACIONES DE ALTO MONTO — conexión real a Firestore
+// ══════════════════════════════════════════════════════════════
+// Gerencia interviene sobre solicitudes que superan un umbral de
+// monto — el analista (Módulo 2) sigue siendo quien hace el
+// análisis inicial; gerencia decide específicamente estas.
+//
+// Ajusta este valor cuando tengas la cifra definitiva:
+const UMBRAL_GERENCIA = 20000000; // COP — placeholder, confirmar con Nico
+
+let _aprobUnsubscribe = null;
+let _aprobData = [];
+
+const fmtCOPGer = n => '$' + Number(n || 0).toLocaleString('es-CO');
+
+function getGerenteActual() {
+  if (typeof FondouneSession !== 'undefined') {
+    const u = FondouneSession.getUser();
+    return { id: u?.id || 'gerencia', nombre: u?.name || 'Jefe de Crédito' };
+  }
+  return { id: 'gerencia', nombre: 'Jefe de Crédito' };
+}
+
+function tiempoRelativoGer(fecha) {
+  if (!fecha) return '—';
+  const diff = Math.floor((Date.now() - new Date(fecha).getTime()) / 1000);
+  if (diff < 60)    return 'Hace menos de 1 min';
+  if (diff < 3600)  return `Hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `Hace ${Math.floor(diff/3600)} h`;
+  return `Hace ${Math.floor(diff/86400)} días`;
+}
+
+async function iniciarListenerAprobaciones() {
+  const umbralTxt = document.getElementById('aprob-umbral-txt');
+  if (umbralTxt) umbralTxt.textContent = fmtCOPGer(UMBRAL_GERENCIA);
+
+  if (typeof FondoUneFirebase === 'undefined') {
+    const nota = document.getElementById('aprob-conexion-nota');
+    if (nota) nota.style.display = 'flex';
+    return;
+  }
+
+  if (_aprobUnsubscribe) { _aprobUnsubscribe(); _aprobUnsubscribe = null; }
+
+  try {
+    _aprobUnsubscribe = await FondoUneFirebase.escucharSolicitudes(
+      (solicitudes) => {
+        // Solo lo que realmente compete a gerencia: pendientes de
+        // decisión y por encima del umbral. Lo demás (aprobado por
+        // el analista, rechazado, ya firmado) no aparece aquí.
+        _aprobData = solicitudes.filter(s =>
+          s.estado === 'pendiente_analista' && Number(s.monto || 0) >= UMBRAL_GERENCIA
+        );
+        renderAprobaciones();
+      },
+      {} // sin filtro de servidor por monto — se filtra en cliente arriba
+    );
+  } catch (err) {
+    console.error('[Módulo Gerencia] Error conectando aprobaciones:', err);
+    const nota = document.getElementById('aprob-conexion-nota');
+    if (nota) nota.style.display = 'flex';
+  }
+}
+
+function renderAprobaciones() {
+  const cont  = document.getElementById('aprob-lista');
+  const vacio = document.getElementById('aprob-vacio');
+  const badge = document.getElementById('sb-badge-aprob');
+  if (!cont) return;
+
+  cont.innerHTML = '';
+
+  if (badge) {
+    if (_aprobData.length > 0) { badge.textContent = _aprobData.length; badge.style.display = 'inline-block'; }
+    else badge.style.display = 'none';
+  }
+
+  if (_aprobData.length === 0) {
+    vacio.style.display = 'block';
+    return;
+  }
+  vacio.style.display = 'none';
+
+  _aprobData.forEach(doc => {
+    const nombre = doc.nombre || '—';
+    const ini = nombre.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '12px';
+
+    const head = document.createElement('div');
+    head.className = 'card-head';
+    head.style.paddingBottom = '10px';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'card-title';
+    const avatar = document.createElement('span');
+    avatar.className = 'av-sm';
+    avatar.style.cssText = 'background:#2563EB20;color:#2563EB';
+    avatar.textContent = ini; // textContent — nunca innerHTML con datos externos
+    const nameEl = document.createElement('span');
+    nameEl.textContent = nombre;
+    titleWrap.append(avatar, nameEl);
+
+    const montoBadge = document.createElement('span');
+    montoBadge.className = 'badge b-amber';
+    montoBadge.textContent = fmtCOPGer(doc.monto);
+
+    head.append(titleWrap, montoBadge);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    body.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:12px;color:var(--slate)';
+
+    const campos = [
+      ['Cédula',   String(doc.cedula || '—')],
+      ['Plazo',    (Number(doc.plazo)||0) + ' meses'],
+      ['Cuota',    fmtCOPGer(doc.cuota)],
+      ['Recibida', tiempoRelativoGer(doc.fechaSolicitud)],
+    ];
+    campos.forEach(([lbl, val]) => {
+      const c = document.createElement('div');
+      const l = document.createElement('div');
+      l.style.cssText = 'font-size:9px;color:var(--slate2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px';
+      l.textContent = lbl;
+      const v = document.createElement('div');
+      v.style.cssText = 'font-weight:600;color:var(--ink)';
+      v.textContent = val;
+      c.append(l, v);
+      body.appendChild(c);
+    });
+
+    const foot = document.createElement('div');
+    foot.className = 'card-foot';
+    foot.style.cssText = 'display:flex;gap:8px;justify-content:flex-end';
+
+    const btnRechazar = document.createElement('button');
+    btnRechazar.className = 'btn btn-red';
+    btnRechazar.innerHTML = '<i class="ti ti-x"></i> Rechazar';
+    btnRechazar.onclick = () => abrirDecisionGerencia('rechazar', doc.id, nombre);
+
+    const btnAprobar = document.createElement('button');
+    btnAprobar.className = 'btn btn-green';
+    btnAprobar.innerHTML = '<i class="ti ti-stamp"></i> Aprobar (Jefe de Crédito)';
+    btnAprobar.onclick = () => abrirDecisionGerencia('aprobar', doc.id, nombre);
+
+    foot.append(btnRechazar, btnAprobar);
+
+    card.append(head, body, foot);
+    cont.appendChild(card);
+  });
+}
+
+// ── Decisión de gerencia (modal ligero propio) ──────────────────
+let _gerAccion = null, _gerSolId = null;
+
+function abrirDecisionGerencia(accion, solId, nombre) {
+  _gerAccion = accion;
+  _gerSolId  = solId;
+
+  const esRechazo = accion === 'rechazar';
+  const nota = esRechazo
+    ? prompt(`Motivo del rechazo para ${nombre} (obligatorio, mínimo 10 caracteres):`)
+    : '';
+
+  if (esRechazo && (!nota || nota.trim().length < 10)) {
+    if (nota !== null) showToast('Debes ingresar un motivo de al menos 10 caracteres.', 't-err', 'ti-alert-circle');
+    return;
+  }
+
+  confirmarDecisionGerencia(nota ? nota.trim() : '');
+}
+
+async function confirmarDecisionGerencia(nota) {
+  const accion   = _gerAccion;
+  const solId    = _gerSolId;
+  const gerente  = getGerenteActual();
+  if (!solId || !accion) return;
+
+  showToast('Procesando decisión...', 't-warn', 'ti-loader');
+
+  try {
+    let resultado;
+
+    if (accion === 'aprobar') {
+      resultado = await FondoUneFirebase.aprobarSolicitud(solId, gerente.id, gerente.nombre);
+
+      if (resultado.ok) {
+        const doc = _aprobData.find(d => d.id === solId);
+        if (typeof EmailService !== 'undefined' && doc?.email) {
+          const linkFirma = `https://fondoune-portal.github.io/Creditos/modulo4-firma.html?token=${resultado.token}`;
+          await EmailService.enviarAprobacion({
+            solicitud: { ...doc, numeroPagare: resultado.numeroPagare, email: doc.email },
+            linkFirma,
+          }).catch(e => console.warn('[Módulo Gerencia] Email no enviado:', e.message));
+        }
+      }
+    } else if (accion === 'rechazar') {
+      resultado = await FondoUneFirebase.rechazarSolicitud(solId, gerente.id, gerente.nombre, nota);
+    }
+
+    if (resultado?.ok) {
+      showToast(accion === 'aprobar' ? 'Solicitud aprobada por gerencia.' : 'Solicitud rechazada.', 't-ok', 'ti-circle-check');
+      // El listener de Firebase actualiza _aprobData automáticamente
+    } else {
+      showToast('Error al procesar la decisión: ' + (resultado?.error || 'Intenta de nuevo'), 't-err', 'ti-alert-circle');
+    }
+  } catch (err) {
+    console.error('[Módulo Gerencia] Error en confirmarDecisionGerencia:', err);
+    showToast('Error inesperado. Verifica tu conexión e intenta de nuevo.', 't-err', 'ti-alert-circle');
+  }
+
+  _gerAccion = null; _gerSolId = null;
+}
+
+// ── KPIs reales del Panel Ejecutivo ──────────────────────────────
+// Solo los KPIs que dependen directamente de la colección
+// `solicitudes` se conectan a datos reales. Los que dependen de
+// cartera/pagos (Desembolsado, Tiempo prom., Mora, Automatización)
+// no tienen colección propia todavía y quedan con su valor de
+// ejemplo hasta que se conecten esos módulos.
+function actualizarKPIsReales(solicitudes) {
+  const total    = solicitudes.length;
+  const aprobadas = solicitudes.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
+  const tasa = total > 0 ? Math.round((aprobadas/total) * 1000) / 10 : 0;
+
+  const kvSol  = document.getElementById('kv-sol');
+  const kvApro = document.getElementById('kv-apro');
+  if (kvSol)  kvSol.textContent  = total;
+  if (kvApro) kvApro.textContent = aprobadas;
+
+  const deltaApro = document.querySelector('#kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
+  if (deltaApro) deltaApro.innerHTML = '<i class="ti ti-trending-up" style="font-size:11px"></i>' + tasa + '% tasa';
+}
+
+async function iniciarKPIsReales() {
+  if (typeof FondoUneFirebase === 'undefined') return;
+  try {
+    await FondoUneFirebase.escucharSolicitudes((solicitudes) => {
+      actualizarKPIsReales(solicitudes);
+    }, {});
+  } catch (err) {
+    console.error('[Módulo Gerencia] Error conectando KPIs:', err);
+  }
+}
+
+// Se inician junto con el resto, una vez el gate de acceso confirma
+// sesión válida (ver bloque de verificarAcceso en el <head>).
+window._iniciarConexionesGerencia = function () {
+  iniciarListenerAprobaciones();
+  iniciarKPIsReales();
+};
 </script>
 
 <!-- FOOTER -->
