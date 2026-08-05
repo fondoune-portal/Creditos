@@ -634,31 +634,8 @@
 
       <div class="form-grid">
         <div class="field">
-          <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
-          <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
-          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
-        </div>
-        <div class="field">
-          <label>Plazo <span style="color:var(--danger)">*</span></label>
-          <select id="f-plazo" onchange="updateSummary()">
-            <option>12 meses</option>
-            <option>18 meses</option>
-            <option selected>24 meses</option>
-            <option>36 meses</option>
-            <option>48 meses</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Tipo de crédito</label>
-          <select>
-            <option selected>Crédito de consumo</option>
-            <option>Educativo</option>
-            <option>Vivienda</option>
-            <option>Emergencia médica</option>
-            <option>Libranza especial</option>
-          </select>
+          <label>Línea de crédito <span style="color:var(--danger)">*</span></label>
+          <select id="f-linea" onchange="poblarPlazos()"></select>
         </div>
         <div class="field">
           <label>Destino</label>
@@ -669,6 +646,17 @@
             <option>Remodelación hogar</option>
             <option>Consolidación deudas</option>
           </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
+          <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
+        </div>
+        <div class="field">
+          <label>Plazo <span style="color:var(--danger)">*</span></label>
+          <select id="f-plazo" onchange="updateSummary()"></select>
         </div>
       </div>
 
@@ -709,9 +697,9 @@
       <div style="background:var(--cream);border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);">
         <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;">Resumen preliminar <span id="cuota-estimada" style="float:right;font-family:'DM Mono';color:var(--blue);">Cuota est.: $391.800/mes</span></div>
         <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
-        <div class="summary-row"><span class="lbl">Plazo</span><span class="val">24 meses</span></div>
-        <div class="summary-row"><span class="lbl">Tasa</span><span class="val">1,1% E.M.</span></div>
-        <div class="summary-row"><span class="lbl">Tipo</span><span class="val">Crédito de consumo</span></div>
+        <div class="summary-row"><span class="lbl">Plazo</span><span class="val" id="sum-plazo">24 meses</span></div>
+        <div class="summary-row"><span class="lbl">Tasa</span><span class="val" id="sum-tasa">1,1% E.M.</span></div>
+        <div class="summary-row"><span class="lbl">Línea</span><span class="val" id="sum-tipo">—</span></div>
       </div>
 
       <div class="btn-row">
@@ -853,7 +841,7 @@ function goTo(n) {
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
   poblarDatosAsociado(n);
-  if (n === 2) buildLineaGrid();
+  if (n === 2) poblarLineas();
   if (n === 3) startValidation();
   if (n === 4) buildResult();
 }
@@ -923,9 +911,8 @@ function poblarDatosAsociado(paso) {
     const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
     const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
     const plazo  = parseInt(plazoS.replace(' meses',''));
-    const tasa   = 0.011;
+    const tasa   = tasaSeleccionada();
     const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
-    const neto   = nomina.neto || 0;
     const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
     const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
     const dentro = pct <= 35;
@@ -1355,13 +1342,78 @@ function runValidation(v, idx) {
   }, v.time);
 }
 
+// ── LÍNEAS DE CRÉDITO FONDOUNE ──
+// Mismo catálogo que Módulo 3 → Parámetros de Crédito (fondoune.com/nuestros-servicios/servicio-de-credito).
+// Cada tramo es un {minM,maxM,tasa} en meses / tasa mensual decimal; para tramos con rango
+// (ej. Vivienda 1 a 10 años) se generan opciones de plazo cada 12 meses dentro del rango.
+// Nota: "Vivienda (solo casa)" 11-15 años trae en la fuente una tasa efectiva menor que la
+// nominal (dato inconsistente del documento original) — se usó la tasa mensual tal cual venía.
+const LINEAS_CREDITO = {
+  'Solidaridad':                                    [{minM:12, maxM:12,  tasa:0.0078}],
+  'Educativo':                                      [{minM:12, maxM:12,  tasa:0.0105},{minM:24, maxM:24, tasa:0.0122},{minM:36, maxM:36, tasa:0.0131}],
+  'Salud':                                          [{minM:12, maxM:24,  tasa:0.0078},{minM:36, maxM:36, tasa:0.0113}],
+  'Vivienda (solo casa)':                           [{minM:12, maxM:120, tasa:0.0113},{minM:132,maxM:180,tasa:0.0131}],
+  'Vivienda inversión tasa fija':                   [{minM:12, maxM:120, tasa:0.0099},{minM:132,maxM:180,tasa:0.0118}],
+  'Vivienda tasa fija VIS':                         [{minM:12, maxM:120, tasa:0.0102},{minM:132,maxM:180,tasa:0.0113}],
+  'Vivienda construcción sobre lote':                [{minM:12, maxM:48,  tasa:0.0113},{minM:60, maxM:120,tasa:0.0132}],
+  'Vacacional – Turismo':                           [{minM:12, maxM:24,  tasa:0.0132}],
+  'Campaña compra cartera':                         [{minM:12, maxM:36,  tasa:0.0102},{minM:48, maxM:60, tasa:0.0118},{minM:72,maxM:72,tasa:0.0128}],
+  'Especial convenios (campañas)':                  [{minM:12, maxM:36,  tasa:0.0175}],
+  'Crediprima':                                     [{minM:12, maxM:36,  tasa:0.0157}],
+  'Vehículo':                                       [{minM:12, maxM:36,  tasa:0.0131},{minM:48, maxM:60, tasa:0.0148}],
+  'Libre inversión – cruce de cuentas':             [{minM:12, maxM:36,  tasa:0.0157},{minM:48, maxM:60, tasa:0.0175}],
+  'Creditributo':                                   [{minM:12, maxM:24,  tasa:0.0122}],
+  'Crediexpress':                                   [{minM:12, maxM:24,  tasa:0.0171}],
+  'Libre inversión (reporte negativo) / Crediya':   [{minM:12, maxM:36,  tasa:0.0184}],
+  'Campaña vehículo (moto/bici/patineta)':          [{minM:12, maxM:36,  tasa:0.0109},{minM:48, maxM:60, tasa:0.0131}],
+  'Movilidad (vehículos eléctricos)':               [{minM:12, maxM:36,  tasa:0.0087},{minM:48, maxM:60, tasa:0.0096}],
+  'Crediavance':                                    [{minM:2,  maxM:2,   tasa:0.0166}],
+};
+
+function poblarLineas() {
+  const sel = document.getElementById('f-linea');
+  if (!sel || sel.options.length) return; // ya poblado, no repetir en cada visita al paso 2
+  const DEFAULT_LINEA = 'Libre inversión – cruce de cuentas';
+  sel.innerHTML = Object.keys(LINEAS_CREDITO).map(l =>
+    `<option value="${l}" ${l===DEFAULT_LINEA?'selected':''}>${l}</option>`).join('');
+  poblarPlazos();
+}
+
+function poblarPlazos() {
+  const linea  = document.getElementById('f-linea')?.value;
+  const tramos = LINEAS_CREDITO[linea] || [];
+  const opciones = [];
+  tramos.forEach(tr => {
+    const paso = tr.maxM > tr.minM ? 12 : 1;
+    for (let m = tr.minM; m <= tr.maxM; m += paso) opciones.push({ meses: m, tasa: tr.tasa });
+  });
+  const selP = document.getElementById('f-plazo');
+  if (!selP) return;
+  selP.innerHTML = opciones.map(o =>
+    `<option value="${o.meses}" data-tasa="${o.tasa}">${o.meses} meses</option>`).join('');
+  // Preferir 24 meses si esa línea lo ofrece; si no, el tramo más cercano
+  const pref = opciones.find(o => o.meses === 24) || opciones[Math.floor(opciones.length/2)];
+  if (pref) selP.value = String(pref.meses);
+  updateSummary();
+}
+
+function tasaSeleccionada() {
+  const opt = document.getElementById('f-plazo')?.selectedOptions?.[0];
+  const t = parseFloat(opt?.dataset.tasa);
+  return isNaN(t) ? 0.011 : t;
+}
+
 // ── UPDATE SUMMARY ──
 function updateSummary() {
   const monto = parseInt(document.getElementById('f-monto').value) || 0;
-  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
-  const tasa = 0.011;
+  const plazo = parseInt(document.getElementById('f-plazo').value) || 24;
+  const tasa  = tasaSeleccionada();
   const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
   document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
+  document.getElementById('sum-plazo').textContent = plazo + ' meses';
+  document.getElementById('sum-tasa').textContent  = (tasa*100).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}) + '% E.M.';
+  const lineaEl = document.getElementById('f-linea');
+  if (lineaEl) document.getElementById('sum-tipo').textContent = lineaEl.value;
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
@@ -1375,7 +1427,7 @@ async function buildResult() {
   const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
   const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
   const plazo  = parseInt(plazoS.replace(' meses','')) || 24;
-  const tasa   = 0.011;
+  const tasa   = tasaSeleccionada();
   const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
 
   const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
@@ -1420,6 +1472,8 @@ async function buildResult() {
     empresa:  user.empresa|| '',
     ciudad:   user.ciudad || 'Medellín',
     monto, plazo, cuota,
+    linea: document.getElementById('f-linea')?.value || '',
+    tasaMensual: tasa,
     periodicidad: 'mensuales',
     scorePropio: 0,          // el score real de DataCrédito lo asigna el analista en Módulo 2
     riesgo: 'sin_datos',     // idem — no lo decide el cliente
