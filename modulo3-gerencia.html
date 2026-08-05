@@ -67,166 +67,50 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
 
-/* ── SIDEBAR ── */
-.sidebar{
-  width:56px; /* colapsado por defecto */
-  background:var(--ink2);
-  display:flex;
-  flex-direction:column;
-  flex-shrink:0;
-  padding:14px 8px;
-  overflow:hidden;
-  transition:width .18s cubic-bezier(0.16,1,0.3,1);
-}
-
-/* contenido interno scrolleable */
+/* ── SIDEBAR (rail colapsable, se expande al hover) ── */
+.sidebar{width:56px;flex-shrink:0;position:relative}
 .sidebar-inner{
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  overflow-y:auto;
+  position:absolute;top:0;left:0;bottom:0;width:56px;
+  background:var(--ink2);border-right:1px solid var(--ink3);
+  display:flex;flex-direction:column;padding:14px 8px;
+  overflow-x:hidden;overflow-y:auto;
+  transition:width .16s ease,box-shadow .16s ease;
+  z-index:50;
 }
-
-/* expandir al pasar el mouse o tener foco dentro */
-.sidebar:hover,
-.sidebar:focus-within{
-  width:210px;
-}
-
-/* grupos y etiquetas */
+.sidebar:hover .sidebar-inner{width:214px;box-shadow:6px 0 28px rgba(13,21,32,.35)}
 .sb-grp{margin-bottom:6px}
-
-.sb-lbl{
-  font-size:9px;
-  font-weight:600;
-  color:var(--slate2);
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  padding:7px 10px 3px;
-  opacity:0;                     /* casi invisible colapsado */
-  transition:opacity .18s;
-}
-
-.sidebar:hover .sb-lbl,
-.sidebar:focus-within .sb-lbl{
-  opacity:.7;                    /* se muestran al expandir */
-}
-
-/* texto de cada item: oculto en modo íconos */
-.sb-label{
-  display:none;
-}
-
-.sidebar:hover .sb-label,
-.sidebar:focus-within .sb-label{
-  display:inline;
-}
-
-/* items del menú (igual que tenías) */
-.sb-item{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
-  border-radius:var(--r);
-  font-size:12px;
-  color:var(--slate3);
-  cursor:pointer;
-  transition:all .12s;
-  position:relative;
-  white-space:nowrap;
-}
-
-.sb-item:hover{
-  background:rgba(255,255,255,.05);
-  color:#fff;
-}
-
-.sb-item.active{
-  background:rgba(212,168,67,.1);
-  color:var(--gold3);
-}
-
-.sb-item.active::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:5px;
-  bottom:5px;
-  width:2px;
-  border-radius:0 2px 2px 0;
-  background:var(--gold2);
-}
-
-.sb-item i{
-  font-size:16px;
-  flex-shrink:0;
-  opacity:.7;
-}
-
-.sb-item.active i{
-  opacity:1;
-}
-
-.sb-badge{
-  margin-left:auto;
-  background:var(--crimson2,#C0392B);
-  color:#fff;
-  font-size:9.5px;
-  font-weight:700;
-  padding:1px 6px;
-  border-radius:20px;
-  line-height:1.5;
-}
-
+.sb-lbl{font-size:9px;font-weight:600;color:var(--slate2);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px 3px;white-space:nowrap;display:none}
+.sidebar:hover .sb-lbl{display:block}
+/* Colapsado (por defecto): solo ícono, centrado, sin texto ni badges */
+.sidebar .sb-item{justify-content:center;padding:9px 0}
+.sb-txt{display:none}
+.sb-badge, .sb-ct{display:none}
+.sidebar .sb-user{justify-content:center}
+.sb-user .sb-txt{display:none}
+/* Expandido (al hacer hover): todo visible, alineado a la izquierda */
+.sidebar:hover .sb-item{justify-content:flex-start;padding:8px 10px}
+.sidebar:hover .sb-txt{display:inline;white-space:nowrap}
+.sidebar:hover .sb-badge,.sidebar:hover .sb-ct{display:flex}
+.sidebar:hover .sb-user{justify-content:flex-start}
+.sidebar:hover .sb-user .sb-txt{display:block}
+.sb-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap;border-radius:var(--r)}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.sb-item.active{background:rgba(212,168,67,.1);color:var(--gold3)}
+.sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--gold2)}
+.sb-item i{font-size:16px;flex-shrink:0;opacity:.7}
+.sb-item.active i{opacity:1}
+.sb-badge{margin-left:auto;background:var(--crimson2,#C0392B);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;line-height:1.5}
+.sb-ct{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;align-items:center;justify-content:center}
+.ct-red{background:rgba(192,57,43,.2);color:var(--crimson3)}
+.ct-amber{background:rgba(217,119,6,.2);color:var(--amber3)}
+.ct-green{background:rgba(10,107,69,.25);color:var(--emerald3)}
+.ct-muted{background:rgba(255,255,255,.08);color:var(--slate3)}
 .sb-spacer{flex:1}
+.sb-user{padding:10px;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;align-items:center;gap:8px;margin-top:8px}
+.sb-user .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;flex-shrink:0}
+.sb-user .uname{font-size:11px;color:#fff;font-weight:600}
+.sb-user .urole{font-size:9px;color:var(--slate2)}
 
-.sb-user{
-  padding:10px;
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:var(--r);
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:8px;
-}
-
-.sb-user .uav{
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--sapphire2),var(--gold2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:9px;
-  font-weight:700;
-  color:#fff;
-  font-family:'Playfair Display',serif;
-}
-
-.sb-user .uname{
-  font-size:11px;
-  color:#fff;
-  font-weight:600;
-}
-
-.sb-user .urole{
-  font-size:9px;
-  color:var(--slate2);
-}
-/* modo colapsado: solo avatar en el footer */
-.sidebar:not(:hover) .sb-user{
-  justify-content:center;
-  padding:4px;
-  border:none;
-  background:transparent;
-}
-
-.sidebar:not(:hover) .sb-user .uname,
-.sidebar:not(:hover) .sb-user .urole{
-  display:none;
-}
 /* ── MAIN ── */
 .main{flex:1;overflow-y:auto;padding:20px 24px 40px}
 
@@ -483,6 +367,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
         // Recién ahora se conectan los datos reales (aprobaciones de
         // alto monto + KPIs) — nunca antes de confirmar el acceso.
+        //
+        // OJO: este bloque corre en el <head>, pero la función que
+        // arranca esas conexiones se define muy al final del <body>.
+        // onAuthStateChanged puede resolver ANTES de que ese script
+        // final se haya ejecutado (p. ej. con sesión ya cacheada),
+        // así que no basta con comprobar si la función ya existe —
+        // dejamos una bandera para que el script del body la revise
+        // apenas se defina, sin importar cuál corrió primero.
+        window._accesoGerenciaConfirmado = true;
         if (typeof window._iniciarConexionesGerencia === 'function') {
           window._iniciarConexionesGerencia();
         }
@@ -518,88 +411,37 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
 <div class="layout">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-inner">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+   <div class="sidebar-inner">
     <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
-
-      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')">
-        <i class="ti ti-layout-dashboard"></i>
-        <span class="sb-label">Panel ejecutivo</span>
-      </div>
-
-      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')">
-        <i class="ti ti-stamp"></i>
-        <span class="sb-label">Aprobaciones de alto monto</span>
-        <span class="sb-badge" id="sb-badge-aprob" style="display:none">0</span>
-      </div>
-
-      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')">
-        <i class="ti ti-chart-line"></i>
-        <span class="sb-label">Cartera activa</span>
-      </div>
-
-      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')">
-        <i class="ti ti-report-analytics"></i>
-        <span class="sb-label">Reportes</span>
-      </div>
-
-      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')">
-        <i class="ti ti-alert-triangle"></i>
-        <span class="sb-label">Alertas de riesgo</span>
-      </div>
+      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> <span class="sb-txt">Panel ejecutivo</span></div>
+      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> <span class="sb-txt">Aprobaciones de alto monto</span></div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> <span class="sb-txt">Cartera activa</span></div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> <span class="sb-txt">Reportes</span></div>
+      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> <span class="sb-txt">Alertas de riesgo</span></div>
     </div>
-
     <div class="sb-grp">
       <div class="sb-lbl">Operativo</div>
-
-      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')">
-        <i class="ti ti-users"></i>
-        <span class="sb-label">Equipo analistas</span>
-      </div>
-
-      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')">
-        <i class="ti ti-rotate-clockwise"></i>
-        <span class="sb-label">Reversiones</span>
-      </div>
-
-      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')">
-        <i class="ti ti-brain"></i>
-        <span class="sb-label">Motor IA — config</span>
-      </div>
-
-      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')">
-        <i class="ti ti-shield-check"></i>
-        <span class="sb-label">Auditoría</span>
-      </div>
+      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> <span class="sb-txt">Equipo analistas</span></div>
+      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> <span class="sb-txt">Reversiones</span></div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> <span class="sb-txt">Motor IA — config</span></div>
+      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> <span class="sb-txt">Auditoría</span></div>
     </div>
-
     <div class="sb-grp">
       <div class="sb-lbl">Config</div>
-
-      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')">
-        <i class="ti ti-adjustments-horizontal"></i>
-        <span class="sb-label">Parámetros crédito</span>
-      </div>
-
-      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')">
-        <i class="ti ti-key"></i>
-        <span class="sb-label">Accesos y roles</span>
-      </div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> <span class="sb-txt">Parámetros crédito</span></div>
+      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> <span class="sb-txt">Accesos y roles</span></div>
     </div>
-
     <div class="sb-spacer"></div>
-
     <div class="sb-user">
       <div class="uav">DM</div>
-      <div>
-        <div class="uname">Diego Montoya</div>
-        <div class="urole">Jefe de Crédito</div>
-      </div>
+      <div class="sb-txt"><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
     </div>
+   </div>
   </div>
-</div>
+
   <!-- MAIN -->
   <div class="main">
 
@@ -814,7 +656,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       </div>
     </div>
 
-    <div class="note" id="aprob-conexion-nota" style="display:none;background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#8B1A1A;font-size:12px;padding:12px 14px;border-radius:10px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+    <div class="note" id="aprob-conexion-nota" style="display:none;background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#8B1A1A;font-size:12px;padding:12px 14px;border-radius:10px;margin-bottom:16px;gap:8px;align-items:flex-start">
       <i class="ti ti-alert-circle" style="flex-shrink:0"></i>
       <span>No fue posible conectar con la base de datos en tiempo real. Verifica tu conexión y recarga la página.</span>
     </div>
@@ -1666,7 +1508,7 @@ setInterval(actualizarFechaHora, 1000);
 const UMBRAL_GERENCIA = 20000000; // COP — placeholder, confirmar con Nico
 
 let _aprobUnsubscribe = null;
-let _aprobData = [];
+let _aprobData = [];          // solicitudes de alto monto pendientes de decisión de gerencia
 
 const fmtCOPGer = n => '$' + Number(n || 0).toLocaleString('es-CO');
 
@@ -1692,6 +1534,14 @@ async function iniciarListenerAprobaciones() {
   if (umbralTxt) umbralTxt.textContent = fmtCOPGer(UMBRAL_GERENCIA);
 
   if (typeof FondoUneFirebase === 'undefined') {
+    console.error('[Módulo Gerencia] FondoUneFirebase no está definido — revisa que <script src="firebase-config.js"> esté cargando correctamente.');
+    const nota = document.getElementById('aprob-conexion-nota');
+    if (nota) nota.style.display = 'flex';
+    return;
+  }
+
+  if (typeof FondoUneFirebase.escucharSolicitudes !== 'function') {
+    console.error('[Módulo Gerencia] FondoUneFirebase.escucharSolicitudes no existe en esta versión de firebase-config.js.');
     const nota = document.getElementById('aprob-conexion-nota');
     if (nota) nota.style.display = 'flex';
     return;
@@ -1699,19 +1549,27 @@ async function iniciarListenerAprobaciones() {
 
   if (_aprobUnsubscribe) { _aprobUnsubscribe(); _aprobUnsubscribe = null; }
 
+  console.log('[Módulo Gerencia] Conectando listener de aprobaciones… umbral =', UMBRAL_GERENCIA);
+
   try {
     _aprobUnsubscribe = await FondoUneFirebase.escucharSolicitudes(
       (solicitudes) => {
+        console.log('[Módulo Gerencia] escucharSolicitudes devolvió', solicitudes.length, 'documento(s) en total.');
         // Solo lo que realmente compete a gerencia: pendientes de
-        // decisión y por encima del umbral. Lo demás (aprobado por
-        // el analista, rechazado, ya firmado) no aparece aquí.
+        // decisión del analista y por encima del umbral. Lo demás
+        // (ya aprobado, rechazado, firmado) no aparece aquí.
         _aprobData = solicitudes.filter(s =>
           s.estado === 'pendiente_analista' && Number(s.monto || 0) >= UMBRAL_GERENCIA
         );
+        console.log('[Módulo Gerencia]', _aprobData.length, 'solicitud(es) de alto monto pendientes tras filtrar.');
         renderAprobaciones();
       },
       {} // sin filtro de servidor por monto — se filtra en cliente arriba
     );
+
+    if (!_aprobUnsubscribe) {
+      console.warn('[Módulo Gerencia] escucharSolicitudes no devolvió una función de unsubscribe — puede indicar que la conexión no quedó activa.');
+    }
   } catch (err) {
     console.error('[Módulo Gerencia] Error conectando aprobaciones:', err);
     const nota = document.getElementById('aprob-conexion-nota');
@@ -1722,15 +1580,9 @@ async function iniciarListenerAprobaciones() {
 function renderAprobaciones() {
   const cont  = document.getElementById('aprob-lista');
   const vacio = document.getElementById('aprob-vacio');
-  const badge = document.getElementById('sb-badge-aprob');
   if (!cont) return;
 
   cont.innerHTML = '';
-
-  if (badge) {
-    if (_aprobData.length > 0) { badge.textContent = _aprobData.length; badge.style.display = 'inline-block'; }
-    else badge.style.display = 'none';
-  }
 
   if (_aprobData.length === 0) {
     vacio.style.display = 'block';
@@ -1908,6 +1760,14 @@ window._iniciarConexionesGerencia = function () {
   iniciarListenerAprobaciones();
   iniciarKPIsReales();
 };
+
+// Si el gate del <head> ya confirmó el acceso ANTES de que este
+// script se ejecutara (onAuthStateChanged resolvió muy rápido),
+// la bandera ya está en true — arrancamos de inmediato en vez de
+// esperar una llamada que ya ocurrió y se perdió.
+if (window._accesoGerenciaConfirmado === true) {
+  window._iniciarConexionesGerencia();
+}
 </script>
 
 <!-- FOOTER -->

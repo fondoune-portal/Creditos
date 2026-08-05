@@ -147,6 +147,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dc-row .dv.good{color:var(--success)}
 
 /* FOOTER STATUS */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:8px 20px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.5);display:flex;gap:20px;z-index:100}
 .sb-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px}
 .sb-green{background:#4DA}
 .sb-gold{background:var(--gold2)}
@@ -395,7 +396,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <!-- Type firma -->
       <div id="firma-type-wrap">
         <input type="text" id="firma-type-input" placeholder="Escribe tu nombre completo" oninput="onTypeSignature(this.value)" autocomplete="off">
-        <div id="firma-preview" style="text-align:center;padding:1rem 0;font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:var(--navy);border-top:1px solid var(--border);margin-top:12px;min-height:60px"></div>
+        <div id="firma-preview" style="text-align:center;padding:1rem 0.5rem;font-family:'DM Serif Display',serif;font-style:italic;color:var(--navy);border-top:1px solid var(--border);margin-top:12px;min-height:60px;overflow-wrap:break-word;word-break:break-word;line-height:1.3"></div>
       </div>
 
       <div class="canvas-controls">
@@ -471,6 +472,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span><span class="sb-dot sb-green"></span>Sesión segura</span>
+  <span><span class="sb-dot sb-green"></span>TLS 1.3</span>
+  <span><span class="sb-dot sb-gold"></span>Módulo 4 — Prototipo v1.0</span>
+  <span style="margin-left:auto"><span class="sb-dot sb-green"></span>FondoUne</span>
 </div>
 
 <script>
@@ -684,19 +693,36 @@ function descargarPagarePDF() {
     const firmaCanvas = document.getElementById('firma-canvas');
     firmaBase64 = firmaCanvas.toDataURL('image/png');
   } else if (currentFirmaMode === 'type' && typedSignature.trim().length > 0) {
-    // Firma escrita: renderizarla en un canvas auxiliar y exportar
+    // Firma escrita: renderizarla en un canvas auxiliar y exportar.
+    // El tamaño de fuente se ajusta automáticamente según el largo
+    // del nombre para que nunca se corte, sin importar cuán largo sea.
     const aux    = document.createElement('canvas');
     const scale  = 3; // alta resolución
-    aux.width    = 400 * scale;
-    aux.height   = 100 * scale;
+    const CW     = 560;  // ancho lógico del canvas (antes 400 — insuficiente para nombres largos)
+    const CH     = 120;
+    const margin = 24;   // margen a cada lado
+    aux.width    = CW * scale;
+    aux.height   = CH * scale;
     const axCtx  = aux.getContext('2d');
     axCtx.scale(scale, scale);
-    axCtx.fillStyle    = 'transparent';
-    axCtx.clearRect(0, 0, 400, 100);
-    axCtx.font         = "italic 44px 'DM Serif Display', Georgia, serif";
+    axCtx.clearRect(0, 0, CW, CH);
     axCtx.fillStyle    = '#0B2545';
     axCtx.textBaseline = 'middle';
-    axCtx.fillText(typedSignature.trim(), 20, 50);
+
+    const texto     = typedSignature.trim();
+    const maxWidth  = CW - margin * 2;
+    let   fontSize  = 44;
+    const minSize   = 16; // nunca más pequeño que esto, por legibilidad
+
+    // Reducir el tamaño hasta que el texto quepa en el ancho disponible
+    do {
+      axCtx.font = `italic ${fontSize}px 'DM Serif Display', Georgia, serif`;
+      const w = axCtx.measureText(texto).width;
+      if (w <= maxWidth || fontSize <= minSize) break;
+      fontSize -= 1;
+    } while (true);
+
+    axCtx.fillText(texto, margin, CH / 2);
     firmaBase64 = aux.toDataURL('image/png');
   }
 
@@ -814,7 +840,16 @@ function switchFirma(mode){
 let typedSignature='';
 function onTypeSignature(val){
   typedSignature=val;
-  document.getElementById('firma-preview').textContent=val;
+  const preview = document.getElementById('firma-preview');
+  preview.textContent = val;
+  // Reducir el tamaño de fuente escalonadamente para nombres largos,
+  // así nunca se corta ni se ve desproporcionado en la vista previa.
+  const len = val.trim().length;
+  let fs = 28;
+  if (len > 35) fs = 18;
+  else if (len > 25) fs = 22;
+  else if (len > 18) fs = 25;
+  preview.style.fontSize = fs + 'px';
   if(val.trim().length>3) setSigned();
   else { hasSig=false; document.getElementById('firma-status').innerHTML='<i class="ti ti-pencil" style="font-size:14px"></i> Sin firma aún'; document.getElementById('firma-status').className='firma-status'; }
 }
@@ -890,7 +925,7 @@ function showToast(msg,type='ok'){
 <!-- FOOTER -->
 <style>
 .fu-footer{
-  position:fixed;bottom:0;left:0;right:0;z-index:99;
+  position:fixed;bottom:34px;left:0;right:0;z-index:99;
   display:flex;align-items:center;justify-content:space-between;
   height:36px;padding:0 20px;
   background:var(--white);border-top:1px solid var(--border);
@@ -903,7 +938,7 @@ function showToast(msg,type='ok'){
 .fu-footer-r a:hover{color:var(--gold)}
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
-body{padding-bottom:40px}
+body{padding-bottom:74px}
 </style>
 <div class="fu-footer">
   <div class="fu-footer-l">
