@@ -395,6 +395,8 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 </style>
   <!-- FondoUne: seguridad y navegación -->
   <script src="security-validator.js"></script>
+  <script src="solicitudes-bridge.js"></script>
+  <script src="email-service.js"></script>
   <script src="navigation.js"></script>
   <script src="session.js"></script>
   <script>FondouneNav.init('analista');</script>
@@ -434,7 +436,8 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <div class="sidebar">
    <div class="sidebar-inner">
     <div class="sb-grp">
-      <div class="sb-grp-label">Solicitudes</div>
+<div class="sb-grp-label">Analista</div>
+
       <div class="sb-item active" onclick="setFilter('todas')"><i class="ti ti-layout-list"></i> <span class="sb-label">Todas</span> <div class="sb-ct ct-muted" id="ct-todas">7</div></div>
       <div class="sb-item" onclick="setFilter('pendiente')"><i class="ti ti-clock"></i> <span class="sb-label">Pendientes</span> <div class="sb-ct ct-amber" id="ct-pend">4</div></div>
       <div class="sb-item" onclick="setFilter('revision')"><i class="ti ti-alert-circle"></i> <span class="sb-label">En revisión</span> <div class="sb-ct ct-amber" id="ct-rev">1</div></div>
@@ -442,7 +445,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
       <div class="sb-item" onclick="setFilter('rechazado')"><i class="ti ti-circle-x"></i> <span class="sb-label">Rechazadas</span> <div class="sb-ct ct-red" id="ct-rech">1</div></div>
     </div>
     <div class="sb-grp">
-      <div class="sb-grp-label">Análisis</div>
+<div class="sb-grp-label">Análisis</div>
       <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-chart-bar"></i> <span class="sb-label">Reportes</span></div>
       <div class="sb-item" data-view="asociados" onclick="switchPage('asociados')"><i class="ti ti-users"></i> <span class="sb-label">Asociados</span></div>
       <div class="sb-item" data-view="kyc" onclick="switchPage('kyc')"><i class="ti ti-shield-check"></i> <span class="sb-label">Auditoría KYC</span></div>
@@ -450,14 +453,18 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
       <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-coin"></i> <span class="sb-label">Cartera activa</span></div>
     </div>
     <div class="sb-grp">
-      <div class="sb-grp-label">Config.</div>
+<div class="sb-grp-label">Config.</div>
+
       <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments"></i> <span class="sb-label">Parámetros</span></div>
       <div class="sb-item" data-view="seguridad" onclick="switchPage('seguridad')"><i class="ti ti-lock"></i> <span class="sb-label">Seguridad</span></div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
-      <div class="av">MR</div>
-      <div class="sb-label"><div class="uname">María Rodríguez</div><div class="urole">Analista de crédito</div></div>
+<div class="av" id="sb-user-av">MR</div>
+      <div class="sb-label">
+        <div class="uname" id="sb-user-name">María Rodríguez</div>
+        <div class="urole" id="sb-user-role">Analista de crédito</div>
+      </div>
     </div>
    </div>
   </div>
@@ -521,6 +528,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
           <div class="filter-tabs" id="filter-tabs">
             <div class="ftab active" onclick="setFilter('todas',this)">Todas</div>
             <div class="ftab" onclick="setFilter('pendiente',this)">Pendientes</div>
+            <div class="ftab" onclick="setFilter('gerencia',this)">En gerencia</div>
             <div class="ftab" onclick="setFilter('revision',this)">En revisión</div>
             <div class="ftab" onclick="setFilter('aprobado',this)">Aprobadas</div>
             <div class="ftab" onclick="setFilter('rechazado',this)">Rechazadas</div>
