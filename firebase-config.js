@@ -33,10 +33,11 @@
 
   // ── 2. ESTADOS DEL FLUJO ───────────────────────────────────────
   const ESTADOS = {
-    PENDIENTE: 'pendiente_analista',
-    APROBADO:  'aprobado',
-    RECHAZADO: 'rechazado',
-    FIRMADO:   'firmado'
+    PENDIENTE:          'pendiente_analista',
+    PENDIENTE_GERENCIA: 'pendiente_gerencia',
+    APROBADO:           'aprobado',
+    RECHAZADO:          'rechazado',
+    FIRMADO:            'firmado',
   };
 
   // Exponer estados globalmente para usar en otros módulos
@@ -312,6 +313,49 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
+  // MÓDULO 2 — ENVIAR A GERENCIA (alto monto / alto compromiso)
+  // ═══════════════════════════════════════════════════════════════
+  /**
+   * El analista recomienda aprobación pero la solicitud requiere
+   * decisión del Jefe de Crédito antes de generar token de firma.
+   *
+   * @param {string} solicitudId
+   * @param {string} analistaId
+   * @param {string} analistaNombre
+   * @param {string} [nota] — recomendación del analista (mín. 10 chars)
+   * @returns {Promise<{ok: boolean, error?: string}>}
+   */
+  async function enviarAGerencia(solicitudId, analistaId, analistaNombre, nota) {
+    try {
+      if (!nota || nota.trim().length < 10) {
+        return { ok: false, error: 'Debes ingresar una recomendación de al menos 10 caracteres.' };
+      }
+
+      const db = await inicializar();
+
+      await db.collection(COL).doc(solicitudId).update({
+        estado:             ESTADOS.PENDIENTE_GERENCIA,
+        fechaEnvioGerencia: _ahora(),
+        analistaId:         analistaId    || 'sistema',
+        analistaNombre:     analistaNombre || '',
+        notaAnalista:       nota.trim(),
+        log: firebase.firestore.FieldValue.arrayUnion({
+          ts:  new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+          txt: `Analista envió a gerencia · ${analistaNombre || 'Analista'} · "${nota.trim()}"`,
+          dot: 'dot-amber',
+        }),
+      });
+
+      console.log('[FondoUne] ✅ Solicitud enviada a gerencia:', solicitudId);
+      return { ok: true };
+
+    } catch (e) {
+      console.error('[FondoUne] ❌ enviarAGerencia:', e);
+      return { ok: false, error: e.message };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
   // MÓDULO 2 — RECHAZAR SOLICITUD
   // ═══════════════════════════════════════════════════════════════
   /**
@@ -460,8 +504,9 @@
         allow update: if
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['estado','tokenFirma','tokenUsado','numeroPagare',
-                      'fechaDecision','analistaId','analistaNombre',
-                      'motivoRechazo','fechaFirmado']);
+                      'fechaDecision','fechaEnvioGerencia','analistaId',
+                      'analistaNombre','notaAnalista','motivoRechazo',
+                      'fechaFirmado','log']);
       }
     }
   }
@@ -475,6 +520,7 @@
     escucharSolicitudes,
     obtenerSolicitud,
     aprobarSolicitud,
+    enviarAGerencia,
     rechazarSolicitud,
     // Módulo 4
     buscarPorToken,
