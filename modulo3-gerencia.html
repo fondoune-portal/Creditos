@@ -67,52 +67,44 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
 
-/* ── SIDEBAR ── */
-/* Rail colapsable: 56px por defecto (solo íconos), expande a 210px al
-   hacer hover — mismo mecanismo que modulo2-analista.html. .sidebar fija
-   el ancho colapsado y .sidebar-inner (absoluto) es lo que crece, para
-   no empujar el layout ni el .main al expandirse. */
+/* ── SIDEBAR (rail colapsable, se expande al hover) ── */
 .sidebar{width:56px;flex-shrink:0;position:relative}
 .sidebar-inner{
   position:absolute;top:0;left:0;bottom:0;width:56px;
-  background:var(--ink2);
+  background:var(--ink2);border-right:1px solid var(--ink3);
   display:flex;flex-direction:column;padding:14px 8px;
   overflow-x:hidden;overflow-y:auto;
   transition:width .16s ease,box-shadow .16s ease;
   z-index:50;
 }
-.sidebar:hover .sidebar-inner{width:210px;box-shadow:6px 0 28px rgba(13,21,32,.45)}
+.sidebar:hover .sidebar-inner{width:214px;box-shadow:6px 0 28px rgba(13,21,32,.35)}
 .sb-grp{margin-bottom:6px}
 .sb-lbl{font-size:9px;font-weight:600;color:var(--slate2);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px 3px;white-space:nowrap;display:none}
 .sidebar:hover .sb-lbl{display:block}
-/* Colapsado: ítem centrado, sin texto ni badge. Selectores compuestos
-   (.sidebar .sb-item) para ganar especificidad sin depender del orden
-   de las reglas base más abajo. */
-.sidebar .sb-item{justify-content:center;padding:8px 0}
-.sb-label{display:none}
-.sb-badge{display:none}
+/* Colapsado (por defecto): solo ícono, centrado, sin texto ni badges */
+.sidebar .sb-item{justify-content:center;padding:9px 0}
+.sb-txt{display:none}
+.sb-badge, .sb-ct{display:none}
 .sidebar .sb-user{justify-content:center}
-.sb-user .sb-label{display:none}
-/* Expandido (hover): todo visible, alineado a la izquierda */
+.sb-user .sb-txt{display:none}
+/* Expandido (al hacer hover): todo visible, alineado a la izquierda */
 .sidebar:hover .sb-item{justify-content:flex-start;padding:8px 10px}
-.sidebar:hover .sb-label{display:inline;white-space:nowrap}
-.sidebar:hover .sb-badge{display:inline-block}
+.sidebar:hover .sb-txt{display:inline;white-space:nowrap}
+.sidebar:hover .sb-badge,.sidebar:hover .sb-ct{display:flex}
 .sidebar:hover .sb-user{justify-content:flex-start}
-.sidebar:hover .sb-user .sb-label{display:block}
-/* El badge de aprobaciones (sb-badge-aprob) lo muestra/oculta JS por
-   style.display inline según haya pendientes (ver renderAprobaciones) —
-   eso pisa las reglas de arriba. Colapsado debe quedar oculto sin
-   importar el dato, así que aquí sí hace falta !important para ganarle
-   al inline style mientras no hay hover; al expandir, el inline style
-   de JS vuelve a mandar y respeta si hay o no pendientes. */
-.sidebar:not(:hover) .sb-badge{display:none!important}
-.sb-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap}
+.sidebar:hover .sb-user .sb-txt{display:block}
+.sb-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate3);cursor:pointer;transition:all .12s;position:relative;white-space:nowrap;border-radius:var(--r)}
 .sb-item:hover{background:rgba(255,255,255,.05);color:#fff}
 .sb-item.active{background:rgba(212,168,67,.1);color:var(--gold3)}
 .sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;border-radius:0 2px 2px 0;background:var(--gold2)}
 .sb-item i{font-size:16px;flex-shrink:0;opacity:.7}
 .sb-item.active i{opacity:1}
 .sb-badge{margin-left:auto;background:var(--crimson2,#C0392B);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:20px;line-height:1.5}
+.sb-ct{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;align-items:center;justify-content:center}
+.ct-red{background:rgba(192,57,43,.2);color:var(--crimson3)}
+.ct-amber{background:rgba(217,119,6,.2);color:var(--amber3)}
+.ct-green{background:rgba(10,107,69,.25);color:var(--emerald3)}
+.ct-muted{background:rgba(255,255,255,.08);color:var(--slate3)}
 .sb-spacer{flex:1}
 .sb-user{padding:10px;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;align-items:center;gap:8px;margin-top:8px}
 .sb-user .uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--sapphire2),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;flex-shrink:0}
@@ -152,6 +144,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .card-title{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px}
 .card-title i{font-size:16px;color:var(--slate2)}
 .card-body{padding:14px 18px}
+.fu3-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 12px;color:var(--slate)}
+.fu3-empty i{font-size:26px;opacity:.4}
+.fu3-empty div{font-size:12px;line-height:1.6;max-width:280px}
 .card-foot{padding:10px 18px;border-top:1px solid var(--paper2);display:flex;align-items:center;gap:8px}
 
 /* ── CHART: BAR ── */
@@ -375,6 +370,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
         // Recién ahora se conectan los datos reales (aprobaciones de
         // alto monto + KPIs) — nunca antes de confirmar el acceso.
+        //
+        // OJO: este bloque corre en el <head>, pero la función que
+        // arranca esas conexiones se define muy al final del <body>.
+        // onAuthStateChanged puede resolver ANTES de que ese script
+        // final se haya ejecutado (p. ej. con sesión ya cacheada),
+        // así que no basta con comprobar si la función ya existe —
+        // dejamos una bandera para que el script del body la revise
+        // apenas se defina, sin importar cuál corrió primero.
+        window._accesoGerenciaConfirmado = true;
         if (typeof window._iniciarConexionesGerencia === 'function') {
           window._iniciarConexionesGerencia();
         }
@@ -415,28 +419,28 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
    <div class="sidebar-inner">
     <div class="sb-grp">
       <div class="sb-lbl">Gerencia</div>
-      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> <span class="sb-label">Panel ejecutivo</span></div>
-      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> <span class="sb-label">Aprobaciones de alto monto</span> <span class="sb-badge" id="sb-badge-aprob" style="display:none">0</span></div>
-      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> <span class="sb-label">Cartera activa</span></div>
-      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> <span class="sb-label">Reportes</span></div>
-      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> <span class="sb-label">Alertas de riesgo</span></div>
+      <div class="sb-item active" data-view="panel" onclick="switchPage('panel')"><i class="ti ti-layout-dashboard"></i> <span class="sb-txt">Panel ejecutivo</span></div>
+      <div class="sb-item" data-view="aprobaciones" onclick="switchPage('aprobaciones')"><i class="ti ti-stamp"></i> <span class="sb-txt">Aprobaciones de alto monto</span></div>
+      <div class="sb-item" data-view="cartera" onclick="switchPage('cartera')"><i class="ti ti-chart-line"></i> <span class="sb-txt">Cartera activa</span></div>
+      <div class="sb-item" data-view="reportes" onclick="switchPage('reportes')"><i class="ti ti-report-analytics"></i> <span class="sb-txt">Reportes</span></div>
+      <div class="sb-item" data-view="alertas" onclick="switchPage('alertas')"><i class="ti ti-alert-triangle"></i> <span class="sb-txt">Alertas de riesgo</span></div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Operativo</div>
-      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> <span class="sb-label">Equipo analistas</span></div>
-      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> <span class="sb-label">Reversiones</span></div>
-      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> <span class="sb-label">Motor IA — config</span></div>
-      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> <span class="sb-label">Auditoría</span></div>
+      <div class="sb-item" data-view="equipo" onclick="switchPage('equipo')"><i class="ti ti-users"></i> <span class="sb-txt">Equipo analistas</span></div>
+      <div class="sb-item" data-view="reversiones" onclick="switchPage('reversiones')"><i class="ti ti-rotate-clockwise"></i> <span class="sb-txt">Reversiones</span></div>
+      <div class="sb-item" data-view="motor-ia" onclick="switchPage('motor-ia')"><i class="ti ti-brain"></i> <span class="sb-txt">Motor IA — config</span></div>
+      <div class="sb-item" data-view="auditoria" onclick="switchPage('auditoria')"><i class="ti ti-shield-check"></i> <span class="sb-txt">Auditoría</span></div>
     </div>
     <div class="sb-grp">
       <div class="sb-lbl">Config</div>
-      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> <span class="sb-label">Parámetros crédito</span></div>
-      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> <span class="sb-label">Accesos y roles</span></div>
+      <div class="sb-item" data-view="parametros" onclick="switchPage('parametros')"><i class="ti ti-adjustments-horizontal"></i> <span class="sb-txt">Parámetros crédito</span></div>
+      <div class="sb-item" data-view="accesos" onclick="switchPage('accesos')"><i class="ti ti-key"></i> <span class="sb-txt">Accesos y roles</span></div>
     </div>
     <div class="sb-spacer"></div>
     <div class="sb-user">
       <div class="uav">DM</div>
-      <div class="sb-label"><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
+      <div class="sb-txt"><div class="uname">Diego Montoya</div><div class="urole">Jefe de Crédito</div></div>
     </div>
    </div>
   </div>
@@ -467,8 +471,8 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     <div class="kpi-grid">
       <div class="kpi" style="--kpi-color:#2563EB">
         <div class="kpi-lbl"><i class="ti ti-file-text"></i> Solicitudes</div>
-        <div class="kpi-val" id="kv-sol">142</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>+23% vs sem. anterior</div>
+        <div class="kpi-val" id="kv-sol">0</div>
+        <div class="kpi-delta" style="color:var(--slate)" id="kv-sol-periodo">Esta semana</div>
         <div class="kpi-spark"><i class="ti ti-file-text"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#0A6B45">
@@ -479,26 +483,26 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       </div>
       <div class="kpi" style="--kpi-color:#B8872A">
         <div class="kpi-lbl"><i class="ti ti-coin"></i> Desembolsado</div>
-        <div class="kpi-val" id="kv-des">$612M</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>COP esta semana</div>
+        <div class="kpi-val" id="kv-des" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-coin"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#D97706">
         <div class="kpi-lbl"><i class="ti ti-clock"></i> Tiempo prom.</div>
-        <div class="kpi-val" id="kv-tiempo">4.2m</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>-96% vs proceso manual</div>
+        <div class="kpi-val" id="kv-tiempo" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-clock"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#8B1A1A">
         <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora activa</div>
-        <div class="kpi-val" id="kv-mora" style="color:var(--crimson2)">2.1%</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-down" style="font-size:11px"></i>vs 3.4% industria</div>
+        <div class="kpi-val" id="kv-mora" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-alert-circle"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#1A3A8B">
         <div class="kpi-lbl"><i class="ti ti-brain"></i> Automatización</div>
-        <div class="kpi-val" style="color:var(--sapphire2)">78%</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>resolución sin analista</div>
+        <div class="kpi-val" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de definir métrica</div>
         <div class="kpi-spark"><i class="ti ti-brain"></i></div>
       </div>
     </div>
@@ -522,8 +526,8 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
           </div>
         </div>
         <div class="card-foot">
-          <span style="font-size:11px;color:var(--slate)">Total semana: <strong style="color:var(--ink)">142 solicitudes</strong></span>
-          <span style="font-size:11px;color:var(--slate);margin-left:12px">Monto acumulado: <strong style="color:var(--ink)">$612.400.000</strong></span>
+          <span style="font-size:11px;color:var(--slate)">Total: <strong style="color:var(--ink)" id="panel-foot-total">0 solicitudes</strong></span>
+          <span style="font-size:11px;color:var(--slate);margin-left:12px">Monto acumulado: <strong style="color:var(--ink)" id="panel-foot-monto">$0</strong></span>
         </div>
       </div>
 
@@ -531,35 +535,11 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head">
           <div class="card-title"><i class="ti ti-alert-triangle"></i> Alertas activas</div>
-          <span class="badge b-red">3 críticas</span>
         </div>
         <div class="card-body">
-          <div class="alert-list">
-            <div class="alert-item al-red">
-              <div class="alert-ico"><i class="ti ti-alert-octagon"></i></div>
-              <div>
-                <div class="alert-title">Alerta SARLAFT — Sol. SOL-2025-0843</div>
-                <div class="alert-body">Rodrigo A. Ríos · Señal en listas de cumplimiento · Requiere revisión manual urgente por Jefe de Crédito</div>
-                <div class="alert-time">Hoy 06:59 · Sin resolver</div>
-              </div>
-              <button class="btn btn-revert" style="flex-shrink:0;margin-top:2px" onclick="showToast('Revisando alerta SARLAFT…','t-warn','ti-alert-triangle')">Ver</button>
-            </div>
-            <div class="alert-item al-amber">
-              <div class="alert-ico"><i class="ti ti-trending-up"></i></div>
-              <div>
-                <div class="alert-title">Concentración de cartera — Tigo-UNE</div>
-                <div class="alert-body">68% de solicitudes provienen de Tigo-UNE S.A.S. Diversificación recomendada entre empresas.</div>
-                <div class="alert-time">Hoy 08:00 · Informativo</div>
-              </div>
-            </div>
-            <div class="alert-item al-blue">
-              <div class="alert-ico"><i class="ti ti-clock"></i></div>
-              <div>
-                <div class="alert-title">4 solicitudes pendientes +2h sin acción</div>
-                <div class="alert-body">SOL-2025-0842, 0845, 0846, 0847 esperan decisión del analista.</div>
-                <div class="alert-time">Actualizado hace 12 min</div>
-              </div>
-            </div>
+          <div class="fu3-empty">
+            <i class="ti ti-bell-off"></i>
+            <div>Aún no hay un sistema de alertas conectado (SARLAFT, concentración de cartera, solicitudes represadas). Se mostrarán aquí en cuanto esté disponible.</div>
           </div>
         </div>
       </div>
@@ -573,17 +553,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-chart-donut"></i> Distribución por tipo</div></div>
         <div class="card-body">
-          <div class="donut-wrap">
-            <svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
-              <circle cx="45" cy="45" r="34" fill="none" stroke="#E8EEF7" stroke-width="14"/>
-            </svg>
-            <div class="donut-legend">
-              <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div><div class="dl-lbl">Consumo</div><div class="dl-val">58</div><div class="dl-pct">40.8%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#0A6B45"></div><div class="dl-lbl">Educativo</div><div class="dl-val">31</div><div class="dl-pct">21.8%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#B8872A"></div><div class="dl-lbl">Vivienda</div><div class="dl-val">22</div><div class="dl-pct">15.5%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#8B1A1A"></div><div class="dl-lbl">Emergencia</div><div class="dl-val">18</div><div class="dl-pct">12.7%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#5A7099"></div><div class="dl-lbl">Libranza</div><div class="dl-val">13</div><div class="dl-pct">9.2%</div></div>
-            </div>
+          <div class="fu3-empty">
+            <i class="ti ti-chart-donut"></i>
+            <div>Aún no se registra la línea de crédito elegida por el asociado. Se mostrará aquí en cuanto el Módulo 1 la capture.</div>
           </div>
         </div>
       </div>
@@ -592,7 +564,10 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-users"></i> Desempeño analistas</div></div>
         <div class="card-body">
-          <div id="analysts-list"></div>
+          <div class="fu3-empty">
+            <i class="ti ti-users"></i>
+            <div>Aún no hay suficientes decisiones registradas por analista para calcular estos indicadores.</div>
+          </div>
         </div>
       </div>
 
@@ -600,16 +575,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-shield-half"></i> Matriz de riesgo de cartera</div></div>
         <div class="card-body">
-          <div class="risk-matrix">
-            <div class="rm-cell rm-green"><div class="rml">Riesgo bajo</div><div class="rmv">74</div><div class="rms">52.1%</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Riesgo medio</div><div class="rmv">41</div><div class="rms">28.9%</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Riesgo alto</div><div class="rmv">27</div><div class="rms">19.0%</div></div>
-            <div class="rm-cell rm-green"><div class="rml">Score prom.</div><div class="rmv">742</div><div class="rms">Bajo</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Score prom.</div><div class="rmv">618</div><div class="rms">Medio</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Score prom.</div><div class="rmv">492</div><div class="rms">Alto</div></div>
-          </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--slate);background:var(--paper);border-radius:7px;padding:8px 10px">
-            <i class="ti ti-info-circle" style="font-size:12px"></i> Índice de mora proyectado: <strong style="color:var(--ink)">2.1%</strong> — por debajo del benchmark del sector (3.4%)
+          <div class="fu3-empty">
+            <i class="ti ti-shield-half"></i>
+            <div>El score de riesgo por solicitud aún no se registra en el análisis del analista. Esta matriz se activará en cuanto ese dato exista.</div>
           </div>
         </div>
       </div>
@@ -655,7 +623,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       </div>
     </div>
 
-    <div class="note" id="aprob-conexion-nota" style="display:none;background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#8B1A1A;font-size:12px;padding:12px 14px;border-radius:10px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+    <div class="note" id="aprob-conexion-nota" style="display:none;background:#FDECEA;border:1px solid rgba(192,57,43,.2);color:#8B1A1A;font-size:12px;padding:12px 14px;border-radius:10px;margin-bottom:16px;gap:8px;align-items:flex-start">
       <i class="ti ti-alert-circle" style="flex-shrink:0"></i>
       <span>No fue posible conectar con la base de datos en tiempo real. Verifica tu conexión y recarga la página.</span>
     </div>
@@ -940,7 +908,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     <div class="pg-head">
       <div>
         <div class="pg-title">Parámetros de Crédito</div>
-        <div class="pg-sub">FondoUne — Tasas y plazos vigentes por línea de crédito</div>
+        <div class="pg-sub">FondoUne — Límites y condiciones por tipo de crédito</div>
       </div>
       <div class="head-r">
         <button class="btn btn-gold" onclick="showToast('Parámetros de crédito guardados','t-ok','ti-device-floppy')"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
@@ -997,106 +965,16 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
 <script>
 // ── BAR CHART ──
-const barData = [
-  {d:'Lun',apro:22,rech:6,pend:4},
-  {d:'Mar',apro:18,rech:5,pend:6},
-  {d:'Mié',apro:25,rech:8,pend:3},
-  {d:'Jue',apro:14,rech:4,pend:5},
-  {d:'Vie',apro:10,rech:3,pend:4,today:true},
-  {d:'Sáb',apro:0,rech:0,pend:0},
-  {d:'Dom',apro:0,rech:0,pend:0},
-];
-const maxVal = Math.max(...barData.map(d=>d.apro+d.rech+d.pend),1);
+// buildBarChart() con datos ficticios fue reemplazada por
+// buildBarChartReal(), definida junto al motor de KPIs reales
+// más abajo — se invoca automáticamente al recibir datos de
+// Firestore, no hace falta llamarla aquí.
 
-function buildBarChart(){
-  const c=document.getElementById('bar-chart');
-  c.innerHTML='';
-  barData.forEach(d=>{
-    const total=d.apro+d.rech+d.pend;
-    const col=document.createElement('div');
-    col.className='bar-col';
-    col.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;position:relative;';
-    if(total>0){
-      [
-        {h:(d.apro/maxVal)*95,bg:'#2563EB'},
-        {h:(d.rech/maxVal)*95,bg:'#C0392B'},
-        {h:(d.pend/maxVal)*95,bg:'#D97706'},
-      ].forEach(seg=>{
-        const bar=document.createElement('div');
-        bar.style.cssText=`width:70%;background:${seg.bg};border-radius:3px;height:0;transition:height 1s cubic-bezier(.4,0,.2,1);opacity:${d.today?1:.7}`;
-        col.appendChild(bar);
-        setTimeout(()=>bar.style.height=seg.h+'%',100);
-      });
-    } else {
-      const empty=document.createElement('div');
-      empty.style.cssText='width:70%;height:6px;background:var(--paper2);border-radius:3px;';
-      col.appendChild(empty);
-    }
-    const lbl=document.createElement('div');
-    lbl.style.cssText=`font-size:9px;color:${d.today?'var(--gold)':'var(--slate)'};font-weight:${d.today?700:400};font-family:'JetBrains Mono',monospace;position:absolute;bottom:-16px;`;
-    lbl.textContent=d.d;
-    col.appendChild(lbl);
-    c.appendChild(col);
-  });
-}
-buildBarChart();
-
-// ── DONUT ──
-function buildDonut(){
-  const data=[
-    {pct:.408,color:'#2563EB'},
-    {pct:.218,color:'#0A6B45'},
-    {pct:.155,color:'#B8872A'},
-    {pct:.127,color:'#8B1A1A'},
-    {pct:.092,color:'#5A7099'},
-  ];
-  const svg=document.getElementById('donut-svg');
-  const R=34,CX=45,CY=45,circ=2*Math.PI*R;
-  let offset=0;
-  // clear existing arcs
-  svg.querySelectorAll('.arc').forEach(e=>e.remove());
-  data.forEach(d=>{
-    const dash=d.pct*circ;
-    const gap=circ-dash;
-    const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    arc.className.baseVal='arc';
-    arc.setAttribute('cx',CX);arc.setAttribute('cy',CY);arc.setAttribute('r',R);
-    arc.setAttribute('fill','none');arc.setAttribute('stroke',d.color);arc.setAttribute('stroke-width','14');
-    arc.setAttribute('stroke-dasharray',`0 ${circ}`);
-    arc.setAttribute('stroke-dashoffset',-(offset*circ - circ/4));
-    arc.style.transition='stroke-dasharray 1s ease';
-    svg.appendChild(arc);
-    setTimeout(()=>arc.setAttribute('stroke-dasharray',`${dash} ${gap}`),50);
-    offset+=d.pct;
-  });
-}
-buildDonut();
-
-// ── ANALYSTS ──
-const analysts=[
-  {nm:'María Rodríguez',role:'Analista senior',ini:'MR',col:'#2563EB',pct:94,apro:42,tiempo:'3.8m'},
-  {nm:'Carlos Pérez',role:'Analista junior',ini:'CP',col:'#0A6B45',pct:78,apro:31,tiempo:'5.1m'},
-  {nm:'Laura Gómez',role:'Analista senior',ini:'LG',col:'#B8872A',pct:88,apro:16,tiempo:'4.2m'},
-];
-function buildAnalysts(){
-  const c=document.getElementById('analysts-list');
-  c.innerHTML='';
-  analysts.forEach(a=>{
-    const row=document.createElement('div');
-    row.className='analyst-row';
-    row.innerHTML=`
-      <div class="an-av" style="background:${a.col}20;color:${a.col}">${a.ini}</div>
-      <div style="flex:1"><div class="an-name">${a.nm}</div><div class="an-role">${a.role} · ${a.apro} aprobadas · ${a.tiempo} prom.</div></div>
-      <div class="an-bar-wrap">
-        <div style="font-size:9px;color:var(--slate);margin-bottom:3px;text-align:right">Eficiencia</div>
-        <div class="an-bar-track"><div class="an-bar-fill" id="anb-${a.ini}" style="width:0%;background:${a.col}"></div></div>
-      </div>
-      <div class="an-val" style="color:${a.col}">${a.pct}%</div>`;
-    c.appendChild(row);
-    setTimeout(()=>{const f=document.getElementById('anb-'+a.ini);if(f)f.style.width=a.pct+'%';},200);
-  });
-}
-buildAnalysts();
+// buildDonut() y buildAnalysts() con datos ficticios fueron
+// quitadas — "Distribución por tipo" y "Desempeño analistas" ahora
+// muestran un estado vacío honesto en el HTML (ver arriba), porque
+// Firestore aún no guarda la línea de crédito elegida ni un
+// analistaId consistente que permita agregar por analista real.
 
 // ── TABLE ──
 const solsData=[
@@ -1158,21 +1036,8 @@ function buildReversiones(){
 }
 buildReversiones();
 
-// ── PERIOD CHANGE ──
-const periods={
-  dia:{sol:'26',apro:'15',des:'$184M',tiempo:'4.2m',mora:'2.1%'},
-  semana:{sol:'142',apro:'89',des:'$612M',tiempo:'4.2m',mora:'2.1%'},
-  mes:{sol:'581',apro:'364',des:'$2.4B',tiempo:'4.1m',mora:'2.1%'},
-  año:{sol:'6.842',apro:'4.281',des:'$28.7B',tiempo:'4.6m',mora:'2.3%'},
-};
-function changePeriod(p){
-  const d=periods[p];
-  document.getElementById('kv-sol').textContent=d.sol;
-  document.getElementById('kv-apro').textContent=d.apro;
-  document.getElementById('kv-des').textContent=d.des;
-  document.getElementById('kv-tiempo').textContent=d.tiempo;
-  document.getElementById('kv-mora').textContent=d.mora;
-}
+// changePeriod() ahora se define más abajo, junto al resto del
+// motor de KPIs reales (ver "PANEL EJECUTIVO — datos reales").
 
 // ── MODAL ──
 let modalAction=null,modalId=null;
@@ -1422,57 +1287,25 @@ function buildAuditoria(){
 buildAuditoria();
 
 // ── PARÁMETROS DE CRÉDITO ──
-// Catálogo real de líneas FondoUne (tomado de fondoune.com/nuestros-servicios/servicio-de-credito).
-// Nota: "Vivienda (solo casa)" 11 a 15 años trae tasa efectiva (12.65%) menor que la nominal (15.93%)
-// en la fuente original — parece una inconsistencia del dato publicado, se dejó tal cual para que
-// gerencia lo verifique contra el documento fuente antes de confiar en ese renglón.
 const parametrosData=[
-  {linea:'Solidaridad',plazo:'1 año',dtf:'-0.1',nom:'9.36%',ef:'9.80%',mensual:'0.78%'},
-  {linea:'Educativo',plazo:'1 año',dtf:'3',nom:'12.55%',ef:'13.35%',mensual:'1.05%'},
-  {linea:'Educativo',plazo:'2 años',dtf:'5',nom:'14.62%',ef:'15.72%',mensual:'1.22%'},
-  {linea:'Educativo',plazo:'3 años',dtf:'6',nom:'15.67%',ef:'16.93%',mensual:'1.31%'},
-  {linea:'Salud',plazo:'1 a 2 años',dtf:'3',nom:'9.36%',ef:'9.80%',mensual:'0.78%'},
-  {linea:'Salud',plazo:'3 años',dtf:'4',nom:'13.59%',ef:'14.53%',mensual:'1.13%'},
-  {linea:'Vivienda (solo casa)',plazo:'1 a 10 años',dtf:'4',nom:'13.59%',ef:'14.53%',mensual:'1.13%'},
-  {linea:'Vivienda (solo casa)',plazo:'11 a 15 años',dtf:'6',nom:'15.93%',ef:'12.65%',mensual:'1.31%'},
-  {linea:'Vivienda inversión tasa fija',plazo:'1 a 10 años',dtf:'2.4',nom:'11.93%',ef:'12.65%',mensual:'0.99%'},
-  {linea:'Vivienda inversión tasa fija',plazo:'11 a 15 años',dtf:'4.5',nom:'14.10%',ef:'15.13%',mensual:'1.18%'},
-  {linea:'Vivienda tasa fija VIS',plazo:'1 a 10 años',dtf:'2.7',nom:'12.24%',ef:'13.00%',mensual:'1.02%'},
-  {linea:'Vivienda tasa fija VIS',plazo:'11 a 15 años',dtf:'4',nom:'13.59%',ef:'14.53%',mensual:'1.13%'},
-  {linea:'Vivienda construcción sobre lote',plazo:'1 a 4 años',dtf:'4',nom:'13.59%',ef:'14.53%',mensual:'1.13%'},
-  {linea:'Vivienda construcción sobre lote',plazo:'5 a 10 años',dtf:'6',nom:'15.87%',ef:'17.18%',mensual:'1.32%'},
-  {linea:'Vacacional – Turismo',plazo:'1 a 2 años',dtf:'6',nom:'15.87%',ef:'17.18%',mensual:'1.32%'},
-  {linea:'Campaña compra cartera',plazo:'1 a 3 años',dtf:'2.7',nom:'12.24%',ef:'13.00%',mensual:'1.02%'},
-  {linea:'Campaña compra cartera',plazo:'4 a 5 años',dtf:'4.5',nom:'14.10%',ef:'15.33%',mensual:'1.18%'},
-  {linea:'Campaña compra cartera',plazo:'6 años',dtf:'5.7',nom:'15.35%',ef:'16.57%',mensual:'1.28%'},
-  {linea:'Especial convenios (campañas)',plazo:'1 a 3 años',dtf:'11',nom:'20.92%',ef:'23.21%',mensual:'1.75%'},
-  {linea:'Crediprima',plazo:'1 a 3 años',dtf:'9',nom:'18.81%',ef:'20.65%',mensual:'1.57%'},
-  {linea:'Vehículo',plazo:'1 a 3 años',dtf:'6',nom:'15.67%',ef:'16.93%',mensual:'1.31%'},
-  {linea:'Vehículo',plazo:'4 a 5 años',dtf:'8',nom:'17.76%',ef:'19.40%',mensual:'1.48%'},
-  {linea:'Libre inversión – cruce de cuentas',plazo:'1 a 3 años',dtf:'9',nom:'18.81%',ef:'20.65%',mensual:'1.57%'},
-  {linea:'Libre inversión – cruce de cuentas',plazo:'4 a 5 años',dtf:'11',nom:'20.92%',ef:'23.21%',mensual:'1.75%'},
-  {linea:'Creditributo',plazo:'1 a 2 años',dtf:'5',nom:'14.62%',ef:'15.72%',mensual:'1.22%'},
-  {linea:'Crediexpress',plazo:'1 a 2 años',dtf:'10.5',nom:'20.39%',ef:'22.57%',mensual:'1.71%'},
-  {linea:'Libre inversión (reporte negativo, hasta $3.501.810) / Crediya',plazo:'1 a 3 años',dtf:'12',nom:'21.98%',ef:'24.52%',mensual:'1.84%'},
-  {linea:'Campaña vehículo (moto/bici/patineta)',plazo:'1 a 3 años',dtf:'3.5',nom:'13.07%',ef:'13.94%',mensual:'1.09%'},
-  {linea:'Campaña vehículo (moto/bici/patineta)',plazo:'4 a 5 años',dtf:'6',nom:'15.67%',ef:'16.93%',mensual:'1.31%'},
-  {linea:'Movilidad (vehículos eléctricos)',plazo:'1 a 3 años',dtf:'1',nom:'10.49%',ef:'11.04%',mensual:'0.87%'},
-  {linea:'Movilidad (vehículos eléctricos)',plazo:'4 a 5 años',dtf:'2',nom:'11.52%',ef:'12.19%',mensual:'0.96%'},
-  {linea:'Crediavance',plazo:'2 meses',dtf:'10',nom:'19.86%',ef:'21.92%',mensual:'1.66%'},
+  {tipo:'Consumo',min:'$500.000',max:'$20.000.000',tasa:'1.8% mensual',plazo:'6-36 meses'},
+  {tipo:'Educativo',min:'$1.000.000',max:'$30.000.000',tasa:'1.2% mensual',plazo:'12-60 meses'},
+  {tipo:'Vivienda',min:'$5.000.000',max:'$80.000.000',tasa:'1.0% mensual',plazo:'24-120 meses'},
+  {tipo:'Emergencia',min:'$300.000',max:'$6.000.000',tasa:'2.0% mensual',plazo:'3-12 meses'},
+  {tipo:'Libranza',min:'$500.000',max:'$25.000.000',tasa:'1.4% mensual',plazo:'6-48 meses'},
 ];
 function buildParametros(){
   const t=document.getElementById('tbl-parametros');
-  t.innerHTML=`<thead><tr><th>Línea</th><th>Plazo</th><th>DTF + puntos</th><th>Tasa nominal</th><th>Tasa efectiva</th><th>Tasa mensual</th></tr></thead><tbody></tbody>`;
+  t.innerHTML=`<thead><tr><th>Tipo de crédito</th><th>Monto mínimo</th><th>Monto máximo</th><th>Tasa</th><th>Plazo</th></tr></thead><tbody></tbody>`;
   const tbody=t.querySelector('tbody');
   parametrosData.forEach(p=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`
-      <td><span class="badge b-slate">${p.linea}</span></td>
-      <td class="mono" contenteditable="true">${p.plazo}</td>
-      <td class="mono" contenteditable="true">${p.dtf}</td>
-      <td class="mono" contenteditable="true">${p.nom}</td>
-      <td class="mono" contenteditable="true">${p.ef}</td>
-      <td class="mono" contenteditable="true">${p.mensual}</td>`;
+      <td><span class="badge b-slate">${p.tipo}</span></td>
+      <td class="mono" contenteditable="true">${p.min}</td>
+      <td class="mono" contenteditable="true">${p.max}</td>
+      <td class="mono" contenteditable="true">${p.tasa}</td>
+      <td class="mono" contenteditable="true">${p.plazo}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1539,7 +1372,7 @@ setInterval(actualizarFechaHora, 1000);
 const UMBRAL_GERENCIA = 20000000; // COP — placeholder, confirmar con Nico
 
 let _aprobUnsubscribe = null;
-let _aprobData = [];
+let _aprobData = [];          // solicitudes de alto monto pendientes de decisión de gerencia
 
 const fmtCOPGer = n => '$' + Number(n || 0).toLocaleString('es-CO');
 
@@ -1565,6 +1398,14 @@ async function iniciarListenerAprobaciones() {
   if (umbralTxt) umbralTxt.textContent = fmtCOPGer(UMBRAL_GERENCIA);
 
   if (typeof FondoUneFirebase === 'undefined') {
+    console.error('[Módulo Gerencia] FondoUneFirebase no está definido — revisa que <script src="firebase-config.js"> esté cargando correctamente.');
+    const nota = document.getElementById('aprob-conexion-nota');
+    if (nota) nota.style.display = 'flex';
+    return;
+  }
+
+  if (typeof FondoUneFirebase.escucharSolicitudes !== 'function') {
+    console.error('[Módulo Gerencia] FondoUneFirebase.escucharSolicitudes no existe en esta versión de firebase-config.js.');
     const nota = document.getElementById('aprob-conexion-nota');
     if (nota) nota.style.display = 'flex';
     return;
@@ -1572,19 +1413,27 @@ async function iniciarListenerAprobaciones() {
 
   if (_aprobUnsubscribe) { _aprobUnsubscribe(); _aprobUnsubscribe = null; }
 
+  console.log('[Módulo Gerencia] Conectando listener de aprobaciones… umbral =', UMBRAL_GERENCIA);
+
   try {
     _aprobUnsubscribe = await FondoUneFirebase.escucharSolicitudes(
       (solicitudes) => {
+        console.log('[Módulo Gerencia] escucharSolicitudes devolvió', solicitudes.length, 'documento(s) en total.');
         // Solo lo que realmente compete a gerencia: pendientes de
-        // decisión y por encima del umbral. Lo demás (aprobado por
-        // el analista, rechazado, ya firmado) no aparece aquí.
+        // decisión del analista y por encima del umbral. Lo demás
+        // (ya aprobado, rechazado, firmado) no aparece aquí.
         _aprobData = solicitudes.filter(s =>
           s.estado === 'pendiente_analista' && Number(s.monto || 0) >= UMBRAL_GERENCIA
         );
+        console.log('[Módulo Gerencia]', _aprobData.length, 'solicitud(es) de alto monto pendientes tras filtrar.');
         renderAprobaciones();
       },
       {} // sin filtro de servidor por monto — se filtra en cliente arriba
     );
+
+    if (!_aprobUnsubscribe) {
+      console.warn('[Módulo Gerencia] escucharSolicitudes no devolvió una función de unsubscribe — puede indicar que la conexión no quedó activa.');
+    }
   } catch (err) {
     console.error('[Módulo Gerencia] Error conectando aprobaciones:', err);
     const nota = document.getElementById('aprob-conexion-nota');
@@ -1595,15 +1444,9 @@ async function iniciarListenerAprobaciones() {
 function renderAprobaciones() {
   const cont  = document.getElementById('aprob-lista');
   const vacio = document.getElementById('aprob-vacio');
-  const badge = document.getElementById('sb-badge-aprob');
   if (!cont) return;
 
   cont.innerHTML = '';
-
-  if (badge) {
-    if (_aprobData.length > 0) { badge.textContent = _aprobData.length; badge.style.display = 'inline-block'; }
-    else badge.style.display = 'none';
-  }
 
   if (_aprobData.length === 0) {
     vacio.style.display = 'block';
@@ -1744,24 +1587,142 @@ async function confirmarDecisionGerencia(nota) {
   _gerAccion = null; _gerSolId = null;
 }
 
-// ── KPIs reales del Panel Ejecutivo ──────────────────────────────
-// Solo los KPIs que dependen directamente de la colección
-// `solicitudes` se conectan a datos reales. Los que dependen de
-// cartera/pagos (Desembolsado, Tiempo prom., Mora, Automatización)
-// no tienen colección propia todavía y quedan con su valor de
-// ejemplo hasta que se conecten esos módulos.
+// ── PANEL EJECUTIVO — datos reales de Firestore ──────────────────
+// Solo los widgets que dependen directamente de la colección
+// `solicitudes` se conectan a datos reales (Solicitudes, Aprobadas,
+// gráfico diario, selector de período). El resto (Desembolsado,
+// Mora, Automatización, Alertas, Distribución por tipo, Desempeño
+// de analistas, Matriz de riesgo) depende de datos que hoy no
+// existen en Firestore — cartera/pagos posteriores a la firma,
+// score de riesgo asignado por analista, y la línea de crédito
+// elegida (el selector del Paso 2 del Módulo 1 aún no la guarda).
+// Esos widgets muestran un estado vacío honesto en vez de simular.
+let _panelSolicitudes = []; // snapshot completo, se reagrupa al cambiar de período
+let _panelPeriodoActivo = 'semana';
+
+const DIAS_ES_ABR = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function fmtCOPCompacto(n) {
+  if (!n) return '$0';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(1).replace('.0','') + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(0) + 'M';
+  return fmtCOPGer(n);
+}
+
+// Filtra el snapshot completo a la ventana de tiempo del período elegido
+function filtrarPorPeriodo(solicitudes, periodo) {
+  const ahora = new Date();
+  const inicio = new Date(ahora);
+  if (periodo === 'dia') {
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'semana') {
+    const diaSemana = (inicio.getDay() + 6) % 7; // lunes=0
+    inicio.setDate(inicio.getDate() - diaSemana);
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'mes') {
+    inicio.setDate(1);
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'año') {
+    inicio.setMonth(0,1);
+    inicio.setHours(0,0,0,0);
+  }
+  return solicitudes.filter(s => s.fechaSolicitud && s.fechaSolicitud >= inicio);
+}
+
 function actualizarKPIsReales(solicitudes) {
-  const total    = solicitudes.length;
-  const aprobadas = solicitudes.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
+  _panelSolicitudes = solicitudes;
+  aplicarPeriodoPanel();
+}
+
+function aplicarPeriodoPanel() {
+  const enPeriodo = filtrarPorPeriodo(_panelSolicitudes, _panelPeriodoActivo);
+
+  const total     = enPeriodo.length;
+  const aprobadas = enPeriodo.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
+  const montoTotal = enPeriodo.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
   const tasa = total > 0 ? Math.round((aprobadas/total) * 1000) / 10 : 0;
 
-  const kvSol  = document.getElementById('kv-sol');
-  const kvApro = document.getElementById('kv-apro');
-  if (kvSol)  kvSol.textContent  = total;
-  if (kvApro) kvApro.textContent = aprobadas;
+  const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  set('kv-sol',  total);
+  set('kv-apro', aprobadas);
 
-  const deltaApro = document.querySelector('#kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
+  const PERIODO_LBL = { dia:'Hoy', semana:'Esta semana', mes:'Este mes', año:'Este año' };
+  set('kv-sol-periodo', PERIODO_LBL[_panelPeriodoActivo] || '');
+
+  const deltaApro = document.getElementById('kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
   if (deltaApro) deltaApro.innerHTML = '<i class="ti ti-trending-up" style="font-size:11px"></i>' + tasa + '% tasa';
+
+  buildBarChartReal(enPeriodo);
+
+  const footTotal = document.getElementById('panel-foot-total');
+  const footMonto = document.getElementById('panel-foot-monto');
+  if (footTotal) footTotal.textContent = total + ' solicitudes';
+  if (footMonto) footMonto.textContent = fmtCOPCompacto(montoTotal) + ' COP';
+}
+
+function changePeriod(p) {
+  _panelPeriodoActivo = p;
+  aplicarPeriodoPanel();
+}
+
+// Gráfico de barras real — agrupa por día de la semana actual
+// usando fechaSolicitud, dentro de la ventana del período activo.
+function buildBarChartReal(solicitudesEnPeriodo) {
+  const c = document.getElementById('bar-chart');
+  if (!c) return;
+
+  const hoy = new Date();
+  const diaSemanaHoy = (hoy.getDay() + 6) % 7; // lunes=0
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - diaSemanaHoy);
+  lunes.setHours(0,0,0,0);
+
+  const dias = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    dias.push({ fecha: d, apro: 0, rech: 0, pend: 0, today: i === diaSemanaHoy });
+  }
+
+  solicitudesEnPeriodo.forEach(s => {
+    if (!s.fechaSolicitud) return;
+    const idx = Math.round((s.fechaSolicitud - lunes) / 86400000);
+    if (idx < 0 || idx > 6) return;
+    if (s.estado === 'aprobado' || s.estado === 'firmado') dias[idx].apro++;
+    else if (s.estado === 'rechazado') dias[idx].rech++;
+    else dias[idx].pend++;
+  });
+
+  const maxVal = Math.max(...dias.map(d => d.apro + d.rech + d.pend), 1);
+
+  c.innerHTML = '';
+  dias.forEach(d => {
+    const total = d.apro + d.rech + d.pend;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;position:relative;';
+    if (total > 0) {
+      [
+        { h: (d.apro/maxVal)*95, bg: '#2563EB' },
+        { h: (d.rech/maxVal)*95, bg: '#C0392B' },
+        { h: (d.pend/maxVal)*95, bg: '#D97706' },
+      ].forEach(seg => {
+        const bar = document.createElement('div');
+        bar.style.cssText = `width:70%;background:${seg.bg};border-radius:3px;height:0;transition:height .6s cubic-bezier(.4,0,.2,1);opacity:${d.today ? 1 : .7}`;
+        col.appendChild(bar);
+        setTimeout(() => bar.style.height = seg.h + '%', 50);
+      });
+    } else {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'width:70%;height:6px;background:var(--paper2);border-radius:3px;';
+      col.appendChild(empty);
+    }
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `font-size:9px;color:${d.today ? 'var(--gold)' : 'var(--slate)'};font-weight:${d.today ? 700 : 400};font-family:'JetBrains Mono',monospace;position:absolute;bottom:-16px;`;
+    lbl.textContent = DIAS_ES_ABR[d.fecha.getDay()];
+    col.appendChild(lbl);
+    c.appendChild(col);
+  });
 }
 
 async function iniciarKPIsReales() {
@@ -1781,6 +1742,14 @@ window._iniciarConexionesGerencia = function () {
   iniciarListenerAprobaciones();
   iniciarKPIsReales();
 };
+
+// Si el gate del <head> ya confirmó el acceso ANTES de que este
+// script se ejecutara (onAuthStateChanged resolvió muy rápido),
+// la bandera ya está en true — arrancamos de inmediato en vez de
+// esperar una llamada que ya ocurrió y se perdió.
+if (window._accesoGerenciaConfirmado === true) {
+  window._iniciarConexionesGerencia();
+}
 </script>
 
 <!-- FOOTER -->
