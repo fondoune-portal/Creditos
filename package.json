@@ -1,0 +1,36 @@
+{
+  "name": "fondoune-creditos-portal",
+  "version": "1.0.0",
+  "description": "Portal de crédito inteligente FondoUne",
+  "type": "module",
+  "author": "FondoUne Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src public --fix",
+    "format": "prettier --write .",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:functions": "cd functions && npm install && npm run deploy",
+    "setup": "npm install && cd functions && npm install"
+  },
+  "dependencies": {
+    "firebase": "^10.13.2",
+    "tabler-icons": "^2.44.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  }
+}
