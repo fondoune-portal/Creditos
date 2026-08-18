@@ -1,0 +1,59 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Salida de build
+dist/
+build/
+out/
+.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de backup
+*.bak
+*.backup
+*.tmp
+*.swp
+*~
+
+# Logs
+logs/
+*.log
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Firebase Cloud Functions
+functions/node_modules/
+functions/.runtimeconfig.json
+
+# Tests
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+=ERROR
+*.tmp
+.temp/
