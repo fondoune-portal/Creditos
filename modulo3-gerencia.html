@@ -300,6 +300,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
+  <script src="creditos-config.js"></script>
   <script>FondouneNav.init('gerencia');</script>
 
   <!-- Firebase — verificación real de sesión y rol (custom claims),
@@ -553,9 +554,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-chart-donut"></i> Distribución por tipo</div></div>
         <div class="card-body">
-          <div class="fu3-empty">
+          <div class="donut-wrap" id="donut-wrap">
+            <svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
+              <circle cx="45" cy="45" r="34" fill="none" stroke="#E8EEF7" stroke-width="14"/>
+            </svg>
+            <div class="donut-legend" id="donut-legend"></div>
+          </div>
+          <div class="fu3-empty" id="donut-empty" style="display:none">
             <i class="ti ti-chart-donut"></i>
-            <div>Aún no se registra la línea de crédito elegida por el asociado. Se mostrará aquí en cuanto el Módulo 1 la capture.</div>
+            <div>Aún no hay solicitudes con línea de crédito registrada en este período.</div>
           </div>
         </div>
       </div>
@@ -971,10 +978,10 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 // Firestore, no hace falta llamarla aquí.
 
 // buildDonut() y buildAnalysts() con datos ficticios fueron
-// quitadas — "Distribución por tipo" y "Desempeño analistas" ahora
-// muestran un estado vacío honesto en el HTML (ver arriba), porque
-// Firestore aún no guarda la línea de crédito elegida ni un
-// analistaId consistente que permita agregar por analista real.
+// quitadas — "Desempeño analistas" sigue en estado vacío honesto
+// (no hay analistaId consistente para agregar). "Distribución por
+// tipo" SÍ se conecta a datos reales — ver buildDonutReal() más
+// abajo, junto al motor de KPIs reales del panel.
 
 // ── TABLE ──
 const solsData=[
@@ -1653,6 +1660,7 @@ function aplicarPeriodoPanel() {
   if (deltaApro) deltaApro.innerHTML = '<i class="ti ti-trending-up" style="font-size:11px"></i>' + tasa + '% tasa';
 
   buildBarChartReal(enPeriodo);
+  buildDonutReal(enPeriodo);
 
   const footTotal = document.getElementById('panel-foot-total');
   const footMonto = document.getElementById('panel-foot-monto');
@@ -1724,6 +1732,72 @@ function buildBarChartReal(solicitudesEnPeriodo) {
     c.appendChild(col);
   });
 }
+
+// Distribución por tipo — agrupa por línea de crédito real
+// (lineaCreditoId, guardado por Módulo 1 desde el grid de líneas).
+// Solicitudes viejas sin ese campo caen en "Sin especificar" en vez
+// de perderse silenciosamente.
+const DONUT_COLORES = ['#2563EB','#0A6B45','#B8872A','#8B1A1A','#5A7099','#7C3AED','#D97706','#0891B2','#BE185D','#4D7C0F','#9333EA'];
+
+function buildDonutReal(solicitudesEnPeriodo) {
+  const wrap  = document.getElementById('donut-wrap');
+  const empty = document.getElementById('donut-empty');
+  const svg   = document.getElementById('donut-svg');
+  const legend= document.getElementById('donut-legend');
+  if (!svg || !legend) return;
+
+  if (solicitudesEnPeriodo.length === 0) {
+    if (wrap) wrap.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  if (wrap) wrap.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  // Agrupar por línea real; nombre para mostrar viene del propio
+  // documento (lineaCreditoNombre) para no depender de que
+  // creditos-config.js esté cargado, aunque si lo está lo preferimos
+  // por tener un orden y etiqueta más estables.
+  const conteo = {};
+  solicitudesEnPeriodo.forEach(s => {
+    const id     = s.lineaCreditoId || '_sin_especificar';
+    const nombre = s.lineaCreditoNombre || (typeof fuBuscarLineaCredito === 'function' && fuBuscarLineaCredito(id)?.nombre) || 'Sin especificar';
+    if (!conteo[id]) conteo[id] = { nombre, count: 0 };
+    conteo[id].count++;
+  });
+
+  const total = solicitudesEnPeriodo.length;
+  const grupos = Object.values(conteo).sort((a,b) => b.count - a.count);
+
+  svg.querySelectorAll('.arc').forEach(e => e.remove());
+  const R = 34, CX = 45, CY = 45, circ = 2 * Math.PI * R;
+  let offset = 0;
+
+  legend.innerHTML = '';
+  grupos.forEach((g, i) => {
+    const pct = g.count / total;
+    const color = DONUT_COLORES[i % DONUT_COLORES.length];
+
+    const dash = pct * circ;
+    const gap  = circ - dash;
+    const arc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    arc.setAttribute('class', 'arc');
+    arc.setAttribute('cx', CX); arc.setAttribute('cy', CY); arc.setAttribute('r', R);
+    arc.setAttribute('fill', 'none'); arc.setAttribute('stroke', color); arc.setAttribute('stroke-width', '14');
+    arc.setAttribute('stroke-dasharray', `0 ${circ}`);
+    arc.setAttribute('stroke-dashoffset', -(offset*circ - circ/4));
+    arc.style.transition = 'stroke-dasharray .6s ease';
+    svg.appendChild(arc);
+    setTimeout(() => arc.setAttribute('stroke-dasharray', `${dash} ${gap}`), 50);
+    offset += pct;
+
+    const item = document.createElement('div');
+    item.className = 'dl-item';
+    item.innerHTML = `<div class="dl-dot" style="background:${color}"></div><div class="dl-lbl">${g.nombre}</div><div class="dl-val">${g.count}</div><div class="dl-pct">${(pct*100).toFixed(1)}%</div>`;
+    legend.appendChild(item);
+  });
+}
+
 
 async function iniciarKPIsReales() {
   if (typeof FondoUneFirebase === 'undefined') return;
