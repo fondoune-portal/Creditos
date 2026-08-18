@@ -602,14 +602,22 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
         </div>
         <div class="card-body" style="padding:0">
           <table class="data-table" id="tbl-sols"></table>
+          <div class="fu3-empty" id="tbl-sols-empty" style="display:none">
+            <i class="ti ti-list-details"></i>
+            <div>Aún no hay solicitudes registradas. Aparecerán aquí en cuanto el Módulo 1 reciba la primera.</div>
+          </div>
         </div>
       </div>
 
       <!-- Reversiones pendientes -->
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-rotate-clockwise"></i> Solicitudes de reversión</div><span class="badge b-amber">2 pendientes</span></div>
+        <div class="card-head"><div class="card-title"><i class="ti ti-rotate-clockwise"></i> Solicitudes de reversión</div><span class="badge b-amber" id="reversion-badge" style="display:none">0 pendientes</span></div>
         <div class="card-body">
           <div id="reversion-list"></div>
+          <div class="fu3-empty" id="reversion-empty">
+            <i class="ti ti-rotate-clockwise"></i>
+            <div>Aún no hay solicitudes de reversión pendientes. Aparecerán aquí cuando un analista o asociado pida reconsiderar una decisión.</div>
+          </div>
         </div>
         <div class="card-foot">
           <span style="font-size:11px;color:var(--slate)">Solo el Jefe de Crédito puede revertir decisiones del analista</span>
@@ -983,65 +991,97 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 // tipo" SÍ se conecta a datos reales — ver buildDonutReal() más
 // abajo, junto al motor de KPIs reales del panel.
 
-// ── TABLE ──
-const solsData=[
-  {id:'SOL-0847',nm:'Carlos A. Gil',ini:'CG',col:'#3B82F6',monto:'$8.000.000',tipo:'Consumo',estado:'pendiente',analista:'M. Rodríguez',score:742,rec:'APROBAR'},
-  {id:'SOL-0846',nm:'Valentina Ospina',ini:'VO',col:'#10B981',monto:'$5.000.000',tipo:'Educativo',estado:'pendiente',analista:'C. Pérez',score:811,rec:'APROBAR'},
-  {id:'SOL-0845',nm:'Jhon F. Morales',ini:'JM',col:'#F59E0B',monto:'$15.000.000',tipo:'Consumo',estado:'revision',analista:'M. Rodríguez',score:614,rec:'REVISAR'},
-  {id:'SOL-0844',nm:'Sandra P. Ruiz',ini:'SR',col:'#8B5CF6',monto:'$3.000.000',tipo:'Emergencia',estado:'aprobado',analista:'L. Gómez',score:756,rec:'APROBAR'},
-  {id:'SOL-0843',nm:'Rodrigo A. Ríos',ini:'RR',col:'#EF4444',monto:'$20.000.000',tipo:'Consumo',estado:'rechazado',analista:'M. Rodríguez',score:501,rec:'RECHAZAR'},
-];
+// ── TABLE — solicitudes recientes (datos reales, alimentado desde
+//    actualizarKPIsReales vía el mismo listener escucharSolicitudes) ──
+// ── REVERSIONES — datos reales. El campo que marca una solicitud
+//    como "reversión pendiente" es `reversionSolicitada: true`. Este
+//    flujo aún no está implementado en ningún módulo (no hay botón
+//    todavía que lo active), así que hoy siempre estará vacío — en
+//    cuanto se implemente "solicitar reconsideración" en módulo 2,
+//    aparecerá aquí automáticamente sin tocar este archivo de nuevo.
+function renderReversionesReales(solicitudes){
+  const c      = document.getElementById('reversion-list');
+  const empty  = document.getElementById('reversion-empty');
+  const badge  = document.getElementById('reversion-badge');
+  if (!c) return;
 
-function buildTable(){
-  const t=document.getElementById('tbl-sols');
-  const eClass={pendiente:'b-amber',revision:'b-amber',aprobado:'b-green',rechazado:'b-red'};
-  const eTxt={pendiente:'Pendiente',revision:'En revisión',aprobado:'Aprobado',rechazado:'Rechazado'};
-  const rClass={APROBAR:'b-green',REVISAR:'b-amber',RECHAZAR:'b-red'};
-  t.innerHTML=`<thead><tr><th>Asociado</th><th>Monto</th><th>Tipo</th><th>Estado</th><th>Score</th><th>IA</th><th>Analista</th></tr></thead><tbody></tbody>`;
-  const tbody=t.querySelector('tbody');
-  solsData.forEach(s=>{
-    const sc=s.score>=700?'var(--emerald2)':s.score>=600?'var(--amber2)':'var(--crimson2)';
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><span class="av-sm" style="background:${s.col}20;color:${s.col}">${s.ini}</span>${s.nm}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${s.id}</div></td>
-      <td class="mono">${s.monto}</td>
-      <td><span class="badge b-slate">${s.tipo}</span></td>
-      <td><span class="badge ${eClass[s.estado]}">${eTxt[s.estado]}</span></td>
-      <td class="mono" style="color:${sc};font-weight:600">${s.score}</td>
-      <td><span class="badge ${rClass[s.rec]}">${s.rec}</span></td>
-      <td style="color:var(--slate)">${s.analista}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-buildTable();
+  const pendientes = (solicitudes||[]).filter(s => s.reversionSolicitada === true);
 
-// ── REVERSIONES ──
-const reversiones=[
-  {id:'SOL-0831',nm:'Andrés Salcedo',monto:'$12M',analista:'C. Pérez',motivo:'Score mejoró significativamente en nueva consulta. Solicita reconsideración.'},
-  {id:'SOL-0819',nm:'Patricia Muñoz',monto:'$6M',analista:'L. Gómez',motivo:'Error en lectura de nómina por IA. Ingreso real es superior al calculado.'},
-];
-function buildReversiones(){
-  const c=document.getElementById('reversion-list');
-  c.innerHTML='';
-  reversiones.forEach(r=>{
+  c.innerHTML = '';
+
+  if (pendientes.length === 0){
+    if (empty) empty.style.display = 'flex';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (badge){ badge.style.display = 'inline-flex'; badge.textContent = pendientes.length + ' pendiente' + (pendientes.length===1?'':'s'); }
+
+  pendientes.forEach(r=>{
     const div=document.createElement('div');
     div.style.cssText='border:1px solid var(--paper3);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;';
     div.innerHTML=`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
         <span class="badge b-slate" style="font-family:'JetBrains Mono',monospace">${r.id}</span>
-        <strong style="font-size:12px">${r.nm}</strong>
-        <span style="font-size:11px;color:var(--slate);margin-left:auto">${r.monto}</span>
+        <strong style="font-size:12px">${r.nombre||'—'}</strong>
+        <span style="font-size:11px;color:var(--slate);margin-left:auto">${fmtCOPGer(r.monto)}</span>
       </div>
-      <div style="font-size:11px;color:var(--slate);margin-bottom:10px;line-height:1.5">${r.motivo}</div>
-      <div style="font-size:10px;color:var(--slate);margin-bottom:8px">Analista original: ${r.analista}</div>
+      <div style="font-size:11px;color:var(--slate);margin-bottom:10px;line-height:1.5">${r.motivoReversion || 'Sin motivo especificado.'}</div>
+      <div style="font-size:10px;color:var(--slate);margin-bottom:8px">Analista original: ${r.analistaNombre || '—'}</div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-revert" onclick="openModal('denegar','${r.id}','${r.nm}')"><i class="ti ti-x"></i> Denegar</button>
-        <button class="btn btn-gold" onclick="openModal('revertir','${r.id}','${r.nm}')"><i class="ti ti-rotate-clockwise"></i> Revertir decisión</button>
+        <button class="btn btn-revert" onclick="openModal('denegar','${r.id}','${r.nombre||''}')"><i class="ti ti-x"></i> Denegar</button>
+        <button class="btn btn-gold" onclick="openModal('revertir','${r.id}','${r.nombre||''}')"><i class="ti ti-rotate-clockwise"></i> Revertir decisión</button>
       </div>`;
     c.appendChild(div);
   });
 }
-buildReversiones();
+
+// ── TABLE — solicitudes recientes (datos reales, alimentado desde
+//    actualizarKPIsReales vía el mismo listener escucharSolicitudes) ──
+function renderSolicitudesRecientes(solicitudes){
+  const t     = document.getElementById('tbl-sols');
+  const empty = document.getElementById('tbl-sols-empty');
+  if (!t) return;
+
+  if (!solicitudes || solicitudes.length === 0){
+    t.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  t.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  const eClass={pendiente_analista:'b-amber',revision:'b-amber',aprobado:'b-green',firmado:'b-green',rechazado:'b-red'};
+  const eTxt={pendiente_analista:'Pendiente',revision:'En revisión',aprobado:'Aprobado',firmado:'Firmado',rechazado:'Rechazado'};
+  const rClass={APROBAR:'b-green',REVISAR:'b-amber',RECHAZAR:'b-red'};
+
+  t.innerHTML=`<thead><tr><th>Asociado</th><th>Monto</th><th>Tipo</th><th>Estado</th><th>Score</th><th>IA</th><th>Analista</th></tr></thead><tbody></tbody>`;
+  const tbody=t.querySelector('tbody');
+
+  // Las 5 más recientes, por fecha de solicitud descendente
+  const recientes = [...solicitudes]
+    .sort((a,b) => (b.fechaSolicitud||0) - (a.fechaSolicitud||0))
+    .slice(0, 5);
+
+  recientes.forEach(s=>{
+    const nombre = s.nombre || '—';
+    const ini    = nombre.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const score  = Number(s.scoreDataCredito) || null;
+    const sc     = score===null ? 'var(--slate)' : score>=700?'var(--emerald2)':score>=600?'var(--amber2)':'var(--crimson2)';
+    const tipo   = s.lineaCreditoNombre || 'Sin especificar';
+    const rec    = s.recomendacionIA || null;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="av-sm" style="background:#3B82F620;color:#3B82F6">${ini}</span>${nombre}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${s.id}</div></td>
+      <td class="mono">${fmtCOPGer(s.monto)}</td>
+      <td><span class="badge b-slate">${tipo}</span></td>
+      <td><span class="badge ${eClass[s.estado]||'b-slate'}">${eTxt[s.estado]||s.estado}</span></td>
+      <td class="mono" style="color:${sc};font-weight:600">${score===null?'—':score}</td>
+      <td>${rec ? `<span class="badge ${rClass[rec]||'b-slate'}">${rec}</span>` : '—'}</td>
+      <td style="color:var(--slate)">${s.analistaNombre || '—'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
 
 // changePeriod() ahora se define más abajo, junto al resto del
 // motor de KPIs reales (ver "PANEL EJECUTIVO — datos reales").
@@ -1639,6 +1679,8 @@ function filtrarPorPeriodo(solicitudes, periodo) {
 function actualizarKPIsReales(solicitudes) {
   _panelSolicitudes = solicitudes;
   aplicarPeriodoPanel();
+  renderSolicitudesRecientes(solicitudes);
+  renderReversionesReales(solicitudes);
 }
 
 function aplicarPeriodoPanel() {
