@@ -144,6 +144,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 .card-title{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px}
 .card-title i{font-size:16px;color:var(--slate2)}
 .card-body{padding:14px 18px}
+.fu3-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 12px;color:var(--slate)}
+.fu3-empty i{font-size:26px;opacity:.4}
+.fu3-empty div{font-size:12px;line-height:1.6;max-width:280px}
 .card-foot{padding:10px 18px;border-top:1px solid var(--paper2);display:flex;align-items:center;gap:8px}
 
 /* ── CHART: BAR ── */
@@ -297,6 +300,7 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
+  <script src="creditos-config.js"></script>
   <script>FondouneNav.init('gerencia');</script>
 
   <!-- Firebase — verificación real de sesión y rol (custom claims),
@@ -468,8 +472,8 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
     <div class="kpi-grid">
       <div class="kpi" style="--kpi-color:#2563EB">
         <div class="kpi-lbl"><i class="ti ti-file-text"></i> Solicitudes</div>
-        <div class="kpi-val" id="kv-sol">142</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>+23% vs sem. anterior</div>
+        <div class="kpi-val" id="kv-sol">0</div>
+        <div class="kpi-delta" style="color:var(--slate)" id="kv-sol-periodo">Esta semana</div>
         <div class="kpi-spark"><i class="ti ti-file-text"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#0A6B45">
@@ -480,26 +484,26 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       </div>
       <div class="kpi" style="--kpi-color:#B8872A">
         <div class="kpi-lbl"><i class="ti ti-coin"></i> Desembolsado</div>
-        <div class="kpi-val" id="kv-des">$612M</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>COP esta semana</div>
+        <div class="kpi-val" id="kv-des" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-coin"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#D97706">
         <div class="kpi-lbl"><i class="ti ti-clock"></i> Tiempo prom.</div>
-        <div class="kpi-val" id="kv-tiempo">4.2m</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>-96% vs proceso manual</div>
+        <div class="kpi-val" id="kv-tiempo" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-clock"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#8B1A1A">
         <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora activa</div>
-        <div class="kpi-val" id="kv-mora" style="color:var(--crimson2)">2.1%</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-down" style="font-size:11px"></i>vs 3.4% industria</div>
+        <div class="kpi-val" id="kv-mora" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de conectar cartera</div>
         <div class="kpi-spark"><i class="ti ti-alert-circle"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#1A3A8B">
         <div class="kpi-lbl"><i class="ti ti-brain"></i> Automatización</div>
-        <div class="kpi-val" style="color:var(--sapphire2)">78%</div>
-        <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>resolución sin analista</div>
+        <div class="kpi-val" style="font-size:15px;color:var(--slate)">Sin datos</div>
+        <div class="kpi-delta" style="color:var(--slate)"><i class="ti ti-info-circle" style="font-size:11px"></i>Pendiente de definir métrica</div>
         <div class="kpi-spark"><i class="ti ti-brain"></i></div>
       </div>
     </div>
@@ -523,8 +527,8 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
           </div>
         </div>
         <div class="card-foot">
-          <span style="font-size:11px;color:var(--slate)">Total semana: <strong style="color:var(--ink)">142 solicitudes</strong></span>
-          <span style="font-size:11px;color:var(--slate);margin-left:12px">Monto acumulado: <strong style="color:var(--ink)">$612.400.000</strong></span>
+          <span style="font-size:11px;color:var(--slate)">Total: <strong style="color:var(--ink)" id="panel-foot-total">0 solicitudes</strong></span>
+          <span style="font-size:11px;color:var(--slate);margin-left:12px">Monto acumulado: <strong style="color:var(--ink)" id="panel-foot-monto">$0</strong></span>
         </div>
       </div>
 
@@ -532,35 +536,11 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head">
           <div class="card-title"><i class="ti ti-alert-triangle"></i> Alertas activas</div>
-          <span class="badge b-red">3 críticas</span>
         </div>
         <div class="card-body">
-          <div class="alert-list">
-            <div class="alert-item al-red">
-              <div class="alert-ico"><i class="ti ti-alert-octagon"></i></div>
-              <div>
-                <div class="alert-title">Alerta SARLAFT — Sol. SOL-2025-0843</div>
-                <div class="alert-body">Rodrigo A. Ríos · Señal en listas de cumplimiento · Requiere revisión manual urgente por Jefe de Crédito</div>
-                <div class="alert-time">Hoy 06:59 · Sin resolver</div>
-              </div>
-              <button class="btn btn-revert" style="flex-shrink:0;margin-top:2px" onclick="showToast('Revisando alerta SARLAFT…','t-warn','ti-alert-triangle')">Ver</button>
-            </div>
-            <div class="alert-item al-amber">
-              <div class="alert-ico"><i class="ti ti-trending-up"></i></div>
-              <div>
-                <div class="alert-title">Concentración de cartera — Tigo-UNE</div>
-                <div class="alert-body">68% de solicitudes provienen de Tigo-UNE S.A.S. Diversificación recomendada entre empresas.</div>
-                <div class="alert-time">Hoy 08:00 · Informativo</div>
-              </div>
-            </div>
-            <div class="alert-item al-blue">
-              <div class="alert-ico"><i class="ti ti-clock"></i></div>
-              <div>
-                <div class="alert-title">4 solicitudes pendientes +2h sin acción</div>
-                <div class="alert-body">SOL-2025-0842, 0845, 0846, 0847 esperan decisión del analista.</div>
-                <div class="alert-time">Actualizado hace 12 min</div>
-              </div>
-            </div>
+          <div class="fu3-empty">
+            <i class="ti ti-bell-off"></i>
+            <div>Aún no hay un sistema de alertas conectado (SARLAFT, concentración de cartera, solicitudes represadas). Se mostrarán aquí en cuanto esté disponible.</div>
           </div>
         </div>
       </div>
@@ -574,17 +554,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-chart-donut"></i> Distribución por tipo</div></div>
         <div class="card-body">
-          <div class="donut-wrap">
+          <div class="donut-wrap" id="donut-wrap">
             <svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90" id="donut-svg">
               <circle cx="45" cy="45" r="34" fill="none" stroke="#E8EEF7" stroke-width="14"/>
             </svg>
-            <div class="donut-legend">
-              <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div><div class="dl-lbl">Consumo</div><div class="dl-val">58</div><div class="dl-pct">40.8%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#0A6B45"></div><div class="dl-lbl">Educativo</div><div class="dl-val">31</div><div class="dl-pct">21.8%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#B8872A"></div><div class="dl-lbl">Vivienda</div><div class="dl-val">22</div><div class="dl-pct">15.5%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#8B1A1A"></div><div class="dl-lbl">Emergencia</div><div class="dl-val">18</div><div class="dl-pct">12.7%</div></div>
-              <div class="dl-item"><div class="dl-dot" style="background:#5A7099"></div><div class="dl-lbl">Libranza</div><div class="dl-val">13</div><div class="dl-pct">9.2%</div></div>
-            </div>
+            <div class="donut-legend" id="donut-legend"></div>
+          </div>
+          <div class="fu3-empty" id="donut-empty" style="display:none">
+            <i class="ti ti-chart-donut"></i>
+            <div>Aún no hay solicitudes con línea de crédito registrada en este período.</div>
           </div>
         </div>
       </div>
@@ -593,7 +571,10 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-users"></i> Desempeño analistas</div></div>
         <div class="card-body">
-          <div id="analysts-list"></div>
+          <div class="fu3-empty">
+            <i class="ti ti-users"></i>
+            <div>Aún no hay suficientes decisiones registradas por analista para calcular estos indicadores.</div>
+          </div>
         </div>
       </div>
 
@@ -601,16 +582,9 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-shield-half"></i> Matriz de riesgo de cartera</div></div>
         <div class="card-body">
-          <div class="risk-matrix">
-            <div class="rm-cell rm-green"><div class="rml">Riesgo bajo</div><div class="rmv">74</div><div class="rms">52.1%</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Riesgo medio</div><div class="rmv">41</div><div class="rms">28.9%</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Riesgo alto</div><div class="rmv">27</div><div class="rms">19.0%</div></div>
-            <div class="rm-cell rm-green"><div class="rml">Score prom.</div><div class="rmv">742</div><div class="rms">Bajo</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Score prom.</div><div class="rmv">618</div><div class="rms">Medio</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Score prom.</div><div class="rmv">492</div><div class="rms">Alto</div></div>
-          </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--slate);background:var(--paper);border-radius:7px;padding:8px 10px">
-            <i class="ti ti-info-circle" style="font-size:12px"></i> Índice de mora proyectado: <strong style="color:var(--ink)">2.1%</strong> — por debajo del benchmark del sector (3.4%)
+          <div class="fu3-empty">
+            <i class="ti ti-shield-half"></i>
+            <div>El score de riesgo por solicitud aún no se registra en el análisis del analista. Esta matriz se activará en cuanto ese dato exista.</div>
           </div>
         </div>
       </div>
@@ -998,106 +972,16 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 
 <script>
 // ── BAR CHART ──
-const barData = [
-  {d:'Lun',apro:22,rech:6,pend:4},
-  {d:'Mar',apro:18,rech:5,pend:6},
-  {d:'Mié',apro:25,rech:8,pend:3},
-  {d:'Jue',apro:14,rech:4,pend:5},
-  {d:'Vie',apro:10,rech:3,pend:4,today:true},
-  {d:'Sáb',apro:0,rech:0,pend:0},
-  {d:'Dom',apro:0,rech:0,pend:0},
-];
-const maxVal = Math.max(...barData.map(d=>d.apro+d.rech+d.pend),1);
+// buildBarChart() con datos ficticios fue reemplazada por
+// buildBarChartReal(), definida junto al motor de KPIs reales
+// más abajo — se invoca automáticamente al recibir datos de
+// Firestore, no hace falta llamarla aquí.
 
-function buildBarChart(){
-  const c=document.getElementById('bar-chart');
-  c.innerHTML='';
-  barData.forEach(d=>{
-    const total=d.apro+d.rech+d.pend;
-    const col=document.createElement('div');
-    col.className='bar-col';
-    col.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;position:relative;';
-    if(total>0){
-      [
-        {h:(d.apro/maxVal)*95,bg:'#2563EB'},
-        {h:(d.rech/maxVal)*95,bg:'#C0392B'},
-        {h:(d.pend/maxVal)*95,bg:'#D97706'},
-      ].forEach(seg=>{
-        const bar=document.createElement('div');
-        bar.style.cssText=`width:70%;background:${seg.bg};border-radius:3px;height:0;transition:height 1s cubic-bezier(.4,0,.2,1);opacity:${d.today?1:.7}`;
-        col.appendChild(bar);
-        setTimeout(()=>bar.style.height=seg.h+'%',100);
-      });
-    } else {
-      const empty=document.createElement('div');
-      empty.style.cssText='width:70%;height:6px;background:var(--paper2);border-radius:3px;';
-      col.appendChild(empty);
-    }
-    const lbl=document.createElement('div');
-    lbl.style.cssText=`font-size:9px;color:${d.today?'var(--gold)':'var(--slate)'};font-weight:${d.today?700:400};font-family:'JetBrains Mono',monospace;position:absolute;bottom:-16px;`;
-    lbl.textContent=d.d;
-    col.appendChild(lbl);
-    c.appendChild(col);
-  });
-}
-buildBarChart();
-
-// ── DONUT ──
-function buildDonut(){
-  const data=[
-    {pct:.408,color:'#2563EB'},
-    {pct:.218,color:'#0A6B45'},
-    {pct:.155,color:'#B8872A'},
-    {pct:.127,color:'#8B1A1A'},
-    {pct:.092,color:'#5A7099'},
-  ];
-  const svg=document.getElementById('donut-svg');
-  const R=34,CX=45,CY=45,circ=2*Math.PI*R;
-  let offset=0;
-  // clear existing arcs
-  svg.querySelectorAll('.arc').forEach(e=>e.remove());
-  data.forEach(d=>{
-    const dash=d.pct*circ;
-    const gap=circ-dash;
-    const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    arc.className.baseVal='arc';
-    arc.setAttribute('cx',CX);arc.setAttribute('cy',CY);arc.setAttribute('r',R);
-    arc.setAttribute('fill','none');arc.setAttribute('stroke',d.color);arc.setAttribute('stroke-width','14');
-    arc.setAttribute('stroke-dasharray',`0 ${circ}`);
-    arc.setAttribute('stroke-dashoffset',-(offset*circ - circ/4));
-    arc.style.transition='stroke-dasharray 1s ease';
-    svg.appendChild(arc);
-    setTimeout(()=>arc.setAttribute('stroke-dasharray',`${dash} ${gap}`),50);
-    offset+=d.pct;
-  });
-}
-buildDonut();
-
-// ── ANALYSTS ──
-const analysts=[
-  {nm:'María Rodríguez',role:'Analista senior',ini:'MR',col:'#2563EB',pct:94,apro:42,tiempo:'3.8m'},
-  {nm:'Carlos Pérez',role:'Analista junior',ini:'CP',col:'#0A6B45',pct:78,apro:31,tiempo:'5.1m'},
-  {nm:'Laura Gómez',role:'Analista senior',ini:'LG',col:'#B8872A',pct:88,apro:16,tiempo:'4.2m'},
-];
-function buildAnalysts(){
-  const c=document.getElementById('analysts-list');
-  c.innerHTML='';
-  analysts.forEach(a=>{
-    const row=document.createElement('div');
-    row.className='analyst-row';
-    row.innerHTML=`
-      <div class="an-av" style="background:${a.col}20;color:${a.col}">${a.ini}</div>
-      <div style="flex:1"><div class="an-name">${a.nm}</div><div class="an-role">${a.role} · ${a.apro} aprobadas · ${a.tiempo} prom.</div></div>
-      <div class="an-bar-wrap">
-        <div style="font-size:9px;color:var(--slate);margin-bottom:3px;text-align:right">Eficiencia</div>
-        <div class="an-bar-track"><div class="an-bar-fill" id="anb-${a.ini}" style="width:0%;background:${a.col}"></div></div>
-      </div>
-      <div class="an-val" style="color:${a.col}">${a.pct}%</div>`;
-    c.appendChild(row);
-    setTimeout(()=>{const f=document.getElementById('anb-'+a.ini);if(f)f.style.width=a.pct+'%';},200);
-  });
-}
-buildAnalysts();
+// buildDonut() y buildAnalysts() con datos ficticios fueron
+// quitadas — "Desempeño analistas" sigue en estado vacío honesto
+// (no hay analistaId consistente para agregar). "Distribución por
+// tipo" SÍ se conecta a datos reales — ver buildDonutReal() más
+// abajo, junto al motor de KPIs reales del panel.
 
 // ── TABLE ──
 const solsData=[
@@ -1159,21 +1043,8 @@ function buildReversiones(){
 }
 buildReversiones();
 
-// ── PERIOD CHANGE ──
-const periods={
-  dia:{sol:'26',apro:'15',des:'$184M',tiempo:'4.2m',mora:'2.1%'},
-  semana:{sol:'142',apro:'89',des:'$612M',tiempo:'4.2m',mora:'2.1%'},
-  mes:{sol:'581',apro:'364',des:'$2.4B',tiempo:'4.1m',mora:'2.1%'},
-  año:{sol:'6.842',apro:'4.281',des:'$28.7B',tiempo:'4.6m',mora:'2.3%'},
-};
-function changePeriod(p){
-  const d=periods[p];
-  document.getElementById('kv-sol').textContent=d.sol;
-  document.getElementById('kv-apro').textContent=d.apro;
-  document.getElementById('kv-des').textContent=d.des;
-  document.getElementById('kv-tiempo').textContent=d.tiempo;
-  document.getElementById('kv-mora').textContent=d.mora;
-}
+// changePeriod() ahora se define más abajo, junto al resto del
+// motor de KPIs reales (ver "PANEL EJECUTIVO — datos reales").
 
 // ── MODAL ──
 let modalAction=null,modalId=null;
@@ -1723,25 +1594,210 @@ async function confirmarDecisionGerencia(nota) {
   _gerAccion = null; _gerSolId = null;
 }
 
-// ── KPIs reales del Panel Ejecutivo ──────────────────────────────
-// Solo los KPIs que dependen directamente de la colección
-// `solicitudes` se conectan a datos reales. Los que dependen de
-// cartera/pagos (Desembolsado, Tiempo prom., Mora, Automatización)
-// no tienen colección propia todavía y quedan con su valor de
-// ejemplo hasta que se conecten esos módulos.
+// ── PANEL EJECUTIVO — datos reales de Firestore ──────────────────
+// Solo los widgets que dependen directamente de la colección
+// `solicitudes` se conectan a datos reales (Solicitudes, Aprobadas,
+// gráfico diario, selector de período). El resto (Desembolsado,
+// Mora, Automatización, Alertas, Distribución por tipo, Desempeño
+// de analistas, Matriz de riesgo) depende de datos que hoy no
+// existen en Firestore — cartera/pagos posteriores a la firma,
+// score de riesgo asignado por analista, y la línea de crédito
+// elegida (el selector del Paso 2 del Módulo 1 aún no la guarda).
+// Esos widgets muestran un estado vacío honesto en vez de simular.
+let _panelSolicitudes = []; // snapshot completo, se reagrupa al cambiar de período
+let _panelPeriodoActivo = 'semana';
+
+const DIAS_ES_ABR = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function fmtCOPCompacto(n) {
+  if (!n) return '$0';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(1).replace('.0','') + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(0) + 'M';
+  return fmtCOPGer(n);
+}
+
+// Filtra el snapshot completo a la ventana de tiempo del período elegido
+function filtrarPorPeriodo(solicitudes, periodo) {
+  const ahora = new Date();
+  const inicio = new Date(ahora);
+  if (periodo === 'dia') {
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'semana') {
+    const diaSemana = (inicio.getDay() + 6) % 7; // lunes=0
+    inicio.setDate(inicio.getDate() - diaSemana);
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'mes') {
+    inicio.setDate(1);
+    inicio.setHours(0,0,0,0);
+  } else if (periodo === 'año') {
+    inicio.setMonth(0,1);
+    inicio.setHours(0,0,0,0);
+  }
+  return solicitudes.filter(s => s.fechaSolicitud && s.fechaSolicitud >= inicio);
+}
+
 function actualizarKPIsReales(solicitudes) {
-  const total    = solicitudes.length;
-  const aprobadas = solicitudes.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
+  _panelSolicitudes = solicitudes;
+  aplicarPeriodoPanel();
+}
+
+function aplicarPeriodoPanel() {
+  const enPeriodo = filtrarPorPeriodo(_panelSolicitudes, _panelPeriodoActivo);
+
+  const total     = enPeriodo.length;
+  const aprobadas = enPeriodo.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
+  const montoTotal = enPeriodo.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
   const tasa = total > 0 ? Math.round((aprobadas/total) * 1000) / 10 : 0;
 
-  const kvSol  = document.getElementById('kv-sol');
-  const kvApro = document.getElementById('kv-apro');
-  if (kvSol)  kvSol.textContent  = total;
-  if (kvApro) kvApro.textContent = aprobadas;
+  const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+  set('kv-sol',  total);
+  set('kv-apro', aprobadas);
 
-  const deltaApro = document.querySelector('#kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
+  const PERIODO_LBL = { dia:'Hoy', semana:'Esta semana', mes:'Este mes', año:'Este año' };
+  set('kv-sol-periodo', PERIODO_LBL[_panelPeriodoActivo] || '');
+
+  const deltaApro = document.getElementById('kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
   if (deltaApro) deltaApro.innerHTML = '<i class="ti ti-trending-up" style="font-size:11px"></i>' + tasa + '% tasa';
+
+  buildBarChartReal(enPeriodo);
+  buildDonutReal(enPeriodo);
+
+  const footTotal = document.getElementById('panel-foot-total');
+  const footMonto = document.getElementById('panel-foot-monto');
+  if (footTotal) footTotal.textContent = total + ' solicitudes';
+  if (footMonto) footMonto.textContent = fmtCOPCompacto(montoTotal) + ' COP';
 }
+
+function changePeriod(p) {
+  _panelPeriodoActivo = p;
+  aplicarPeriodoPanel();
+}
+
+// Gráfico de barras real — agrupa por día de la semana actual
+// usando fechaSolicitud, dentro de la ventana del período activo.
+function buildBarChartReal(solicitudesEnPeriodo) {
+  const c = document.getElementById('bar-chart');
+  if (!c) return;
+
+  const hoy = new Date();
+  const diaSemanaHoy = (hoy.getDay() + 6) % 7; // lunes=0
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - diaSemanaHoy);
+  lunes.setHours(0,0,0,0);
+
+  const dias = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    dias.push({ fecha: d, apro: 0, rech: 0, pend: 0, today: i === diaSemanaHoy });
+  }
+
+  solicitudesEnPeriodo.forEach(s => {
+    if (!s.fechaSolicitud) return;
+    const idx = Math.round((s.fechaSolicitud - lunes) / 86400000);
+    if (idx < 0 || idx > 6) return;
+    if (s.estado === 'aprobado' || s.estado === 'firmado') dias[idx].apro++;
+    else if (s.estado === 'rechazado') dias[idx].rech++;
+    else dias[idx].pend++;
+  });
+
+  const maxVal = Math.max(...dias.map(d => d.apro + d.rech + d.pend), 1);
+
+  c.innerHTML = '';
+  dias.forEach(d => {
+    const total = d.apro + d.rech + d.pend;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;position:relative;';
+    if (total > 0) {
+      [
+        { h: (d.apro/maxVal)*95, bg: '#2563EB' },
+        { h: (d.rech/maxVal)*95, bg: '#C0392B' },
+        { h: (d.pend/maxVal)*95, bg: '#D97706' },
+      ].forEach(seg => {
+        const bar = document.createElement('div');
+        bar.style.cssText = `width:70%;background:${seg.bg};border-radius:3px;height:0;transition:height .6s cubic-bezier(.4,0,.2,1);opacity:${d.today ? 1 : .7}`;
+        col.appendChild(bar);
+        setTimeout(() => bar.style.height = seg.h + '%', 50);
+      });
+    } else {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'width:70%;height:6px;background:var(--paper2);border-radius:3px;';
+      col.appendChild(empty);
+    }
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `font-size:9px;color:${d.today ? 'var(--gold)' : 'var(--slate)'};font-weight:${d.today ? 700 : 400};font-family:'JetBrains Mono',monospace;position:absolute;bottom:-16px;`;
+    lbl.textContent = DIAS_ES_ABR[d.fecha.getDay()];
+    col.appendChild(lbl);
+    c.appendChild(col);
+  });
+}
+
+// Distribución por tipo — agrupa por línea de crédito real
+// (lineaCreditoId, guardado por Módulo 1 desde el grid de líneas).
+// Solicitudes viejas sin ese campo caen en "Sin especificar" en vez
+// de perderse silenciosamente.
+const DONUT_COLORES = ['#2563EB','#0A6B45','#B8872A','#8B1A1A','#5A7099','#7C3AED','#D97706','#0891B2','#BE185D','#4D7C0F','#9333EA'];
+
+function buildDonutReal(solicitudesEnPeriodo) {
+  const wrap  = document.getElementById('donut-wrap');
+  const empty = document.getElementById('donut-empty');
+  const svg   = document.getElementById('donut-svg');
+  const legend= document.getElementById('donut-legend');
+  if (!svg || !legend) return;
+
+  if (solicitudesEnPeriodo.length === 0) {
+    if (wrap) wrap.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  if (wrap) wrap.style.display = '';
+  if (empty) empty.style.display = 'none';
+
+  // Agrupar por línea real; nombre para mostrar viene del propio
+  // documento (lineaCreditoNombre) para no depender de que
+  // creditos-config.js esté cargado, aunque si lo está lo preferimos
+  // por tener un orden y etiqueta más estables.
+  const conteo = {};
+  solicitudesEnPeriodo.forEach(s => {
+    const id     = s.lineaCreditoId || '_sin_especificar';
+    const nombre = s.lineaCreditoNombre || (typeof fuBuscarLineaCredito === 'function' && fuBuscarLineaCredito(id)?.nombre) || 'Sin especificar';
+    if (!conteo[id]) conteo[id] = { nombre, count: 0 };
+    conteo[id].count++;
+  });
+
+  const total = solicitudesEnPeriodo.length;
+  const grupos = Object.values(conteo).sort((a,b) => b.count - a.count);
+
+  svg.querySelectorAll('.arc').forEach(e => e.remove());
+  const R = 34, CX = 45, CY = 45, circ = 2 * Math.PI * R;
+  let offset = 0;
+
+  legend.innerHTML = '';
+  grupos.forEach((g, i) => {
+    const pct = g.count / total;
+    const color = DONUT_COLORES[i % DONUT_COLORES.length];
+
+    const dash = pct * circ;
+    const gap  = circ - dash;
+    const arc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    arc.setAttribute('class', 'arc');
+    arc.setAttribute('cx', CX); arc.setAttribute('cy', CY); arc.setAttribute('r', R);
+    arc.setAttribute('fill', 'none'); arc.setAttribute('stroke', color); arc.setAttribute('stroke-width', '14');
+    arc.setAttribute('stroke-dasharray', `0 ${circ}`);
+    arc.setAttribute('stroke-dashoffset', -(offset*circ - circ/4));
+    arc.style.transition = 'stroke-dasharray .6s ease';
+    svg.appendChild(arc);
+    setTimeout(() => arc.setAttribute('stroke-dasharray', `${dash} ${gap}`), 50);
+    offset += pct;
+
+    const item = document.createElement('div');
+    item.className = 'dl-item';
+    item.innerHTML = `<div class="dl-dot" style="background:${color}"></div><div class="dl-lbl">${g.nombre}</div><div class="dl-val">${g.count}</div><div class="dl-pct">${(pct*100).toFixed(1)}%</div>`;
+    legend.appendChild(item);
+  });
+}
+
 
 async function iniciarKPIsReales() {
   if (typeof FondoUneFirebase === 'undefined') return;
