@@ -406,6 +406,11 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+    
+  <!-- Librería para exportar a PDF en el navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <div id="fu-auth-gate" class="fu-gate">
@@ -1536,7 +1541,31 @@ async function confirmDecision() {
 
 // ── EXPORTAR PDF ──────────────────────────────────────────────
 function exportarPDF(id) {
-  showToast('Función de exportación disponible próximamente', 'toast-warn', 'ti-clock');
+  const el = document.getElementById('export-solicitud');
+  if (!el) {
+    showToast('No encontré el contenido para exportar. Abre primero una solicitud.', 'toast-err', 'ti-alert-circle');
+    return;
+  }
+
+  const s = DATA.find(x => x.id === id);
+  let filename = 'Solicitud-FondoUne.pdf';
+  if (s) {
+    const nombreLimpio = (s.nombre || 'Asociado')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-zA-Z0-9\- ]/g,'')
+      .replace(/\s+/g,'-');
+    filename = `Solicitud-${nombreLimpio}-${s.id.slice(0,8)}.pdf`;
+  }
+
+  const opt = {
+    margin:      10,
+    filename:    filename,
+    image:       { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(el).save();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
