@@ -1256,8 +1256,8 @@ function buildDetail(s) {
     ? `<span class="badge b-blue" style="margin-left:4px">CIFIN consultado</span>`
     : `<span class="badge b-muted" style="margin-left:4px">CIFIN pendiente</span>`;
 
-  return `
-<div class="detail-body">
+    return `
+<div class="detail-body" id="export-solicitud">
   <div class="dhead">
     <div class="d-av" style="background:${s.col}20;color:${s.col}">${s.ini}</div>
     <div style="flex:1;min-width:0">
