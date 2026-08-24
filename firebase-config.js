@@ -156,6 +156,7 @@
         periodicidad:         String(datosSolicitud.periodicidad || 'mensuales'),
         destinoCredito:       String(datosSolicitud.destino     || ''),
         lineaCreditoId:       String(datosSolicitud.lineaCreditoId || ''),
+        recaptchaToken:       String(datosSolicitud.recaptchaToken || ''),
 
         // ── Resultado del motor de análisis (Paso 3 del Módulo 1)
         scorePropio:          Number(datosSolicitud.scorePropio          || 0),
