@@ -465,15 +465,16 @@
     const nominaSchema = Schema.object({
       properties: {
         empleador:        Schema.string(),
-        cargo:            Schema.string({ optional: true }),
+        cargo:            Schema.string(),
         salarioBasico:    Schema.number(),
         totalDevengado:   Schema.number(),
         totalDeducciones: Schema.number(),
         netoAPagar:       Schema.number(),
         periodoPago:      Schema.string(),
-        libranzas:        Schema.number({ optional: true }),
-        aportesFondo:     Schema.number({ optional: true }),
-      }
+        libranzas:        Schema.number(),
+        aportesFondo:     Schema.number(),
+      },
+      optionalProperties: ['cargo', 'libranzas', 'aportesFondo'],
     });
 
     let modelPromise = null;
