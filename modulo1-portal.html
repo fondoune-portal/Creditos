@@ -126,32 +126,6 @@
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
-  /* ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ── */
-  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  .linea-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px 12px;cursor:pointer;transition:all .15s;position:relative}
-  .linea-card:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 6px 16px rgba(11,37,69,.07)}
-  .linea-card.active{border-color:var(--gold);background:rgba(240,192,96,.06);box-shadow:0 0 0 1px var(--gold)}
-  .linea-check{display:none;position:absolute;top:8px;right:8px;font-size:15px;color:var(--gold2)}
-  .linea-card.active .linea-check{display:block}
-  .linea-card i{font-size:19px;color:var(--gold2);margin-bottom:6px;display:block}
-  .linea-nombre{font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:3px;line-height:1.3}
-  .linea-desc{font-size:10.5px;color:var(--muted);line-height:1.4;margin-bottom:8px;min-height:28px}
-  .linea-tasa{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--blue)}
-  .linea-tasa span{font-size:9px;color:var(--muted);font-weight:400}
-  .linea-plazo{font-size:9.5px;color:var(--muted);margin-top:2px}
-  @media(max-width:600px){.linea-grid{grid-template-columns:repeat(2,1fr)}}
-
-  /* ── TABLA DE TASAS (vista Tasas FondoUne) ── */
-  .fu-tasas-table-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-  .fu-tasas-table{width:100%;border-collapse:collapse;font-size:12.5px}
-  .fu-tasas-table th{text-align:left;background:var(--cream);color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:11px 16px;border-bottom:1px solid var(--border)}
-  .fu-tasas-table td{padding:11px 16px;border-bottom:1px solid var(--border)}
-  .fu-tasas-table tr:last-child td{border-bottom:none}
-  .fu-tasas-table tr:hover td{background:rgba(240,192,96,.05)}
-  .fu-tasas-nombre{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--navy)}
-  .fu-tasas-nombre i{color:var(--gold2);font-size:15px}
-  .fu-tasas-tasa{font-family:'DM Mono',monospace;font-weight:600;color:var(--blue)}
   .card-eyebrow {
     font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--muted);
@@ -444,7 +418,6 @@
   <!-- FondoUne: navegacion y sesion compartida -->
   <script src="navigation.js"></script>
   <script src="session.js"></script>
-  <script src="creditos-config.js"></script>
   <script src="fondoune-ui.js"></script>
   <script src="sheets-connector.js"></script>
   <script>FondouneNav.init('solicitud');</script>
@@ -455,8 +428,93 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
-  <!-- reCAPTCHA Enterprise — protege el envío de solicitudes de crédito -->
-  <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfU0ZYtAAAAADYx792zo8jnKCdFU-Yoscfml7IL"></script>
+
+  <!-- ── Lectura de nómina con IA (Gemini vía Firebase AI Logic) ──
+       Bloque aparte, en SDK modular (type="module"), independiente del
+       Firebase "compat" de arriba — no lo toca ni depende de él, así que
+       si esto falla el resto del módulo (login, Firestore) sigue
+       funcionando igual. Usa el MISMO proyecto/config de firebase-config.js.
+
+       ANTES DE QUE ESTO FUNCIONE, hacen falta 2 pasos manuales en la
+       consola de Firebase (proyecto fondoune-credito) que no se pueden
+       hacer por código:
+         1. Build → AI Logic → Comenzar → elegir proveedor "Vertex AI
+            Gemini API" (ya están en plan Blaze, que es lo que pide).
+         2. Build → App Check → registrar la app web con reCAPTCHA v3 (o
+            el proveedor que ofrezca por defecto) y pegar aquí abajo el
+            "site key" que te den, en APP_CHECK_SITE_KEY. Sin App Check,
+            Firebase bloqueará las llamadas desde este dominio.
+  -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app-check.js';
+    import { getAI, getGenerativeModel, AgentPlatformBackend, Schema } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-ai.js';
+
+    const APP_CHECK_SITE_KEY = '6LfU0ZYtAAAAADYx792zo8jnKCdFU-Yoscfml7lL'; // reCAPTCHA Enterprise — proyecto fondoune-credito
+
+    // Mismo firebaseConfig que ya usa firebase-config.js (proyecto fondoune-credito).
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBdOboHrnM1O0rI7kbPK6NH2UnUy9Pk2is",
+      authDomain:        "fondoune-credito.firebaseapp.com",
+      projectId:         "fondoune-credito",
+      storageBucket:     "fondoune-credito.appspot.com",
+    };
+
+    const nominaSchema = Schema.object({
+      properties: {
+        empleador:        Schema.string(),
+        cargo:            Schema.string({ optional: true }),
+        salarioBasico:    Schema.number(),
+        totalDevengado:   Schema.number(),
+        totalDeducciones: Schema.number(),
+        netoAPagar:       Schema.number(),
+        periodoPago:      Schema.string(),
+        libranzas:        Schema.number({ optional: true }),
+        aportesFondo:     Schema.number({ optional: true }),
+      }
+    });
+
+    let modelPromise = null;
+    function getModel() {
+      if (!modelPromise) {
+        modelPromise = (async () => {
+          const app = initializeApp(firebaseConfig, 'ai-nomina');
+          if (APP_CHECK_SITE_KEY && !APP_CHECK_SITE_KEY.startsWith('PEGAR_')) {
+            initializeAppCheck(app, {
+              provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+              isTokenAutoRefreshEnabled: true,
+            });
+          }
+          const ai = getAI(app, { backend: new AgentPlatformBackend() });
+          return getGenerativeModel(ai, {
+            model: 'gemini-flash-latest',
+            generationConfig: { responseMimeType: 'application/json', responseSchema: nominaSchema },
+          });
+        })();
+      }
+      return modelPromise;
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Expuesta en window porque el resto del portal es JS clásico (no módulos).
+    window.extraerNominaConGemini = async function (file) {
+      const model = await getModel();
+      const base64 = await fileToBase64(file);
+      const result = await model.generateContent([
+        { inlineData: { data: base64, mimeType: file.type || 'application/pdf' } },
+        { text: 'Extrae los datos de esta certificación laboral / desprendible de nómina colombiano según el esquema dado. Si un campo no aparece en el documento, usa 0 (numéricos) o cadena vacía (texto).' },
+      ]);
+      return JSON.parse(result.response.text());
+    };
+  </script>
   <script>
   (function () {
     const PORTAL_KEY = 'solicitud';
@@ -663,26 +721,30 @@
 
       <div class="form-grid">
         <div class="field">
+          <label>Línea de crédito <span style="color:var(--danger)">*</span></label>
+          <select id="f-linea" onchange="poblarPlazos()"></select>
+        </div>
+        <div class="field">
+          <label>Destino</label>
+          <select>
+            <option>Gastos personales</option>
+            <option>Educación</option>
+            <option>Salud</option>
+            <option>Remodelación hogar</option>
+            <option>Consolidación deudas</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
           <label>Monto solicitado (COP) <span style="color:var(--danger)">*</span></label>
           <input type="number" id="f-monto" value="8000000" oninput="updateSummary()">
           <span class="hint">Máximo aprobable según perfil: $12.000.000</span>
         </div>
         <div class="field">
           <label>Plazo <span style="color:var(--danger)">*</span></label>
-          <select id="f-plazo" onchange="updateSummary()">
-            <option>12 meses</option>
-            <option>18 meses</option>
-            <option selected>24 meses</option>
-            <option>36 meses</option>
-            <option>48 meses</option>
-          </select>
+          <select id="f-plazo" onchange="updateSummary()"></select>
         </div>
-      </div>
-      <div class="field" style="margin-top:4px">
-        <label>Línea de crédito <span style="color:var(--danger)">*</span></label>
-        <div class="hint" style="margin-bottom:10px">Elige la línea que mejor se ajuste a lo que necesitas — cada una tiene su propia tasa y plazo máximo.</div>
-        <div id="linea-grid" class="linea-grid"></div>
-        <input type="hidden" id="f-linea-id" value="">
       </div>
 
       <!-- Validación capacidad de pago -->
@@ -691,7 +753,8 @@
 
       <div class="note info"><i class="ti ti-info-circle"></i> Dado que no tenemos acceso directo a la nómina, puedes adjuntar tu desprendible de pago. La IA lo leerá automáticamente — no necesitas llenar ningún formulario adicional.</div>
 
-      <div class="upload-zone" id="uz-nomina" onclick="simulateNomina()" style="margin:10px 0;">
+      <input type="file" id="input-nomina-pdf" accept="application/pdf,image/*" style="display:none" onchange="procesarNominaConIA(this.files[0])">
+      <div class="upload-zone" id="uz-nomina" onclick="document.getElementById('input-nomina-pdf').click()" style="margin:10px 0;">
         <i class="ti ti-file-invoice" id="uz-nomina-icon"></i>
         <strong id="uz-nomina-status">Adjuntar desprendible de nómina (PDF)</strong>
         <p>Opcional pero acelera el proceso · La IA extrae los datos automáticamente</p>
@@ -724,7 +787,7 @@
         <div class="summary-row"><span class="lbl">Monto</span><span class="val" id="sum-monto">$8.000.000</span></div>
         <div class="summary-row"><span class="lbl">Plazo</span><span class="val" id="sum-plazo">24 meses</span></div>
         <div class="summary-row"><span class="lbl">Tasa</span><span class="val" id="sum-tasa">1,1% E.M.</span></div>
-        <div class="summary-row"><span class="lbl">Línea de crédito</span><span class="val" id="sum-linea">—</span></div>
+        <div class="summary-row"><span class="lbl">Línea</span><span class="val" id="sum-tipo">—</span></div>
       </div>
 
       <div class="btn-row">
@@ -820,7 +883,7 @@
         <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;">Fuentes consultadas automáticamente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Registraduría RNEC — Cédula vigente</div>
         <div class="src-row src-ok"><i class="ti ti-check"></i> Base interna FondoUne — Datos del asociado</div>
-        <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Claude API)</div>
+        <div class="src-row src-ok"><i class="ti ti-check"></i> Nómina PDF — Leída por IA (Gemini)</div>
         <div class="src-row src-pending"><i class="ti ti-clock"></i> Score DataCrédito y decisión — Revisión analista humano, ≤ 24 h</div>
       </div>
 
@@ -840,6 +903,8 @@
       </div>
     </div>
   </div>
+
+</div>
 
 </div>
 
@@ -864,7 +929,7 @@ function goTo(n) {
   if (el) { el.classList.remove('hidden'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   currentStep = n;
   poblarDatosAsociado(n);
-  if (n === 2) buildLineaGrid();
+  if (n === 2) poblarLineas();
   if (n === 3) startValidation();
   if (n === 4) buildResult();
 }
@@ -934,9 +999,8 @@ function poblarDatosAsociado(paso) {
     const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
     const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
     const plazo  = parseInt(plazoS.replace(' meses',''));
-    const tasa   = _lineaSeleccionada ? _lineaSeleccionada.tasaMensual / 100 : 0.011;
+    const tasa   = tasaSeleccionada();
     const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
-    const neto   = nomina.neto || 0;
     const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
     const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
     const dentro = pct <= 35;
@@ -994,23 +1058,45 @@ function cedulaFotoSeleccionada(lado, input) {
   }
 }
 
-function simulateNomina() {
-  const zone = document.getElementById('uz-nomina');
+async function procesarNominaConIA(file) {
+  const zone   = document.getElementById('uz-nomina');
   const status = document.getElementById('uz-nomina-status');
-  const icon = document.getElementById('uz-nomina-icon');
-  if (!zone || zone.classList.contains('done')) return;
-  status.textContent = 'Leyendo nómina...';
+  const icon   = document.getElementById('uz-nomina-icon');
+  if (!file || (zone && zone.classList.contains('done'))) return;
+
+  status.textContent = 'Leyendo nómina con IA...';
   icon.className = 'ti ti-loader spin';
-  setTimeout(() => {
+
+  try {
+    if (typeof window.extraerNominaConGemini !== 'function') {
+      throw new Error('El módulo de IA (Gemini) no cargó — revisa la consola.');
+    }
+    const datos = await window.extraerNominaConGemini(file);
+
+    if (typeof FondouneSession !== 'undefined') {
+      FondouneSession.saveNomina({
+        basico:      datos.salarioBasico    || 0,
+        devengado:   datos.totalDevengado   || datos.salarioBasico || 0,
+        deducciones: datos.totalDeducciones || 0,
+        neto:        datos.netoAPagar       || 0,
+        libranzas:   datos.libranzas        || 0,
+        aportes:     datos.aportesFondo     || 0,
+        empresa:     datos.empleador        || '',
+        periodo:     datos.periodoPago      || '',
+        fuente:      'IA (Gemini) — desprendible adjunto',
+      });
+    }
+
     zone.classList.add('done');
     icon.className = 'ti ti-circle-check';
-    const nomina = (typeof FondouneSession !== 'undefined') ? FondouneSession.getNomina() : null;
-    const emp    = nomina?.empresa || 'empresa registrada';
-    const per    = nomina?.periodo || 'periodo actual';
-    status.textContent = '✓ Nómina procesada — ' + emp + ' · ' + per;
+    status.textContent = '✓ Nómina procesada — ' + (datos.empleador || 'empresa detectada') + ' · ' + (datos.periodoPago || 'periodo detectado');
     document.getElementById('nomina-result').classList.remove('hidden');
     poblarDatosAsociado(3);
-  }, 1400);
+  } catch (err) {
+    console.error('[Módulo1] Error leyendo nómina con IA:', err);
+    icon.className = 'ti ti-alert-circle';
+    status.textContent = 'No pudimos leer el archivo automáticamente — inténtalo de nuevo o continúa, un analista lo revisará.';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1366,83 +1452,79 @@ function runValidation(v, idx) {
   }, v.time);
 }
 
-// ── UPDATE SUMMARY ──
-// ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ──────────────────────────
-let _lineaSeleccionada = null;
+// ── LÍNEAS DE CRÉDITO FONDOUNE ──
+// Mismo catálogo que Módulo 3 → Parámetros de Crédito (fondoune.com/nuestros-servicios/servicio-de-credito).
+// Cada tramo es un {minM,maxM,tasa} en meses / tasa mensual decimal; para tramos con rango
+// (ej. Vivienda 1 a 10 años) se generan opciones de plazo cada 12 meses dentro del rango.
+// Nota: "Vivienda (solo casa)" 11-15 años trae en la fuente una tasa efectiva menor que la
+// nominal (dato inconsistente del documento original) — se usó la tasa mensual tal cual venía.
+const LINEAS_CREDITO = {
+  'Solidaridad':                                    [{minM:12, maxM:12,  tasa:0.0078}],
+  'Educativo':                                      [{minM:12, maxM:12,  tasa:0.0105},{minM:24, maxM:24, tasa:0.0122},{minM:36, maxM:36, tasa:0.0131}],
+  'Salud':                                          [{minM:12, maxM:24,  tasa:0.0078},{minM:36, maxM:36, tasa:0.0113}],
+  'Vivienda (solo casa)':                           [{minM:12, maxM:120, tasa:0.0113},{minM:132,maxM:180,tasa:0.0131}],
+  'Vivienda inversión tasa fija':                   [{minM:12, maxM:120, tasa:0.0099},{minM:132,maxM:180,tasa:0.0118}],
+  'Vivienda tasa fija VIS':                         [{minM:12, maxM:120, tasa:0.0102},{minM:132,maxM:180,tasa:0.0113}],
+  'Vivienda construcción sobre lote':                [{minM:12, maxM:48,  tasa:0.0113},{minM:60, maxM:120,tasa:0.0132}],
+  'Vacacional – Turismo':                           [{minM:12, maxM:24,  tasa:0.0132}],
+  'Campaña compra cartera':                         [{minM:12, maxM:36,  tasa:0.0102},{minM:48, maxM:60, tasa:0.0118},{minM:72,maxM:72,tasa:0.0128}],
+  'Especial convenios (campañas)':                  [{minM:12, maxM:36,  tasa:0.0175}],
+  'Crediprima':                                     [{minM:12, maxM:36,  tasa:0.0157}],
+  'Vehículo':                                       [{minM:12, maxM:36,  tasa:0.0131},{minM:48, maxM:60, tasa:0.0148}],
+  'Libre inversión – cruce de cuentas':             [{minM:12, maxM:36,  tasa:0.0157},{minM:48, maxM:60, tasa:0.0175}],
+  'Creditributo':                                   [{minM:12, maxM:24,  tasa:0.0122}],
+  'Crediexpress':                                   [{minM:12, maxM:24,  tasa:0.0171}],
+  'Libre inversión (reporte negativo) / Crediya':   [{minM:12, maxM:36,  tasa:0.0184}],
+  'Campaña vehículo (moto/bici/patineta)':          [{minM:12, maxM:36,  tasa:0.0109},{minM:48, maxM:60, tasa:0.0131}],
+  'Movilidad (vehículos eléctricos)':               [{minM:12, maxM:36,  tasa:0.0087},{minM:48, maxM:60, tasa:0.0096}],
+  'Crediavance':                                    [{minM:2,  maxM:2,   tasa:0.0166}],
+};
 
-function buildLineaGrid() {
-  const cont = document.getElementById('linea-grid');
-  if (!cont) return;
-  if (typeof FONDOUNE_LINEAS_CREDITO === 'undefined') {
-    console.error('[Módulo1] creditos-config.js no cargó — no se puede mostrar el grid de líneas.');
-    cont.innerHTML = '<div class="note error"><i class="ti ti-alert-circle"></i> No fue posible cargar las líneas de crédito. Recarga la página.</div>';
-    return;
-  }
-
-  cont.innerHTML = '';
-  FONDOUNE_LINEAS_CREDITO.forEach(linea => {
-    const card = document.createElement('div');
-    card.className = 'linea-card';
-    card.dataset.lineaId = linea.id;
-    card.innerHTML = `
-      <i class="ti ti-circle-check linea-check"></i>
-      <i class="ti ${linea.icono}"></i>
-      <div class="linea-nombre">${linea.nombre}</div>
-      <div class="linea-desc">${linea.descripcion}</div>
-      <div class="linea-tasa">${linea.tasaMensual.toFixed(2).replace('.', ',')}% <span>E.M.</span></div>
-      <div class="linea-plazo">Hasta ${linea.plazoMaxAnios * 12} meses</div>
-    `;
-    card.onclick = () => seleccionarLinea(linea.id);
-    cont.appendChild(card);
-  });
-
-  // Selecciona la primera línea por defecto para que el resumen
-  // preliminar nunca quede sin tasa mientras el usuario decide.
-  if (!_lineaSeleccionada && FONDOUNE_LINEAS_CREDITO.length) {
-    seleccionarLinea(FONDOUNE_LINEAS_CREDITO[0].id);
-  }
+function poblarLineas() {
+  const sel = document.getElementById('f-linea');
+  if (!sel || sel.options.length) return; // ya poblado, no repetir en cada visita al paso 2
+  const DEFAULT_LINEA = 'Libre inversión – cruce de cuentas';
+  sel.innerHTML = Object.keys(LINEAS_CREDITO).map(l =>
+    `<option value="${l}" ${l===DEFAULT_LINEA?'selected':''}>${l}</option>`).join('');
+  poblarPlazos();
 }
 
-function seleccionarLinea(id) {
-  const linea = fuBuscarLineaCredito(id);
-  if (!linea) return;
-  _lineaSeleccionada = linea;
-
-  document.getElementById('f-linea-id').value = id;
-  document.querySelectorAll('.linea-card').forEach(c => c.classList.toggle('active', c.dataset.lineaId === id));
-
-  // Ajustar el select de plazo al máximo permitido por esta línea
-  const plazoSelect = document.getElementById('f-plazo');
-  if (plazoSelect) {
-    const maxMeses = linea.plazoMaxAnios * 12;
-    Array.from(plazoSelect.options).forEach(opt => {
-      const meses = parseInt(opt.value || opt.textContent);
-      opt.disabled = meses > maxMeses;
-    });
-    const actual = parseInt((plazoSelect.value || '24').replace(' meses',''));
-    if (actual > maxMeses) {
-      const opciones = Array.from(plazoSelect.options).filter(o => !o.disabled);
-      if (opciones.length) plazoSelect.value = opciones[opciones.length - 1].value;
-    }
-  }
-
+function poblarPlazos() {
+  const linea  = document.getElementById('f-linea')?.value;
+  const tramos = LINEAS_CREDITO[linea] || [];
+  const opciones = [];
+  tramos.forEach(tr => {
+    const paso = tr.maxM > tr.minM ? 12 : 1;
+    for (let m = tr.minM; m <= tr.maxM; m += paso) opciones.push({ meses: m, tasa: tr.tasa });
+  });
+  const selP = document.getElementById('f-plazo');
+  if (!selP) return;
+  selP.innerHTML = opciones.map(o =>
+    `<option value="${o.meses}" data-tasa="${o.tasa}">${o.meses} meses</option>`).join('');
+  // Preferir 24 meses si esa línea lo ofrece; si no, el tramo más cercano
+  const pref = opciones.find(o => o.meses === 24) || opciones[Math.floor(opciones.length/2)];
+  if (pref) selP.value = String(pref.meses);
   updateSummary();
 }
 
+function tasaSeleccionada() {
+  const opt = document.getElementById('f-plazo')?.selectedOptions?.[0];
+  const t = parseFloat(opt?.dataset.tasa);
+  return isNaN(t) ? 0.011 : t;
+}
+
+// ── UPDATE SUMMARY ──
 function updateSummary() {
   const monto = parseInt(document.getElementById('f-monto').value) || 0;
-  const plazo = parseInt((document.getElementById('f-plazo').value||'24').replace(' meses',''));
-  const tasa  = _lineaSeleccionada ? _lineaSeleccionada.tasaMensual / 100 : 0.011;
+  const plazo = parseInt(document.getElementById('f-plazo').value) || 24;
+  const tasa  = tasaSeleccionada();
   const cuota = monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1);
   document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
+  document.getElementById('sum-plazo').textContent = plazo + ' meses';
+  document.getElementById('sum-tasa').textContent  = (tasa*100).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}) + '% E.M.';
+  const lineaEl = document.getElementById('f-linea');
+  if (lineaEl) document.getElementById('sum-tipo').textContent = lineaEl.value;
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
-
-  const sumPlazo = document.getElementById('sum-plazo');
-  const sumTasa  = document.getElementById('sum-tasa');
-  const sumLinea = document.getElementById('sum-linea');
-  if (sumPlazo) sumPlazo.textContent = plazo + ' meses';
-  if (sumTasa)  sumTasa.textContent  = (tasa*100).toFixed(2).replace('.',',') + '% E.M.';
-  if (sumLinea) sumLinea.textContent = _lineaSeleccionada ? _lineaSeleccionada.nombre : '—';
 }
 
 // ── BUILD RESULT (Paso 4) — crea la solicitud REAL en Firestore ──
@@ -1455,7 +1537,7 @@ async function buildResult() {
   const monto  = parseInt(document.getElementById('f-monto')?.value) || 8000000;
   const plazoS = document.getElementById('f-plazo')?.value || '24 meses';
   const plazo  = parseInt(plazoS.replace(' meses','')) || 24;
-  const tasa   = _lineaSeleccionada ? _lineaSeleccionada.tasaMensual / 100 : 0.011;
+  const tasa   = tasaSeleccionada();
   const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
 
   const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
@@ -1492,28 +1574,6 @@ async function buildResult() {
   const capacidadPago = nomina?.neto ? Math.round(nomina.neto * 0.35) : 0;
   const porcentajeCompromiso = (nomina?.neto && cuota) ? Math.round((cuota / nomina.neto) * 100) : 0;
 
-  // ── reCAPTCHA Enterprise — protege el envío contra bots ─────────
-  // El token se genera aquí y viaja con la solicitud para que un
-  // backend (Cloud Function, por ejemplo) pueda validarlo más
-  // adelante contra la Secret Key. Hoy no hay backend que lo
-  // verifique todavía, así que si grecaptcha falla por cualquier
-  // razón (bloqueador de anuncios, red lenta, etc.) NO bloqueamos
-  // el envío — solo lo dejamos registrado como token vacío.
-  let recaptchaToken = '';
-  try {
-    if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-      await new Promise(resolve => grecaptcha.enterprise.ready(resolve));
-      recaptchaToken = await grecaptcha.enterprise.execute(
-        '6LfU0ZYtAAAAADYx792zo8jnKCdFU-Yoscfml7IL',
-        { action: 'SUBMIT_SOLICITUD' }
-      );
-    } else {
-      console.warn('[Módulo1] reCAPTCHA no cargó — se envía la solicitud sin token.');
-    }
-  } catch (err) {
-    console.warn('[Módulo1] No fue posible obtener el token de reCAPTCHA:', err);
-  }
-
   const resultado = await FondoUneFirebase.crearSolicitud({
     cedula:   user.id     || '',
     nombre:   user.name   || '',
@@ -1522,11 +1582,9 @@ async function buildResult() {
     empresa:  user.empresa|| '',
     ciudad:   user.ciudad || 'Medellín',
     monto, plazo, cuota,
+    linea: document.getElementById('f-linea')?.value || '',
+    tasaMensual: tasa,
     periodicidad: 'mensuales',
-    lineaCreditoId:     _lineaSeleccionada?.id     || '',
-    lineaCreditoNombre: _lineaSeleccionada?.nombre || '',
-    destino: _lineaSeleccionada?.nombre || '',
-    recaptchaToken,
     scorePropio: 0,          // el score real de DataCrédito lo asigna el analista en Módulo 2
     riesgo: 'sin_datos',     // idem — no lo decide el cliente
     capacidadPago,
@@ -1786,16 +1844,24 @@ updateSummary();
 // Las fotos de cédula se cargan manualmente por el usuario (cámara real)
 </script>
 
-</div><!-- /.portal -->
-
 <!-- FOOTER -->
 <style>
 .fu-footer{
-  position:fixed;bottom:0;left:0;right:0;z-index:99;
-  display:flex;align-items:center;justify-content:space-between;
-  height:36px;padding:0 20px;
-  background:var(--white);border-top:1px solid var(--border);
-  font-size:10.5px;color:var(--muted);gap:16px;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:99;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height:36px;
+  padding:0 20px;
+  background:var(--white);
+  border-top:1px solid var(--border);
+  font-size:10.5px;
+  color:var(--muted);
+  gap:16px;
 }
 .fu-footer-l{display:flex;align-items:center;gap:9px;white-space:nowrap}
 .fu-footer-logo{height:20px;width:auto;mix-blend-mode:multiply}
@@ -1804,7 +1870,7 @@ updateSummary();
 .fu-footer-r a:hover{color:var(--gold)}
 .fu-footer-r a i{font-size:12px}
 @media(max-width:760px){.fu-footer{font-size:9.5px;padding:0 12px;gap:8px}.fu-footer-r{gap:10px}.fu-footer-r a span{display:none}}
-body{padding-bottom:74px}
+body{padding-bottom:40px}
 </style>
 <div class="fu-footer">
   <div class="fu-footer-l">
