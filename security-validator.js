@@ -422,11 +422,11 @@ const FondouneValidator = (() => {
     meta.content = [
       // Solo scripts del mismo origen y CDNs permitidos
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://esm.sh",  // unsafe-inline necesario para scripts inline de los módulos
+      "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://esm.sh",  // unsafe-inline necesario para scripts inline de los módulos
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://www.gstatic.com",
       "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
       "img-src 'self' data: blob:",
-      "connect-src 'self' https://script.google.com https://firestore.googleapis.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasevertexai.googleapis.com https://us-central1-fondoune-credito.cloudfunctions.net https://api.resend.com https://www.googleapis.com https://www.gstatic.com https://cdn.jsdelivr.net https://test.stytch.com https://api.stytch.com",
+      "connect-src 'self' https://script.google.com https://firestore.googleapis.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasevertexai.googleapis.com https://us-central1-fondoune-credito.cloudfunctions.net https://api.resend.com https://www.googleapis.com https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://test.stytch.com https://api.stytch.com",
       "worker-src blob:",
       "frame-src 'none'",
       "object-src 'none'",
