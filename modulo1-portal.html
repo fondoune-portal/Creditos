@@ -1004,8 +1004,8 @@ function poblarDatosAsociado(paso) {
     const plazo  = parseInt(plazoS.replace(' meses',''));
     const tasa   = tasaSeleccionada();
     const cuota  = Math.round(monto * (tasa * Math.pow(1+tasa,plazo)) / (Math.pow(1+tasa,plazo)-1));
-    const cap    = Math.round(neto * 0.35 - (nomina.libranzas || 0));
-    const pct    = neto > 0 ? Math.round((cuota / neto) * 100 * 10) / 10 : 0;
+    const cap    = Math.round(nomina.neto * 0.35 - (nomina.libranzas || 0));
+    const pct    = nomina.neto > 0 ? Math.round((cuota / nomina.neto) * 100 * 10) / 10 : 0;
     const dentro = pct <= 35;
 
     set('res-capacidad',  fmt(cap) + '/mes disponible');
@@ -1411,7 +1411,6 @@ function getCapacidadLabel() {
 // ── VALIDATION ENGINE ──
 const validations = [
   { id:'v1', pb:'pb1', vi:'vi1', vs:'vs1', icon:'ti ti-building-bank', time:1400, result:'Score: 742/900', detail:'Sin novedad' },
-  { id:'v2', pb:'pb2', vi:'vi2', vs:'vs2', icon:'ti ti-alert-octagon', time:900,  result:'Sin reportes', detail:'UIAF/OFAC/ONU' },
   { id:'v3', pb:'pb3', vi:'vi3', vs:'vs3', icon:'ti ti-users', time:700, result:'2 créditos OK', detail:'Historial limpio' },
   { id:'v4', pb:'pb4', vi:'vi4', vs:'vs4', icon:'ti ti-file-invoice', time:1200, result:getCapacidadLabel(), detail:'Análisis completado' },
   { id:'v5', pb:'pb5', vi:'vi5', vs:'vs5', icon:'ti ti-brain', time:1000, result:'Recomendación: APROBAR', detail:'Riesgo BAJO' },
