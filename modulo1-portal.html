@@ -128,35 +128,44 @@
   }
 
   /* ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ── */
-  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;align-items:start;margin-bottom:12px}
   .linea-card{
     background:var(--white);border:1px solid var(--border);border-radius:12px;
-    padding:16px 10px;text-align:center;cursor:pointer;position:relative;
-    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    padding:14px 8px;text-align:center;cursor:pointer;position:relative;
+    height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:visible;
+    transition:border-color .18s ease,box-shadow .18s ease;
   }
-  .linea-card i.linea-icono{font-size:21px;color:var(--muted);transition:color .18s ease;display:block}
-  .linea-nombre{font-family:'DM Serif Display',serif;font-size:13px;color:var(--navy);margin-top:8px}
+  .linea-card i.linea-icono{font-size:20px;color:var(--muted);transition:color .18s ease;flex-shrink:0}
+  .linea-nombre{font-family:'DM Serif Display',serif;font-size:12.5px;color:var(--navy);margin-top:7px;line-height:1.25}
 
-  /* Detalle: colapsado por defecto, se expande al hover o cuando la
-     tarjeta está seleccionada — así en móvil (sin hover real) el
-     usuario sigue viendo el detalle de la línea que eligió. */
-  .linea-detail{max-height:0;opacity:0;overflow:hidden;transition:max-height .22s ease,opacity .22s ease}
-  .linea-desc{font-size:10px;color:var(--muted);line-height:1.4;margin:10px 0 7px;padding-top:9px;border-top:1px solid var(--border)}
-  .linea-tasa{font-family:'DM Serif Display',serif;font-size:16px;color:var(--navy)}
+  /* El detalle se superpone por encima de la propia tarjeta (misma
+     posición, más alto) en vez de empujar el resto del grid hacia
+     abajo — así ninguna otra tarjeta ni fila se mueve al expandir. */
+  .linea-detail{
+    position:absolute;top:100%;left:-1px;right:-1px;
+    background:var(--white);border:1px solid var(--gold);border-top:none;
+    border-radius:0 0 12px 12px;
+    box-shadow:0 10px 20px rgba(11,37,69,.12);
+    max-height:0;opacity:0;overflow:hidden;pointer-events:none;
+    transition:max-height .2s ease,opacity .2s ease;
+    z-index:5;
+  }
+  .linea-desc{font-size:10px;color:var(--muted);line-height:1.4;padding:9px 10px 0}
+  .linea-tasa{font-family:'DM Serif Display',serif;font-size:16px;color:var(--navy);padding:0 10px}
   .linea-tasa span{font-size:9.5px;color:var(--muted);font-family:'DM Sans',sans-serif}
-  .linea-plazo{font-size:9px;color:var(--muted);margin-top:1px}
+  .linea-plazo{font-size:9px;color:var(--muted);padding:0 10px 10px}
 
-  .linea-card:hover,.linea-card:focus-visible,.linea-card.linea-expandida{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08)}
+  .linea-card:hover,.linea-card:focus-visible,.linea-card.linea-expandida{border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08);z-index:6}
   .linea-card:hover i.linea-icono,.linea-card:focus-visible i.linea-icono,.linea-card.linea-expandida i.linea-icono{color:var(--navy)}
-  .linea-card:hover .linea-detail,.linea-card:focus-visible .linea-detail,.linea-card.linea-expandida .linea-detail{max-height:100px;opacity:1}
+  .linea-card:hover .linea-detail,.linea-card:focus-visible .linea-detail,.linea-card.linea-expandida .linea-detail{max-height:100px;opacity:1;pointer-events:auto}
 
-  /* Selección: marca discreta con check, y el detalle queda visible
-     aunque el mouse ya no esté encima (clave para touch/móvil). */
+  /* Selección: marca discreta con check, detalle visible siempre
+     que esté activa (clave para touch/móvil, donde no hay hover). */
   .linea-check{display:none;position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--navy);align-items:center;justify-content:center}
   .linea-check i{font-size:10px;color:#fff}
   .linea-card.active{border-color:var(--navy)}
   .linea-card.active .linea-check{display:flex}
-  .linea-card.active .linea-detail{max-height:100px;opacity:1}
+  .linea-card.active .linea-detail{border-color:var(--navy)}
 
   @media(max-width:600px){.linea-grid{grid-template-columns:repeat(3,1fr)}}
 
