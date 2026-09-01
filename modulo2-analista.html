@@ -1485,7 +1485,9 @@ async function confirmDecision() {
   const nota = document.getElementById('modal-nota').value.trim();
 
   // 1. Validar nota con el validador de seguridad
-  const minLen = pendingAction === 'rechazar' ? 20 : 10;
+  // Solo rechazar exige una justificación mínima — aprobar y pedir
+  // información no necesitan nota extensa (puede ser breve o vacía).
+  const minLen = pendingAction === 'rechazar' ? 20 : 0;
   const vNota = (typeof FondouneValidator !== 'undefined')
     ? FondouneValidator.validarTextoLibre(nota, minLen, 500)
     : { ok: nota.length >= minLen, valor: nota, error: nota.length < minLen ? 'Nota muy corta' : null };
@@ -1495,6 +1497,8 @@ async function confirmDecision() {
     el.style.borderColor = 'var(--red2)';
     el.focus();
     el.placeholder = `⚠ ${vNota.error || 'La nota es obligatoria'}`;
+    // El borde rojo por sí solo pasa desapercibido — mostrar también un toast
+    showToast(vNota.error || 'La nota es obligatoria para rechazar la solicitud', 'toast-err', 'ti-alert-circle');
     return;
   }
 
@@ -1509,17 +1513,20 @@ async function confirmDecision() {
 
   // 2. Mostrar loading
   showToast('Procesando decisión...', 'toast-warn', 'ti-loader');
+  console.log('[Módulo2] Iniciando confirmDecision — acción:', pendingAction, '· solicitud:', s.fbId);
 
   try {
     let resultado;
 
     if (pendingAction === 'aprobar') {
       // Aprobar en Firebase — genera token y número de pagaré
+      console.log('[Módulo2] Llamando a FondoUneFirebase.aprobarSolicitud...');
       resultado = await FondoUneFirebase.aprobarSolicitud(
         s.fbId,
         analista.id,
         analista.nombre
       );
+      console.log('[Módulo2] Resultado de aprobarSolicitud:', resultado);
 
       if (resultado.ok && typeof EmailService !== 'undefined' && s.email) {
         // Construir el link de firma con el token generado
@@ -1533,12 +1540,14 @@ async function confirmDecision() {
       }
 
     } else if (pendingAction === 'rechazar') {
+      console.log('[Módulo2] Llamando a FondoUneFirebase.rechazarSolicitud...');
       resultado = await FondoUneFirebase.rechazarSolicitud(
         s.fbId,
         analista.id,
         analista.nombre,
         notaLimpia
       );
+      console.log('[Módulo2] Resultado de rechazarSolicitud:', resultado);
 
     } else if (pendingAction === 'info') {
       // Estado "revision" — actualización directa
