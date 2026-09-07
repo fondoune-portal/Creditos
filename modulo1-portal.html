@@ -170,9 +170,9 @@
   .linea-tasa span{font-size:9.5px;color:var(--muted);font-family:'DM Sans',sans-serif}
   .linea-plazo{font-size:9px;color:var(--muted);padding:0 10px 10px}
 
-  .linea-card:hover,.linea-card:focus-visible,.linea-card.linea-expandida{border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08);z-index:6}
-  .linea-card:hover i.linea-icono,.linea-card:focus-visible i.linea-icono,.linea-card.linea-expandida i.linea-icono{color:var(--navy)}
-  .linea-card:hover .linea-detail,.linea-card:focus-visible .linea-detail,.linea-card.linea-expandida .linea-detail{max-height:100px;opacity:1;pointer-events:auto}
+  .linea-card:hover,.linea-card.linea-abierta{border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08);z-index:6}
+  .linea-card:hover i.linea-icono,.linea-card.linea-abierta i.linea-icono{color:var(--navy)}
+  .linea-card:hover .linea-detail,.linea-card.linea-abierta .linea-detail{max-height:100px;opacity:1;pointer-events:auto}
 
   /* Selección: marca discreta con check. El overlay NO queda abierto
      de forma permanente al estar seleccionada (evita que tape la
@@ -1570,12 +1570,16 @@ function poblarLineas() {
         '<div class="linea-plazo">Hasta ' + maxMeses + ' meses</div>' +
       '</div>';
 
+    // La clase que abre el detalle (.linea-abierta) la controla JS de
+    // forma explícita en cada caso — nunca depende de :focus-visible
+    // del navegador, que puede persistir tras el click de formas
+    // inconsistentes entre navegadores y dejar el overlay pegado.
     if (esTouch) {
       card.onclick = (e) => {
-        if (!card.classList.contains('linea-expandida')) {
+        if (!card.classList.contains('linea-abierta')) {
           e.preventDefault();
-          document.querySelectorAll('.linea-card.linea-expandida').forEach(c => c.classList.remove('linea-expandida'));
-          card.classList.add('linea-expandida');
+          document.querySelectorAll('.linea-card.linea-abierta').forEach(c => c.classList.remove('linea-abierta'));
+          card.classList.add('linea-abierta');
           return;
         }
         seleccionarLinea(nombre, true);
@@ -1583,6 +1587,11 @@ function poblarLineas() {
     } else {
       card.onclick = () => seleccionarLinea(nombre, true);
     }
+    // Navegación por teclado: el detalle se abre solo mientras la
+    // tarjeta tiene el foco, y se cierra en cuanto lo pierde —
+    // independiente de cómo cada navegador resuelva :focus-visible.
+    card.addEventListener('focus', () => card.classList.add('linea-abierta'));
+    card.addEventListener('blur',  () => card.classList.remove('linea-abierta'));
     card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarLinea(nombre); } };
     cont.appendChild(card);
   });
@@ -1595,16 +1604,18 @@ function seleccionarLinea(nombre, quitarFoco) {
   _lineaSeleccionada = nombre;
   document.querySelectorAll('.linea-card').forEach(c => {
     c.classList.toggle('active', c.dataset.lineaNombre === nombre);
-    c.classList.remove('linea-expandida');
   });
-  // El click con mouse/touch deja la tarjeta con foco de teclado
-  // (comportamiento normal de un <div tabindex="0">), y eso mantenía
-  // el overlay de detalle abierto vía :focus-visible mucho después de
-  // soltar el click, tapando la tarjeta de abajo. Solo quitamos el
-  // foco en ese caso — al seleccionar con teclado (Enter/Espacio) se
-  // conserva, para no romper la navegación por Tab.
-  if (quitarFoco && document.activeElement && document.activeElement.classList.contains('linea-card')) {
-    document.activeElement.blur();
+  // Al seleccionar con click (mouse/touch) cerramos el overlay de
+  // TODAS las tarjetas de forma incondicional — sin depender de
+  // adivinar cuál quedó con foco, que resultó inconsistente entre
+  // navegadores. La selección por teclado (Enter/Espacio) no pasa
+  // por aquí con quitarFoco=true, así que Tab sigue mostrando el
+  // detalle de la tarjeta enfocada con normalidad.
+  if (quitarFoco) {
+    document.querySelectorAll('.linea-card.linea-abierta').forEach(c => {
+      c.classList.remove('linea-abierta');
+      c.blur();
+    });
   }
   poblarPlazos();
 }
