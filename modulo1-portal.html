@@ -1578,10 +1578,10 @@ function poblarLineas() {
           card.classList.add('linea-expandida');
           return;
         }
-        seleccionarLinea(nombre);
+        seleccionarLinea(nombre, true);
       };
     } else {
-      card.onclick = () => seleccionarLinea(nombre);
+      card.onclick = () => seleccionarLinea(nombre, true);
     }
     card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarLinea(nombre); } };
     cont.appendChild(card);
@@ -1590,13 +1590,22 @@ function poblarLineas() {
   seleccionarLinea(DEFAULT_LINEA);
 }
 
-function seleccionarLinea(nombre) {
+function seleccionarLinea(nombre, quitarFoco) {
   if (!LINEAS_CREDITO[nombre]) return;
   _lineaSeleccionada = nombre;
   document.querySelectorAll('.linea-card').forEach(c => {
     c.classList.toggle('active', c.dataset.lineaNombre === nombre);
     c.classList.remove('linea-expandida');
   });
+  // El click con mouse/touch deja la tarjeta con foco de teclado
+  // (comportamiento normal de un <div tabindex="0">), y eso mantenía
+  // el overlay de detalle abierto vía :focus-visible mucho después de
+  // soltar el click, tapando la tarjeta de abajo. Solo quitamos el
+  // foco en ese caso — al seleccionar con teclado (Enter/Espacio) se
+  // conserva, para no romper la navegación por Tab.
+  if (quitarFoco && document.activeElement && document.activeElement.classList.contains('linea-card')) {
+    document.activeElement.blur();
+  }
   poblarPlazos();
 }
 
