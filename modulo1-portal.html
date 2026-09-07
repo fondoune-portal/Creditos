@@ -142,6 +142,50 @@
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
   .form-grid.full { grid-template-columns: 1fr; }
   .field { display: flex; flex-direction: column; gap: 5px; }
+
+  /* ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ── */
+  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;align-items:start;margin-bottom:12px}
+  .linea-card{
+    background:var(--white);border:1px solid var(--border);border-radius:12px;
+    padding:14px 8px;text-align:center;cursor:pointer;position:relative;
+    height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:visible;
+    transition:border-color .18s ease,box-shadow .18s ease;
+  }
+  .linea-card i.linea-icono{font-size:20px;color:var(--muted);transition:color .18s ease;flex-shrink:0}
+  .linea-nombre{font-family:'DM Serif Display',serif;font-size:12px;color:var(--navy);margin-top:7px;line-height:1.25}
+
+  /* El detalle se superpone por encima del contenido de abajo
+     (position:absolute, no ocupa espacio en el grid) — así ninguna
+     otra tarjeta ni fila se mueve al expandir una de ellas. */
+  .linea-detail{
+    position:absolute;top:100%;left:-1px;right:-1px;
+    background:var(--white);border:1px solid var(--gold);border-top:none;
+    border-radius:0 0 12px 12px;
+    box-shadow:0 10px 20px rgba(11,37,69,.12);
+    max-height:0;opacity:0;overflow:hidden;pointer-events:none;
+    transition:max-height .2s ease,opacity .2s ease;
+    z-index:5;
+  }
+  .linea-tasa{font-family:'DM Serif Display',serif;font-size:16px;color:var(--navy);padding:10px 10px 0}
+  .linea-tasa span{font-size:9.5px;color:var(--muted);font-family:'DM Sans',sans-serif}
+  .linea-plazo{font-size:9px;color:var(--muted);padding:0 10px 10px}
+
+  .linea-card:hover,.linea-card:focus-visible,.linea-card.linea-expandida{border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08);z-index:6}
+  .linea-card:hover i.linea-icono,.linea-card:focus-visible i.linea-icono,.linea-card.linea-expandida i.linea-icono{color:var(--navy)}
+  .linea-card:hover .linea-detail,.linea-card:focus-visible .linea-detail,.linea-card.linea-expandida .linea-detail{max-height:100px;opacity:1;pointer-events:auto}
+
+  /* Selección: marca discreta con check. El overlay NO queda abierto
+     de forma permanente al estar seleccionada (evita que tape la
+     fila de abajo) — la línea elegida ya se confirma en el resumen
+     preliminar del formulario. */
+  .linea-check{display:none;position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--navy);align-items:center;justify-content:center}
+  .linea-check i{font-size:10px;color:#fff}
+  .linea-card.active{border-color:var(--navy)}
+  .linea-card.active .linea-check{display:flex}
+  .linea-card.active .linea-detail{border-color:var(--navy)}
+
+  @media(max-width:600px){.linea-grid{grid-template-columns:repeat(3,1fr)}}
+
   .field label { font-size: 12px; font-weight: 500; color: var(--navy); }
   .field input, .field select, .field textarea {
     padding: 11px 14px; font-size: 14px;
@@ -722,21 +766,10 @@
       <div class="card-title">Configura tu crédito</div>
       <div class="card-sub">Define el monto y condiciones. El sistema calculará automáticamente la cuota y evaluará tu capacidad de pago.</div>
 
-      <div class="form-grid">
-        <div class="field">
-          <label>Línea de crédito <span style="color:var(--danger)">*</span></label>
-          <select id="f-linea" onchange="poblarPlazos()"></select>
-        </div>
-        <div class="field">
-          <label>Destino</label>
-          <select>
-            <option>Gastos personales</option>
-            <option>Educación</option>
-            <option>Salud</option>
-            <option>Remodelación hogar</option>
-            <option>Consolidación deudas</option>
-          </select>
-        </div>
+      <div class="field" style="margin-top:4px">
+        <label>Línea de crédito <span style="color:var(--danger)">*</span></label>
+        <div class="hint" style="margin-bottom:10px">Elige la línea que mejor se ajuste a lo que necesitas — cada una tiene su propia tasa y plazo máximo.</div>
+        <div id="linea-grid" class="linea-grid"></div>
       </div>
       <div class="form-grid">
         <div class="field">
@@ -1486,17 +1519,89 @@ const LINEAS_CREDITO = {
   'Crediavance':                                    [{minM:2,  maxM:2,   tasa:0.0166}],
 };
 
+let _lineaSeleccionada = null;
+
 function poblarLineas() {
-  const sel = document.getElementById('f-linea');
-  if (!sel || sel.options.length) return; // ya poblado, no repetir en cada visita al paso 2
+  const cont = document.getElementById('linea-grid');
+  if (!cont || cont.dataset.built === '1') return; // ya poblado, no repetir en cada visita al paso 2
+  cont.dataset.built = '1';
+
   const DEFAULT_LINEA = 'Libre inversión – cruce de cuentas';
-  sel.innerHTML = Object.keys(LINEAS_CREDITO).map(l =>
-    `<option value="${l}" ${l===DEFAULT_LINEA?'selected':''}>${l}</option>`).join('');
+  const ICONOS = {
+    'Solidaridad': 'ti-heart-handshake',
+    'Educativo': 'ti-school',
+    'Salud': 'ti-first-aid-kit',
+    'Vivienda (solo casa)': 'ti-home',
+    'Vivienda inversión tasa fija': 'ti-home-dollar',
+    'Vivienda tasa fija VIS': 'ti-home-check',
+    'Vivienda construcción sobre lote': 'ti-building-cottage',
+    'Vacacional – Turismo': 'ti-plane',
+    'Campaña compra cartera': 'ti-arrows-exchange',
+    'Especial convenios (campañas)': 'ti-star',
+    'Crediprima': 'ti-calendar-dollar',
+    'Vehículo': 'ti-car',
+    'Libre inversión – cruce de cuentas': 'ti-wallet',
+    'Creditributo': 'ti-receipt-tax',
+    'Crediexpress': 'ti-bolt',
+    'Libre inversión (reporte negativo) / Crediya': 'ti-report-money',
+    'Campaña vehículo (moto/bici/patineta)': 'ti-bike',
+    'Movilidad (vehículos eléctricos)': 'ti-plug',
+    'Crediavance': 'ti-progress',
+  };
+
+  const esTouch = window.matchMedia('(hover: none)').matches;
+
+  cont.innerHTML = '';
+  Object.keys(LINEAS_CREDITO).forEach(nombre => {
+    const tramos = LINEAS_CREDITO[nombre];
+    const tasaEntrada = tramos[0].tasa; // primer tramo = tasa "de entrada" mostrada en la tarjeta
+    const maxMeses = Math.max(...tramos.map(t => t.maxM));
+
+    const card = document.createElement('div');
+    card.className = 'linea-card';
+    card.dataset.lineaNombre = nombre;
+    card.tabIndex = 0;
+    card.innerHTML =
+      '<div class="linea-check"><i class="ti ti-check"></i></div>' +
+      '<i class="ti ' + (ICONOS[nombre] || 'ti-coin') + ' linea-icono"></i>' +
+      '<div class="linea-nombre">' + nombre + '</div>' +
+      '<div class="linea-detail">' +
+        '<div class="linea-tasa">' + (tasaEntrada*100).toFixed(2).replace('.', ',') + '<span> % E.M.</span></div>' +
+        '<div class="linea-plazo">Hasta ' + maxMeses + ' meses</div>' +
+      '</div>';
+
+    if (esTouch) {
+      card.onclick = (e) => {
+        if (!card.classList.contains('linea-expandida')) {
+          e.preventDefault();
+          document.querySelectorAll('.linea-card.linea-expandida').forEach(c => c.classList.remove('linea-expandida'));
+          card.classList.add('linea-expandida');
+          return;
+        }
+        seleccionarLinea(nombre);
+      };
+    } else {
+      card.onclick = () => seleccionarLinea(nombre);
+    }
+    card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarLinea(nombre); } };
+    cont.appendChild(card);
+  });
+
+  seleccionarLinea(DEFAULT_LINEA);
+}
+
+function seleccionarLinea(nombre) {
+  if (!LINEAS_CREDITO[nombre]) return;
+  _lineaSeleccionada = nombre;
+  document.querySelectorAll('.linea-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.lineaNombre === nombre);
+    c.classList.remove('linea-expandida');
+  });
   poblarPlazos();
 }
 
 function poblarPlazos() {
-  const linea  = document.getElementById('f-linea')?.value;
+  const linea  = _lineaSeleccionada;
   const tramos = LINEAS_CREDITO[linea] || [];
   const opciones = [];
   tramos.forEach(tr => {
@@ -1528,8 +1633,7 @@ function updateSummary() {
   document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
   document.getElementById('sum-plazo').textContent = plazo + ' meses';
   document.getElementById('sum-tasa').textContent  = (tasa*100).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}) + '% E.M.';
-  const lineaEl = document.getElementById('f-linea');
-  if (lineaEl) document.getElementById('sum-tipo').textContent = lineaEl.value;
+  if (_lineaSeleccionada) document.getElementById('sum-tipo').textContent = _lineaSeleccionada;
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
@@ -1588,7 +1692,7 @@ async function buildResult() {
     empresa:  user.empresa|| '',
     ciudad:   user.ciudad || 'Medellín',
     monto, plazo, cuota,
-    linea: document.getElementById('f-linea')?.value || '',
+    linea: _lineaSeleccionada || '',
     tasaMensual: tasa,
     periodicidad: 'mensuales',
     scorePropio: 0,          // el score real de DataCrédito lo asigna el analista en Módulo 2
