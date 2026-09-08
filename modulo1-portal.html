@@ -143,46 +143,28 @@
   .form-grid.full { grid-template-columns: 1fr; }
   .field { display: flex; flex-direction: column; gap: 5px; }
 
-  /* ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ── */
-  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;align-items:start;margin-bottom:12px}
+  /* ── GRID DE LÍNEAS DE CRÉDITO (Paso 2) ──
+     Sin overlay ni estado oculto que revelar: la tasa se muestra
+     siempre como parte fija de la tarjeta. El plazo máximo de la
+     línea elegida se consulta en el resumen preliminar del
+     formulario, no aquí. */
+  .linea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-bottom:12px}
   .linea-card{
     background:var(--white);border:1px solid var(--border);border-radius:12px;
-    padding:14px 8px;text-align:center;cursor:pointer;position:relative;
-    height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:visible;
-    transition:border-color .18s ease,box-shadow .18s ease;
+    padding:12px 8px;text-align:center;cursor:pointer;position:relative;
+    transition:border-color .15s ease,box-shadow .15s ease;
   }
-  .linea-card i.linea-icono{font-size:20px;color:var(--muted);transition:color .18s ease;flex-shrink:0}
-  .linea-nombre{font-family:'DM Serif Display',serif;font-size:12px;color:var(--navy);margin-top:7px;line-height:1.25}
+  .linea-card:hover{border-color:var(--gold);box-shadow:0 4px 12px rgba(11,37,69,.06)}
+  .linea-card i.linea-icono{font-size:19px;color:var(--muted);transition:color .15s ease;display:block}
+  .linea-card:hover i.linea-icono{color:var(--navy)}
+  .linea-nombre{font-family:'DM Serif Display',serif;font-size:11.5px;color:var(--navy);margin-top:6px;line-height:1.25;min-height:28px;display:flex;align-items:center;justify-content:center}
+  .linea-tasa{font-size:12px;font-weight:600;color:var(--blue);margin-top:5px;font-family:'DM Mono',monospace}
+  .linea-tasa span{font-size:8.5px;color:var(--muted);font-weight:400;font-family:'DM Sans',sans-serif}
 
-  /* El detalle se superpone por encima del contenido de abajo
-     (position:absolute, no ocupa espacio en el grid) — así ninguna
-     otra tarjeta ni fila se mueve al expandir una de ellas. */
-  .linea-detail{
-    position:absolute;top:100%;left:-1px;right:-1px;
-    background:var(--white);border:1px solid var(--gold);border-top:none;
-    border-radius:0 0 12px 12px;
-    box-shadow:0 10px 20px rgba(11,37,69,.12);
-    max-height:0;opacity:0;overflow:hidden;pointer-events:none;
-    transition:max-height .2s ease,opacity .2s ease;
-    z-index:5;
-  }
-  .linea-tasa{font-family:'DM Serif Display',serif;font-size:16px;color:var(--navy);padding:10px 10px 0}
-  .linea-tasa span{font-size:9.5px;color:var(--muted);font-family:'DM Sans',sans-serif}
-  .linea-plazo{font-size:9px;color:var(--muted);padding:0 10px 10px}
-
-  .linea-card:hover,.linea-card.linea-abierta{border-color:var(--gold);box-shadow:0 8px 20px rgba(11,37,69,.08);z-index:6}
-  .linea-card:hover i.linea-icono,.linea-card.linea-abierta i.linea-icono{color:var(--navy)}
-  .linea-card:hover .linea-detail,.linea-card.linea-abierta .linea-detail{max-height:100px;opacity:1;pointer-events:auto}
-
-  /* Selección: marca discreta con check. El overlay NO queda abierto
-     de forma permanente al estar seleccionada (evita que tape la
-     fila de abajo) — la línea elegida ya se confirma en el resumen
-     preliminar del formulario. */
-  .linea-check{display:none;position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--navy);align-items:center;justify-content:center}
-  .linea-check i{font-size:10px;color:#fff}
-  .linea-card.active{border-color:var(--navy)}
+  .linea-check{display:none;position:absolute;top:8px;right:8px;width:15px;height:15px;border-radius:50%;background:var(--navy);align-items:center;justify-content:center}
+  .linea-check i{font-size:9px;color:#fff}
+  .linea-card.active{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
   .linea-card.active .linea-check{display:flex}
-  .linea-card.active .linea-detail{border-color:var(--navy)}
 
   @media(max-width:600px){.linea-grid{grid-template-columns:repeat(3,1fr)}}
 
@@ -824,6 +806,7 @@
         <div class="summary-row"><span class="lbl">Plazo</span><span class="val" id="sum-plazo">24 meses</span></div>
         <div class="summary-row"><span class="lbl">Tasa</span><span class="val" id="sum-tasa">1,1% E.M.</span></div>
         <div class="summary-row"><span class="lbl">Línea</span><span class="val" id="sum-tipo">—</span></div>
+        <div class="summary-row"><span class="lbl">Plazo máximo de la línea</span><span class="val" id="sum-plazo-max">—</span></div>
       </div>
 
       <div class="btn-row">
@@ -1549,13 +1532,10 @@ function poblarLineas() {
     'Crediavance': 'ti-progress',
   };
 
-  const esTouch = window.matchMedia('(hover: none)').matches;
-
   cont.innerHTML = '';
   Object.keys(LINEAS_CREDITO).forEach(nombre => {
     const tramos = LINEAS_CREDITO[nombre];
     const tasaEntrada = tramos[0].tasa; // primer tramo = tasa "de entrada" mostrada en la tarjeta
-    const maxMeses = Math.max(...tramos.map(t => t.maxM));
 
     const card = document.createElement('div');
     card.className = 'linea-card';
@@ -1565,33 +1545,12 @@ function poblarLineas() {
       '<div class="linea-check"><i class="ti ti-check"></i></div>' +
       '<i class="ti ' + (ICONOS[nombre] || 'ti-coin') + ' linea-icono"></i>' +
       '<div class="linea-nombre">' + nombre + '</div>' +
-      '<div class="linea-detail">' +
-        '<div class="linea-tasa">' + (tasaEntrada*100).toFixed(2).replace('.', ',') + '<span> % E.M.</span></div>' +
-        '<div class="linea-plazo">Hasta ' + maxMeses + ' meses</div>' +
-      '</div>';
+      '<div class="linea-tasa">' + (tasaEntrada*100).toFixed(2).replace('.', ',') + '<span> %E.M.</span></div>';
 
-    // La clase que abre el detalle (.linea-abierta) la controla JS de
-    // forma explícita en cada caso — nunca depende de :focus-visible
-    // del navegador, que puede persistir tras el click de formas
-    // inconsistentes entre navegadores y dejar el overlay pegado.
-    if (esTouch) {
-      card.onclick = (e) => {
-        if (!card.classList.contains('linea-abierta')) {
-          e.preventDefault();
-          document.querySelectorAll('.linea-card.linea-abierta').forEach(c => c.classList.remove('linea-abierta'));
-          card.classList.add('linea-abierta');
-          return;
-        }
-        seleccionarLinea(nombre, true);
-      };
-    } else {
-      card.onclick = () => seleccionarLinea(nombre, true);
-    }
-    // Navegación por teclado: el detalle se abre solo mientras la
-    // tarjeta tiene el foco, y se cierra en cuanto lo pierde —
-    // independiente de cómo cada navegador resuelva :focus-visible.
-    card.addEventListener('focus', () => card.classList.add('linea-abierta'));
-    card.addEventListener('blur',  () => card.classList.remove('linea-abierta'));
+    // Sin overlay que abrir/cerrar, así que no hace falta distinguir
+    // touch de mouse ni manejar focus/blur especial — un solo click
+    // (o Enter/Espacio con teclado) selecciona la línea, punto.
+    card.onclick = () => seleccionarLinea(nombre);
     card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarLinea(nombre); } };
     cont.appendChild(card);
   });
@@ -1599,24 +1558,12 @@ function poblarLineas() {
   seleccionarLinea(DEFAULT_LINEA);
 }
 
-function seleccionarLinea(nombre, quitarFoco) {
+function seleccionarLinea(nombre) {
   if (!LINEAS_CREDITO[nombre]) return;
   _lineaSeleccionada = nombre;
   document.querySelectorAll('.linea-card').forEach(c => {
     c.classList.toggle('active', c.dataset.lineaNombre === nombre);
   });
-  // Al seleccionar con click (mouse/touch) cerramos el overlay de
-  // TODAS las tarjetas de forma incondicional — sin depender de
-  // adivinar cuál quedó con foco, que resultó inconsistente entre
-  // navegadores. La selección por teclado (Enter/Espacio) no pasa
-  // por aquí con quitarFoco=true, así que Tab sigue mostrando el
-  // detalle de la tarjeta enfocada con normalidad.
-  if (quitarFoco) {
-    document.querySelectorAll('.linea-card.linea-abierta').forEach(c => {
-      c.classList.remove('linea-abierta');
-      c.blur();
-    });
-  }
   poblarPlazos();
 }
 
@@ -1653,7 +1600,12 @@ function updateSummary() {
   document.getElementById('sum-monto').textContent = '$'+monto.toLocaleString('es-CO');
   document.getElementById('sum-plazo').textContent = plazo + ' meses';
   document.getElementById('sum-tasa').textContent  = (tasa*100).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}) + '% E.M.';
-  if (_lineaSeleccionada) document.getElementById('sum-tipo').textContent = _lineaSeleccionada;
+  if (_lineaSeleccionada) {
+    document.getElementById('sum-tipo').textContent = _lineaSeleccionada;
+    const tramos = LINEAS_CREDITO[_lineaSeleccionada] || [];
+    const maxMeses = tramos.length ? Math.max(...tramos.map(t => t.maxM)) : null;
+    document.getElementById('sum-plazo-max').textContent = maxMeses ? maxMeses + ' meses' : '—';
+  }
   document.getElementById('cuota-estimada').textContent = 'Cuota est.: $'+Math.round(cuota).toLocaleString('es-CO')+'/mes';
 }
 
