@@ -1451,10 +1451,15 @@ const MDEFS = {
 };
 
 function openModal(action, solId) {
+  console.log('[Módulo2] openModal llamado — action:', action, '· solId:', solId);
   pendingAction = action; pendingSolId = solId;
   const d = MDEFS[action];
   const s = DATA.find(x => x.id === solId);
-  if (!s || !d) return;
+  console.log('[Módulo2] ¿Solicitud encontrada en DATA?', !!s, '· ¿Definición de acción encontrada?', !!d);
+  if (!s || !d) {
+    console.warn('[Módulo2] openModal abortado silenciosamente — s:', s, '· d:', d, '· DATA completo:', DATA);
+    return;
+  }
 
   document.getElementById('modal-ico').innerHTML   = d.ico;
   document.getElementById('modal-ico').style.background = d.icoBg;
