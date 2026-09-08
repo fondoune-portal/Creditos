@@ -993,7 +993,7 @@ function poblarDatosAsociado(paso) {
   }
 
   // Paso 3 — Nómina desde sesión
-  if (paso === 2 && nomina) {
+  if (paso === 3 && nomina) {
     set('nom-basico',      fmt(nomina.basico));
     set('nom-devengado',   fmt(nomina.devengado || nomina.basico));
     set('nom-deducciones', fmt(nomina.deducciones || nomina.cuotaAporte));
