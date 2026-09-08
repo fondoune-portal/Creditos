@@ -856,7 +856,7 @@ function adaptarDoc(doc) {
     pct:  n(doc.porcentajeCompromiso),
 
     // Historial
-    hist: s(doc.historial || 'Sin historial previo en el fondo'),
+    hist: s(doc.historial || ''),
     rec:  doc.recomendacionIA || (doc.riesgo==='bajo'?'APROBAR':doc.riesgo==='alto'?'RECHAZAR':'REVISAR'),
 
     // Visual
@@ -1273,6 +1273,43 @@ function buildDetail(s) {
     return Array.from({length:n},(_,i)=>`<div class="rb-seg ${i<f?fc:''}"></div>`).join('');
   };
 
+  // Motivos de la recomendación del motor IA — generados con reglas
+  // simples a partir de datos ya disponibles (score, % compromiso de
+  // ingreso, riesgo asignado, estado KYC). No es un campo que alguien
+  // escriba a mano; se recalcula siempre que se abre la solicitud, así
+  // que refleja el estado más reciente de esos datos.
+  const generarMotivosIA = () => {
+    const motivos = [];
+
+    if (s.score > 0) {
+      if (s.score >= 700) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Score de ' + s.score + ' — dentro del rango de bajo riesgo.' });
+      else if (s.score >= 600) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Score de ' + s.score + ' — rango medio, amerita revisión.' });
+      else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Score de ' + s.score + ' — por debajo del umbral recomendado.' });
+    } else {
+      motivos.push({ ic:'ti-help-circle', cls:'warn', txt:'Sin score de centrales de riesgo consultado aún.' });
+    }
+
+    if (s.pct > 0) {
+      if (s.pct <= 35) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — dentro del límite del 35%.' });
+      else if (s.pct <= 50) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — supera el límite recomendado del 35%.' });
+      else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — nivel de endeudamiento alto.' });
+    }
+
+    if (s.cap <= 0 && s.nom.neto > 0) {
+      motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Capacidad de pago estimada en $0 o negativa tras libranzas activas.' });
+    }
+
+    const kycFallas = ['cedula','rnec','liveness','biometria','uiaf']
+      .filter(k => s.kyc[k] && s.kyc[k] !== 'ok');
+    if (kycFallas.length) {
+      motivos.push({ ic:'ti-shield-x', cls:'fail', txt:'Verificación KYC con hallazgos pendientes: ' + kycFallas.join(', ') + '.' });
+    } else {
+      motivos.push({ ic:'ti-shield-check', cls:'ok', txt:'Verificación KYC completa sin hallazgos.' });
+    }
+
+    return motivos;
+  };
+
   const tlItems = s.log.map(l =>
     `<div class="tl-item"><div class="tl-dot ${l.dot}"></div><div class="tl-time">${l.ts}</div><div class="tl-txt">${l.txt}</div></div>`
   ).join('') || '<div class="tl-item"><div class="tl-dot dot-muted"></div><div class="tl-txt">Sin registro de auditoría previo</div></div>';
@@ -1378,7 +1415,11 @@ function buildDetail(s) {
   <div class="grid-2" style="margin-bottom:18px">
     <div>
       <div class="sec-title"><i class="ti ti-history"></i>Historial FondoUne</div>
-      <div class="cell" style="min-height:90px"><div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div></div>
+      <div class="cell" style="min-height:90px">
+        ${s.hist
+          ? `<div class="cv" style="font-size:12px;line-height:1.7">${s.hist}</div>`
+          : `<div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px"><i class="ti ti-info-circle" style="font-size:13px"></i>Sin historial registrado aún — no hay créditos previos ni comportamiento de pago cargado en el fondo.</div>`}
+      </div>
     </div>
     <div>
       <div class="sec-title"><i class="ti ti-brain"></i>Recomendación motor IA</div>
@@ -1391,6 +1432,14 @@ function buildDetail(s) {
           <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Indicador de riesgo compuesto</div>
           <div class="risk-bar">${riskSegs()}</div>
           <div style="font-size:10px;font-weight:600;color:${rColor};margin-top:5px">${rLabel.toUpperCase()}</div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Motivos de la recomendación</div>
+            ${generarMotivosIA().map(m => `
+              <div style="display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.5;margin-bottom:5px">
+                <i class="ti ${m.ic}" style="font-size:13px;flex-shrink:0;margin-top:1px;color:${m.cls==='ok'?'var(--green2)':m.cls==='warn'?'var(--amber3)':'var(--red2)'}"></i>
+                <span>${m.txt}</span>
+              </div>`).join('')}
+          </div>
         </div>
       </div>
     </div>
