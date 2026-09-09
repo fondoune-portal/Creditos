@@ -500,13 +500,13 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
         <div class="kpi-spark"><i class="ti ti-clock"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#8B1A1A">
-        <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora activa</div>
+        <div class="kpi-lbl"><i class="ti ti-alert-circle"></i> Mora activa <span style="font-size:8px;font-weight:700;color:var(--slate);background:var(--paper2);padding:1px 5px;border-radius:4px;margin-left:3px">EJEMPLO</span></div>
         <div class="kpi-val" id="kv-mora" style="color:var(--crimson2)">2.1%</div>
         <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-down" style="font-size:11px"></i>vs 3.4% industria</div>
         <div class="kpi-spark"><i class="ti ti-alert-circle"></i></div>
       </div>
       <div class="kpi" style="--kpi-color:#1A3A8B">
-        <div class="kpi-lbl"><i class="ti ti-brain"></i> Automatización</div>
+        <div class="kpi-lbl"><i class="ti ti-brain"></i> Automatización <span style="font-size:8px;font-weight:700;color:var(--slate);background:var(--paper2);padding:1px 5px;border-radius:4px;margin-left:3px">EJEMPLO</span></div>
         <div class="kpi-val" style="color:var(--sapphire2)">78%</div>
         <div class="kpi-delta" style="color:var(--emerald2)"><i class="ti ti-trending-up" style="font-size:11px"></i>resolución sin analista</div>
         <div class="kpi-spark"><i class="ti ti-brain"></i></div>
@@ -611,15 +611,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
         <div class="card-head"><div class="card-title"><i class="ti ti-shield-half"></i> Matriz de riesgo de cartera</div></div>
         <div class="card-body">
           <div class="risk-matrix">
-            <div class="rm-cell rm-green"><div class="rml">Riesgo bajo</div><div class="rmv">74</div><div class="rms">52.1%</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Riesgo medio</div><div class="rmv">41</div><div class="rms">28.9%</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Riesgo alto</div><div class="rmv">27</div><div class="rms">19.0%</div></div>
-            <div class="rm-cell rm-green"><div class="rml">Score prom.</div><div class="rmv">742</div><div class="rms">Bajo</div></div>
-            <div class="rm-cell rm-amber"><div class="rml">Score prom.</div><div class="rmv">618</div><div class="rms">Medio</div></div>
-            <div class="rm-cell rm-red"><div class="rml">Score prom.</div><div class="rmv">492</div><div class="rms">Alto</div></div>
+            <div class="rm-cell rm-green"><div class="rml">Riesgo bajo</div><div class="rmv" id="rm-bajo-n">—</div><div class="rms" id="rm-bajo-p">—</div></div>
+            <div class="rm-cell rm-amber"><div class="rml">Riesgo medio</div><div class="rmv" id="rm-medio-n">—</div><div class="rms" id="rm-medio-p">—</div></div>
+            <div class="rm-cell rm-red"><div class="rml">Riesgo alto</div><div class="rmv" id="rm-alto-n">—</div><div class="rms" id="rm-alto-p">—</div></div>
+            <div class="rm-cell rm-green"><div class="rml">Score prom.</div><div class="rmv" id="rm-score-bajo">—</div><div class="rms">Bajo</div></div>
+            <div class="rm-cell rm-amber"><div class="rml">Score prom.</div><div class="rmv" id="rm-score-medio">—</div><div class="rms">Medio</div></div>
+            <div class="rm-cell rm-red"><div class="rml">Score prom.</div><div class="rmv" id="rm-score-alto">—</div><div class="rms">Alto</div></div>
           </div>
           <div style="margin-top:10px;font-size:11px;color:var(--slate);background:var(--paper);border-radius:7px;padding:8px 10px">
-            <i class="ti ti-info-circle" style="font-size:12px"></i> Índice de mora proyectado: <strong style="color:var(--ink)">2.1%</strong> — por debajo del benchmark del sector (3.4%)
+            <i class="ti ti-info-circle" style="font-size:12px"></i> Distribución calculada en tiempo real sobre las solicitudes cargadas — no incluye mora de cartera (ver nota en la tarjeta "Mora activa").
           </div>
         </div>
       </div>
@@ -1016,21 +1016,33 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 </div>
 
 <script>
-// ── BAR CHART ──
-const barData = [
-  {d:'Lun',apro:22,rech:6,pend:4},
-  {d:'Mar',apro:18,rech:5,pend:6},
-  {d:'Mié',apro:25,rech:8,pend:3},
-  {d:'Jue',apro:14,rech:4,pend:5},
-  {d:'Vie',apro:10,rech:3,pend:4,today:true},
-  {d:'Sáb',apro:0,rech:0,pend:0},
-  {d:'Dom',apro:0,rech:0,pend:0},
-];
-const maxVal = Math.max(...barData.map(d=>d.apro+d.rech+d.pend),1);
+// ── BAR CHART — Solicitudes diarias (real, calculado desde Firestore) ──
+const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let barData = DIAS.slice(1).concat(DIAS[0]).map(d => ({d, apro:0, rech:0, pend:0}));
+
+function calcularBarData(solicitudes) {
+  const hoy = new Date();
+  const inicioSemana = new Date(hoy); inicioSemana.setDate(hoy.getDate() - hoy.getDay() + 1); inicioSemana.setHours(0,0,0,0);
+  const dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d => ({d, apro:0, rech:0, pend:0}));
+  solicitudes.forEach(s => {
+    if (!s.fechaSolicitud) return;
+    const f = new Date(s.fechaSolicitud);
+    if (f < inicioSemana) return;
+    const idx = (f.getDay() + 6) % 7; // Lun=0 ... Dom=6
+    const bucket = dias[idx];
+    if (s.estado === 'aprobado' || s.estado === 'firmado') bucket.apro++;
+    else if (s.estado === 'rechazado') bucket.rech++;
+    else bucket.pend++;
+  });
+  const hoyIdx = (hoy.getDay() + 6) % 7;
+  dias[hoyIdx].today = true;
+  return dias;
+}
 
 function buildBarChart(){
   const c=document.getElementById('bar-chart');
   c.innerHTML='';
+  const maxVal = Math.max(...barData.map(d=>d.apro+d.rech+d.pend),1);
   barData.forEach(d=>{
     const total=d.apro+d.rech+d.pend;
     const col=document.createElement('div');
@@ -1061,21 +1073,33 @@ function buildBarChart(){
 }
 buildBarChart();
 
-// ── DONUT ──
+// ── DONUT — Distribución por tipo (real) ──
+const DONUT_COLORS = ['#2563EB','#0A6B45','#B8872A','#8B1A1A','#5A7099','#7C3AED','#0891B2'];
+let donutData = [];
+
+function calcularDonutData(solicitudes) {
+  const porTipo = {};
+  solicitudes.forEach(s => { const t = s.tipo || 'Sin especificar'; porTipo[t] = (porTipo[t]||0) + 1; });
+  const total = solicitudes.length || 1;
+  return Object.entries(porTipo)
+    .sort((a,b) => b[1]-a[1])
+    .map(([tipo, count], i) => ({ tipo, count, pct: count/total, color: DONUT_COLORS[i % DONUT_COLORS.length] }));
+}
+
 function buildDonut(){
-  const data=[
-    {pct:.408,color:'#2563EB'},
-    {pct:.218,color:'#0A6B45'},
-    {pct:.155,color:'#B8872A'},
-    {pct:.127,color:'#8B1A1A'},
-    {pct:.092,color:'#5A7099'},
-  ];
   const svg=document.getElementById('donut-svg');
+  const legend=document.querySelector('.donut-legend');
   const R=34,CX=45,CY=45,circ=2*Math.PI*R;
   let offset=0;
-  // clear existing arcs
   svg.querySelectorAll('.arc').forEach(e=>e.remove());
-  data.forEach(d=>{
+  if (!donutData.length) {
+    legend.innerHTML = '<div class="empty-mini" style="font-size:11px;color:var(--slate)">Aún no hay solicitudes para calcular la distribución.</div>';
+    return;
+  }
+  legend.innerHTML = donutData.map(d =>
+    `<div class="dl-item"><div class="dl-dot" style="background:${d.color}"></div><div class="dl-lbl">${d.tipo}</div><div class="dl-val">${d.count}</div><div class="dl-pct">${(d.pct*100).toFixed(1)}%</div></div>`
+  ).join('');
+  donutData.forEach(d=>{
     const dash=d.pct*circ;
     const gap=circ-dash;
     const arc=document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -1092,23 +1116,51 @@ function buildDonut(){
 }
 buildDonut();
 
-// ── ANALYSTS ──
-const analysts=[
-  {nm:'María Rodríguez',role:'Analista senior',ini:'MR',col:'#2563EB',pct:94,apro:42,tiempo:'3.8m'},
-  {nm:'Carlos Pérez',role:'Analista junior',ini:'CP',col:'#0A6B45',pct:78,apro:31,tiempo:'5.1m'},
-  {nm:'Laura Gómez',role:'Analista senior',ini:'LG',col:'#B8872A',pct:88,apro:16,tiempo:'4.2m'},
-];
+// ── ANALYSTS — Desempeño real por analista ──
+const AN_COLORS = ['#2563EB','#0A6B45','#B8872A','#8B1A1A','#5A7099'];
+let analysts=[];
+
+function calcularAnalistas(solicitudes) {
+  const porAnalista = {};
+  solicitudes.forEach(s => {
+    if (!s.analistaNombre) return; // sin analista asignado todavía -> no cuenta
+    const key = s.analistaNombre;
+    if (!porAnalista[key]) porAnalista[key] = { nm:key, apro:0, decididas:0, sumaMin:0 };
+    const a = porAnalista[key];
+    if (s.estado === 'aprobado' || s.estado === 'firmado') a.apro++;
+    if (s.fechaSolicitud && s.fechaDecision) {
+      const min = (new Date(s.fechaDecision) - new Date(s.fechaSolicitud)) / 60000;
+      if (min >= 0) { a.sumaMin += min; a.decididas++; }
+    }
+  });
+  return Object.values(porAnalista).map((a, i) => {
+    const ini = a.nm.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+    const tiempoProm = a.decididas ? (a.sumaMin / a.decididas) : null;
+    return {
+      nm: a.nm, role: '', ini, col: AN_COLORS[i % AN_COLORS.length],
+      apro: a.apro,
+      tiempo: tiempoProm != null ? (tiempoProm < 60 ? tiempoProm.toFixed(1)+'m' : (tiempoProm/60).toFixed(1)+'h') : '—',
+      // "Eficiencia" = % de lo que ha decidido que terminó aprobado — proxy simple mientras no haya una métrica propia definida
+      pct: a.decididas ? Math.round((a.apro / a.decididas) * 100) : 0,
+    };
+  }).sort((a,b) => b.apro - a.apro);
+}
+
 function buildAnalysts(){
   const c=document.getElementById('analysts-list');
   c.innerHTML='';
+  if (!analysts.length) {
+    c.innerHTML = '<div class="empty-mini" style="font-size:11px;color:var(--slate);padding:8px 0">Aún no hay solicitudes con analista asignado.</div>';
+    return;
+  }
   analysts.forEach(a=>{
     const row=document.createElement('div');
     row.className='analyst-row';
     row.innerHTML=`
       <div class="an-av" style="background:${a.col}20;color:${a.col}">${a.ini}</div>
-      <div style="flex:1"><div class="an-name">${a.nm}</div><div class="an-role">${a.role} · ${a.apro} aprobadas · ${a.tiempo} prom.</div></div>
+      <div style="flex:1"><div class="an-name">${a.nm}</div><div class="an-role">${a.apro} aprobadas · ${a.tiempo} prom.</div></div>
       <div class="an-bar-wrap">
-        <div style="font-size:9px;color:var(--slate);margin-bottom:3px;text-align:right">Eficiencia</div>
+        <div style="font-size:9px;color:var(--slate);margin-bottom:3px;text-align:right">Aprobación</div>
         <div class="an-bar-track"><div class="an-bar-fill" id="anb-${a.ini}" style="width:0%;background:${a.col}"></div></div>
       </div>
       <div class="an-val" style="color:${a.col}">${a.pct}%</div>`;
@@ -1118,14 +1170,26 @@ function buildAnalysts(){
 }
 buildAnalysts();
 
-// ── TABLE ──
-const solsData=[
-  {id:'SOL-0847',nm:'Carlos A. Gil',ini:'CG',col:'#3B82F6',monto:'$8.000.000',tipo:'Consumo',estado:'pendiente',analista:'M. Rodríguez',score:742,rec:'APROBAR'},
-  {id:'SOL-0846',nm:'Valentina Ospina',ini:'VO',col:'#10B981',monto:'$5.000.000',tipo:'Educativo',estado:'pendiente',analista:'C. Pérez',score:811,rec:'APROBAR'},
-  {id:'SOL-0845',nm:'Jhon F. Morales',ini:'JM',col:'#F59E0B',monto:'$15.000.000',tipo:'Consumo',estado:'revision',analista:'M. Rodríguez',score:614,rec:'REVISAR'},
-  {id:'SOL-0844',nm:'Sandra P. Ruiz',ini:'SR',col:'#8B5CF6',monto:'$3.000.000',tipo:'Emergencia',estado:'aprobado',analista:'L. Gómez',score:756,rec:'APROBAR'},
-  {id:'SOL-0843',nm:'Rodrigo A. Ríos',ini:'RR',col:'#EF4444',monto:'$20.000.000',tipo:'Consumo',estado:'rechazado',analista:'M. Rodríguez',score:501,rec:'RECHAZAR'},
-];
+// ── TABLE — Solicitudes recientes (real, últimas 8) ──
+const TABLE_COLORS = ['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#0891B2'];
+let solsData=[];
+
+function calcularSolsData(solicitudes) {
+  return solicitudes
+    .slice()
+    .sort((a,b) => new Date(b.fechaSolicitud||0) - new Date(a.fechaSolicitud||0))
+    .slice(0, 8)
+    .map((s, i) => ({
+      id: s.id || '—', nm: s.nombre || 'Sin nombre',
+      ini: (s.nombre||'??').split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase(),
+      col: TABLE_COLORS[i % TABLE_COLORS.length],
+      monto: fmtCOPGer(Number(s.monto||0)), tipo: s.tipo || '—',
+      estado: ({pendiente_analista:'pendiente', aprobado:'aprobado', rechazado:'rechazado', revision:'revision', firmado:'aprobado'})[s.estado] || 'pendiente',
+      analista: s.analistaNombre || 'Sin asignar',
+      score: Number(s.scoreCIFIN || s.scoreDataCredito || s.scorePropio || 0) || null,
+      rec: s.recomendacionIA || (s.riesgo==='bajo'?'APROBAR':s.riesgo==='alto'?'RECHAZAR':'REVISAR'),
+    }));
+}
 
 function buildTable(){
   const t=document.getElementById('tbl-sols');
@@ -1134,30 +1198,62 @@ function buildTable(){
   const rClass={APROBAR:'b-green',REVISAR:'b-amber',RECHAZAR:'b-red'};
   t.innerHTML=`<thead><tr><th>Asociado</th><th>Monto</th><th>Tipo</th><th>Estado</th><th>Score</th><th>IA</th><th>Analista</th></tr></thead><tbody></tbody>`;
   const tbody=t.querySelector('tbody');
+  if (!solsData.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--slate);padding:20px">Aún no hay solicitudes registradas.</td></tr>';
+    return;
+  }
   solsData.forEach(s=>{
-    const sc=s.score>=700?'var(--emerald2)':s.score>=600?'var(--amber2)':'var(--crimson2)';
+    const sc=!s.score?'var(--slate)':s.score>=700?'var(--emerald2)':s.score>=600?'var(--amber2)':'var(--crimson2)';
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td><span class="av-sm" style="background:${s.col}20;color:${s.col}">${s.ini}</span>${s.nm}<div class="mono" style="color:var(--slate);font-size:9px;margin-left:35px;margin-top:-2px">${s.id}</div></td>
       <td class="mono">${s.monto}</td>
       <td><span class="badge b-slate">${s.tipo}</span></td>
       <td><span class="badge ${eClass[s.estado]}">${eTxt[s.estado]}</span></td>
-      <td class="mono" style="color:${sc};font-weight:600">${s.score}</td>
-      <td><span class="badge ${rClass[s.rec]}">${s.rec}</span></td>
+      <td class="mono" style="color:${sc};font-weight:600">${s.score || '—'}</td>
+      <td><span class="badge ${rClass[s.rec]||'b-slate'}">${s.rec}</span></td>
       <td style="color:var(--slate)">${s.analista}</td>`;
     tbody.appendChild(tr);
   });
 }
 buildTable();
 
+// ── MATRIZ DE RIESGO — real, agrupado por s.riesgo ──
+function calcularMatrizRiesgo(solicitudes) {
+  const grupos = { bajo: [], medio: [], alto: [] };
+  solicitudes.forEach(s => { if (grupos[s.riesgo]) grupos[s.riesgo].push(Number(s.scoreCIFIN||s.scoreDataCredito||s.scorePropio||0)); });
+  const total = solicitudes.length || 1;
+  const out = {};
+  ['bajo','medio','alto'].forEach(k => {
+    const arr = grupos[k];
+    out[k] = { count: arr.length, pct: (arr.length/total*100).toFixed(1), scoreProm: arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0 };
+  });
+  return out;
+}
+
+function buildMatrizRiesgo(m) {
+  document.getElementById('rm-bajo-n').textContent  = m.bajo.count;
+  document.getElementById('rm-bajo-p').textContent  = m.bajo.pct + '%';
+  document.getElementById('rm-medio-n').textContent = m.medio.count;
+  document.getElementById('rm-medio-p').textContent = m.medio.pct + '%';
+  document.getElementById('rm-alto-n').textContent  = m.alto.count;
+  document.getElementById('rm-alto-p').textContent  = m.alto.pct + '%';
+  document.getElementById('rm-score-bajo').textContent  = m.bajo.scoreProm  || '—';
+  document.getElementById('rm-score-medio').textContent = m.medio.scoreProm || '—';
+  document.getElementById('rm-score-alto').textContent  = m.alto.scoreProm  || '—';
+}
+
 // ── REVERSIONES ──
+// Sin fuente de datos real todavía: no existe un estado "reversión" en el
+// modelo de solicitudes (ver ESTADO_MAP en Módulo 2) ni una colección propia.
+// Se deja el ejemplo, marcado como tal, hasta que se defina ese flujo.
 const reversiones=[
   {id:'SOL-0831',nm:'Andrés Salcedo',monto:'$12M',analista:'C. Pérez',motivo:'Score mejoró significativamente en nueva consulta. Solicita reconsideración.'},
   {id:'SOL-0819',nm:'Patricia Muñoz',monto:'$6M',analista:'L. Gómez',motivo:'Error en lectura de nómina por IA. Ingreso real es superior al calculado.'},
 ];
 function buildReversiones(){
   const c=document.getElementById('reversion-list');
-  c.innerHTML='';
+  c.innerHTML='<div style="font-size:10px;color:var(--slate);background:var(--paper);border-radius:6px;padding:6px 9px;margin-bottom:8px"><i class="ti ti-info-circle"></i> Ejemplo — todavía no existe un flujo de reversión real conectado a Firestore.</div>';
   reversiones.forEach(r=>{
     const div=document.createElement('div');
     div.style.cssText='border:1px solid var(--paper3);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;';
@@ -1961,13 +2057,33 @@ function actualizarKPIsReales(solicitudes) {
   const aprobadas = solicitudes.filter(s => s.estado === 'aprobado' || s.estado === 'firmado').length;
   const tasa = total > 0 ? Math.round((aprobadas/total) * 1000) / 10 : 0;
 
+  const desembolsado = solicitudes
+    .filter(s => s.estado === 'aprobado' || s.estado === 'firmado')
+    .reduce((a, s) => a + Number(s.monto || 0), 0);
+
+  const decididas = solicitudes.filter(s => s.fechaSolicitud && s.fechaDecision);
+  const minsProm = decididas.length
+    ? decididas.reduce((a, s) => a + Math.max(0, (new Date(s.fechaDecision) - new Date(s.fechaSolicitud)) / 60000), 0) / decididas.length
+    : null;
+
   const kvSol  = document.getElementById('kv-sol');
   const kvApro = document.getElementById('kv-apro');
+  const kvDes  = document.getElementById('kv-des');
+  const kvTiempo = document.getElementById('kv-tiempo');
   if (kvSol)  kvSol.textContent  = total;
   if (kvApro) kvApro.textContent = aprobadas;
+  if (kvDes)  kvDes.textContent  = '$' + (desembolsado/1e6).toLocaleString('es-CO',{maximumFractionDigits:1}) + 'M';
+  if (kvTiempo) kvTiempo.textContent = minsProm == null ? '—' : (minsProm < 60 ? minsProm.toFixed(1)+'m' : (minsProm/60).toFixed(1)+'h');
 
   const deltaApro = document.querySelector('#kv-apro')?.closest('.kpi')?.querySelector('.kpi-delta');
   if (deltaApro) deltaApro.innerHTML = '<i class="ti ti-trending-up" style="font-size:11px"></i>' + tasa + '% tasa';
+
+  // Resto del panel: barras, donut, analistas, matriz de riesgo, tabla
+  barData = calcularBarData(solicitudes);   buildBarChart();
+  donutData = calcularDonutData(solicitudes); buildDonut();
+  analysts = calcularAnalistas(solicitudes);  buildAnalysts();
+  solsData = calcularSolsData(solicitudes);   buildTable();
+  buildMatrizRiesgo(calcularMatrizRiesgo(solicitudes));
 }
 
 async function iniciarKPIsReales() {
