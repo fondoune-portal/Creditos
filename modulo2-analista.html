@@ -1536,6 +1536,7 @@ function closeModal() {
 
 // ── CONFIRMAR DECISIÓN — ahora escribe en Firebase ───────────
 async function confirmDecision() {
+  console.log('[Módulo2] confirmDecision() ejecutado — pendingAction:', pendingAction, '· pendingSolId:', pendingSolId);
   const nota = document.getElementById('modal-nota').value.trim();
 
   // 1. Validar nota con el validador de seguridad
