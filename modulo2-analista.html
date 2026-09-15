@@ -1571,22 +1571,29 @@ async function confirmDecision() {
 
   const notaLimpia = vNota.valor;
   console.log('[Módulo2] Validación de nota superada — vNota:', vNota, '· cerrando modal y continuando...');
+
+  // closeModal() resetea pendingAction/pendingSolId a null — hay que
+  // capturarlos aquí, ANTES de llamar closeModal(), o el resto de la
+  // función (incluyendo el DATA.find de abajo) los ve como null y
+  // retorna en silencio sin llegar nunca a aprobarSolicitud().
+  const accionActual = pendingAction;
+  const solIdActual   = pendingSolId;
   closeModal();
 
-  const s = DATA.find(x => x.id === pendingSolId);
-  if (!s) return;
+  const s = DATA.find(x => x.id === solIdActual);
+  if (!s) { console.error('[Módulo2] No se encontró la solicitud en DATA con id:', solIdActual, '· abortando confirmDecision.'); return; }
 
-  const d        = MDEFS[pendingAction];
+  const d        = MDEFS[accionActual];
   const analista = getAnalistaActual();
 
   // 2. Mostrar loading
   showToast('Procesando decisión...', 'toast-warn', 'ti-loader');
-  console.log('[Módulo2] Iniciando confirmDecision — acción:', pendingAction, '· solicitud:', s.fbId);
+  console.log('[Módulo2] Iniciando confirmDecision — acción:', accionActual, '· solicitud:', s.fbId);
 
   try {
     let resultado;
 
-    if (pendingAction === 'aprobar') {
+    if (accionActual === 'aprobar') {
       // Aprobar en Firebase — genera token y número de pagaré
       console.log('[Módulo2] Llamando a FondoUneFirebase.aprobarSolicitud...');
       resultado = await FondoUneFirebase.aprobarSolicitud(
@@ -1607,7 +1614,7 @@ async function confirmDecision() {
         }).catch(e => console.warn('[Módulo2] Email no enviado:', e.message));
       }
 
-    } else if (pendingAction === 'rechazar') {
+    } else if (accionActual === 'rechazar') {
       console.log('[Módulo2] Llamando a FondoUneFirebase.rechazarSolicitud...');
       resultado = await FondoUneFirebase.rechazarSolicitud(
         s.fbId,
@@ -1617,7 +1624,7 @@ async function confirmDecision() {
       );
       console.log('[Módulo2] Resultado de rechazarSolicitud:', resultado);
 
-    } else if (pendingAction === 'info') {
+    } else if (accionActual === 'info') {
       // Estado "revision" — actualización directa
       const db = await FondoUneFirebase.inicializar();
       await db.collection('solicitudes').doc(s.fbId).update({
