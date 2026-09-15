@@ -1543,11 +1543,23 @@ async function confirmDecision() {
   // Solo rechazar exige una justificación mínima — aprobar y pedir
   // información no necesitan nota extensa (puede ser breve o vacía).
   const minLen = pendingAction === 'rechazar' ? 20 : 0;
-  const vNota = (typeof FondouneValidator !== 'undefined')
+  console.log('[Módulo2] Nota ingresada:', JSON.stringify(nota), '· longitud:', nota.length, '· minLen requerido:', minLen, '· FondouneValidator disponible:', typeof FondouneValidator !== 'undefined');
+  let vNota = (typeof FondouneValidator !== 'undefined')
     ? FondouneValidator.validarTextoLibre(nota, minLen, 500)
     : { ok: nota.length >= minLen, valor: nota, error: nota.length < minLen ? 'Nota muy corta' : null };
 
+  // Salvavidas: cuando la nota no es obligatoria (minLen 0, para
+  // aprobar/pedir info) el flujo nunca debe bloquearse por su
+  // ausencia. Si el validador externo (security-validator.js)
+  // devolviera ok:false para un campo opcional vacío, no dejamos
+  // que eso frene la aprobación/solicitud de información.
+  if (minLen === 0 && !vNota.ok && nota.length === 0) {
+    console.warn('[Módulo2] FondouneValidator marcó inválida una nota vacía en un campo opcional — se ignora esa validación y se continúa.');
+    vNota = { ok: true, valor: '', error: null };
+  }
+
   if (!vNota.ok) {
+    console.warn('[Módulo2] Validación de nota FALLÓ — vNota:', vNota, '· la función se detiene aquí, no llega a aprobarSolicitud()');
     const el = document.getElementById('modal-nota');
     el.style.borderColor = 'var(--red2)';
     el.focus();
@@ -1558,6 +1570,7 @@ async function confirmDecision() {
   }
 
   const notaLimpia = vNota.valor;
+  console.log('[Módulo2] Validación de nota superada — vNota:', vNota, '· cerrando modal y continuando...');
   closeModal();
 
   const s = DATA.find(x => x.id === pendingSolId);
