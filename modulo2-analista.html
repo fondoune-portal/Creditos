@@ -1245,6 +1245,45 @@ function selectSol(id) {
   }, 100);
 }
 
+// Motivos de la recomendación del motor IA — generados con reglas
+// simples a partir de datos ya disponibles (score, % compromiso de
+// ingreso, riesgo asignado, estado KYC). No es un campo que alguien
+// escriba a mano; se recalcula cada vez que se llama, así que
+// refleja el estado más reciente de esos datos. Función de nivel
+// superior (no solo dentro de buildDetail) para poder reutilizarla
+// también al generar el PDF.
+function generarMotivosIA(s) {
+  const motivos = [];
+
+  if (s.score > 0) {
+    if (s.score >= 700) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Score de ' + s.score + ' — dentro del rango de bajo riesgo.' });
+    else if (s.score >= 600) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Score de ' + s.score + ' — rango medio, amerita revisión.' });
+    else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Score de ' + s.score + ' — por debajo del umbral recomendado.' });
+  } else {
+    motivos.push({ ic:'ti-help-circle', cls:'warn', txt:'Sin score de centrales de riesgo consultado aún.' });
+  }
+
+  if (s.pct > 0) {
+    if (s.pct <= 35) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — dentro del límite del 35%.' });
+    else if (s.pct <= 50) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — supera el límite recomendado del 35%.' });
+    else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — nivel de endeudamiento alto.' });
+  }
+
+  if (s.cap <= 0 && s.nom.neto > 0) {
+    motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Capacidad de pago estimada en $0 o negativa tras libranzas activas.' });
+  }
+
+  const kycFallas = ['cedula','rnec','liveness','biometria','uiaf']
+    .filter(k => s.kyc[k] && s.kyc[k] !== 'ok');
+  if (kycFallas.length) {
+    motivos.push({ ic:'ti-shield-x', cls:'fail', txt:'Verificación KYC con hallazgos pendientes: ' + kycFallas.join(', ') + '.' });
+  } else {
+    motivos.push({ ic:'ti-shield-check', cls:'ok', txt:'Verificación KYC completa sin hallazgos.' });
+  }
+
+  return motivos;
+}
+
 // ── BUILD DETAIL ──────────────────────────────────────────────
 function buildDetail(s) {
   const canAct  = s.estado !== 'aprobado' && s.estado !== 'rechazado' && s.estado !== 'firmado';
@@ -1271,43 +1310,6 @@ function buildDetail(s) {
     const n=10, f=s.riesgo==='bajo'?3:s.riesgo==='medio'?6:9;
     const fc=s.riesgo==='bajo'?'rb-green':s.riesgo==='medio'?'rb-amber':'rb-red';
     return Array.from({length:n},(_,i)=>`<div class="rb-seg ${i<f?fc:''}"></div>`).join('');
-  };
-
-  // Motivos de la recomendación del motor IA — generados con reglas
-  // simples a partir de datos ya disponibles (score, % compromiso de
-  // ingreso, riesgo asignado, estado KYC). No es un campo que alguien
-  // escriba a mano; se recalcula siempre que se abre la solicitud, así
-  // que refleja el estado más reciente de esos datos.
-  const generarMotivosIA = () => {
-    const motivos = [];
-
-    if (s.score > 0) {
-      if (s.score >= 700) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Score de ' + s.score + ' — dentro del rango de bajo riesgo.' });
-      else if (s.score >= 600) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Score de ' + s.score + ' — rango medio, amerita revisión.' });
-      else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Score de ' + s.score + ' — por debajo del umbral recomendado.' });
-    } else {
-      motivos.push({ ic:'ti-help-circle', cls:'warn', txt:'Sin score de centrales de riesgo consultado aún.' });
-    }
-
-    if (s.pct > 0) {
-      if (s.pct <= 35) motivos.push({ ic:'ti-circle-check', cls:'ok',   txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — dentro del límite del 35%.' });
-      else if (s.pct <= 50) motivos.push({ ic:'ti-alert-triangle', cls:'warn', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — supera el límite recomendado del 35%.' });
-      else motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Cuota compromete el ' + s.pct.toFixed(1) + '% del ingreso neto — nivel de endeudamiento alto.' });
-    }
-
-    if (s.cap <= 0 && s.nom.neto > 0) {
-      motivos.push({ ic:'ti-alert-circle', cls:'fail', txt:'Capacidad de pago estimada en $0 o negativa tras libranzas activas.' });
-    }
-
-    const kycFallas = ['cedula','rnec','liveness','biometria','uiaf']
-      .filter(k => s.kyc[k] && s.kyc[k] !== 'ok');
-    if (kycFallas.length) {
-      motivos.push({ ic:'ti-shield-x', cls:'fail', txt:'Verificación KYC con hallazgos pendientes: ' + kycFallas.join(', ') + '.' });
-    } else {
-      motivos.push({ ic:'ti-shield-check', cls:'ok', txt:'Verificación KYC completa sin hallazgos.' });
-    }
-
-    return motivos;
   };
 
   const tlItems = s.log.map(l =>
@@ -1434,7 +1436,7 @@ function buildDetail(s) {
           <div style="font-size:10px;font-weight:600;color:${rColor};margin-top:5px">${rLabel.toUpperCase()}</div>
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
             <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Motivos de la recomendación</div>
-            ${generarMotivosIA().map(m => `
+            ${generarMotivosIA(s).map(m => `
               <div style="display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.5;margin-bottom:5px">
                 <i class="ti ${m.ic}" style="font-size:13px;flex-shrink:0;margin-top:1px;color:${m.cls==='ok'?'var(--green2)':m.cls==='warn'?'var(--amber3)':'var(--red2)'}"></i>
                 <span>${m.txt}</span>
@@ -1656,32 +1658,119 @@ async function confirmDecision() {
 }
 
 // ── EXPORTAR PDF ──────────────────────────────────────────────
+// ── EXPORTAR PDF ─────────────────────────────────────────────
+// Esta plantilla es EXCLUSIVA del PDF — no toca ni reutiliza el
+// HTML del panel de detalle en pantalla (#export-solicitud), que
+// se queda tal cual está hoy. Se genera un elemento aparte, oculto,
+// solo para la captura del PDF, y se descarta después.
 function exportarPDF(id) {
-  const el = document.getElementById('export-solicitud');
-  if (!el) {
-    showToast('No encontré el contenido para exportar. Abre primero una solicitud.', 'toast-err', 'ti-alert-circle');
+  const s = DATA.find(x => x.id === id);
+  if (!s) {
+    showToast('No encontré la solicitud para exportar.', 'toast-err', 'ti-alert-circle');
     return;
   }
 
-  const s = DATA.find(x => x.id === id);
-  let filename = 'Solicitud-FondoUne.pdf';
-  if (s) {
-    const nombreLimpio = (s.nombre || 'Asociado')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-zA-Z0-9\- ]/g,'')
-      .replace(/\s+/g,'-');
-    filename = `Solicitud-${nombreLimpio}-${s.id.slice(0,8)}.pdf`;
-  }
+  const nombreLimpio = (s.nombre || 'Asociado')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-zA-Z0-9\- ]/g,'')
+    .replace(/\s+/g,'-');
+  const filename = `Solicitud-${nombreLimpio}-${s.id.slice(0,8)}.pdf`;
+
+  const fmtCOP = n => '$' + Number(n || 0).toLocaleString('es-CO');
+  const rLabel = {bajo:'Riesgo bajo', medio:'Riesgo medio', alto:'Riesgo alto'}[s.riesgo] || 'Sin datos';
+  // Posición del marcador sobre la barra de gradiente verde→rojo:
+  // usamos el score cuando existe (0-900 invertido, a mayor score
+  // menor riesgo), y si no hay score, el nivel categórico de riesgo.
+  const riesgoPct = s.score > 0
+    ? Math.max(4, Math.min(96, 100 - (s.score / 900) * 100))
+    : ({bajo:20, medio:50, alto:80}[s.riesgo] ?? 50);
+
+  const estadoBadge = {
+    aprobado:  { bg:'#0A6B4515', color:'#0A6B45', ic:'ti-circle-check', txt:'Aprobado'  },
+    rechazado: { bg:'#8B1A1A15', color:'#8B1A1A', ic:'ti-circle-x',     txt:'Rechazado' },
+    firmado:   { bg:'#0A6B4515', color:'#0A6B45', ic:'ti-writing-sign', txt:'Firmado'   },
+  }[s.estado] || { bg:'#B8872A15', color:'#B8872A', ic:'ti-clock', txt:'Pendiente' };
+
+  const motivosHTML = generarMotivosIA(s).map(m => {
+    const color = m.cls === 'ok' ? '#0A6B45' : m.cls === 'warn' ? '#B8872A' : '#8B1A1A';
+    return `<div style="display:flex;gap:6px;font-size:11px;margin-bottom:5px">
+      <i class="ti ${m.ic}" style="color:${color};font-size:13px;flex-shrink:0;margin-top:1px"></i>
+      <span>${m.txt}</span>
+    </div>`;
+  }).join('');
+
+  const hoy = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:720px';
+  wrap.innerHTML = `
+    <div style="font-family:'DM Sans',sans-serif;background:#fff;padding:1.5rem;color:#0B2545">
+
+      <div style="display:flex;align-items:flex-start;gap:14px;padding-bottom:14px;border-bottom:2px solid #0B2545;margin-bottom:16px">
+        <div style="width:48px;height:48px;border-radius:10px;background:${s.col}20;color:${s.col};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0">${s.ini}</div>
+        <div style="flex:1">
+          <div style="font-family:'DM Serif Display',serif;font-size:19px;font-weight:400">${s.nombre}</div>
+          <div style="font-size:11px;color:#5A7099;margin-top:2px">C.C. ${s.ced} &nbsp;·&nbsp; ${s.empresa}${s.email ? ' &nbsp;·&nbsp; ' + s.email : ''}</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <span style="font-size:9.5px;font-family:monospace;background:#F0F2F5;color:#5A7099;padding:2px 8px;border-radius:4px">${s.fbId}</span>
+            <span style="font-size:9.5px;background:#F0F2F5;color:#5A7099;padding:2px 8px;border-radius:4px">${s.tiempo}</span>
+          </div>
+        </div>
+        <div style="background:${estadoBadge.bg};color:${estadoBadge.color};font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;flex-shrink:0"><i class="ti ${estadoBadge.ic}" style="font-size:13px;vertical-align:-2px"></i> ${estadoBadge.txt}</div>
+      </div>
+
+      <div style="font-size:10px;font-weight:600;color:#5A7099;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Datos de la solicitud</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;page-break-inside:avoid">
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px"><div style="font-size:9.5px;color:#5A7099">Monto</div><div style="font-family:monospace;font-size:14px;font-weight:600">${fmtCOP(s.monto)}</div></div>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px"><div style="font-size:9.5px;color:#5A7099">Plazo</div><div style="font-size:14px;font-weight:600">${s.plazo} meses</div></div>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px"><div style="font-size:9.5px;color:#5A7099">Línea de crédito</div><div style="font-size:12.5px;font-weight:600">${s.tipo}</div></div>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px"><div style="font-size:9.5px;color:#5A7099">Cuota estimada</div><div style="font-family:monospace;font-size:14px;font-weight:600;color:#B8872A">${fmtCOP(s.cuota)}</div></div>
+      </div>
+
+      <div style="font-size:10px;font-weight:600;color:#5A7099;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Recomendación motor IA</div>
+      <div style="background:#F7F8FA;border-radius:10px;padding:14px;page-break-inside:avoid;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:11px;color:#5A7099">Decisión sugerida</span>
+          <span style="font-size:13px;font-weight:700;color:${s.rec==='APROBAR'?'#0A6B45':s.rec==='REVISAR'?'#B8872A':'#8B1A1A'}">${s.rec}</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#0A6B45 0%,#B8872A 50%,#8B1A1A 100%);position:relative;margin-bottom:4px">
+          <div style="position:absolute;left:${riesgoPct}%;top:-3px;width:2px;height:12px;background:#0B2545"></div>
+        </div>
+        <div style="font-size:10px;color:#5A7099;margin-bottom:10px">${rLabel}${s.score > 0 ? ' — score ' + s.score : ''}</div>
+        <div style="border-top:0.5px solid rgba(11,37,69,.1);padding-top:10px">
+          ${motivosHTML}
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:600;color:#5A7099;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Historial FondoUne</div>
+      <div style="background:#F7F8FA;border-radius:8px;padding:12px;font-size:11px;color:${s.hist ? '#0B2545' : '#5A7099'};margin-bottom:16px;page-break-inside:avoid">
+        ${s.hist || 'Sin historial registrado aún — no hay créditos previos ni comportamiento de pago cargado en el fondo.'}
+      </div>
+
+      <div style="margin-top:16px;padding-top:10px;border-top:0.5px solid rgba(11,37,69,.1);font-size:9.5px;color:#5A7099;display:flex;justify-content:space-between">
+        <span>FondoUne · Documento generado el ${hoy}</span>
+        <span>Solicitud ${s.fbId}</span>
+      </div>
+    </div>`;
+
+  document.body.appendChild(wrap);
 
   const opt = {
     margin:      10,
     filename:    filename,
     image:       { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2 },
-    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:   { mode: ['css', 'avoid-all'] }
   };
 
-  html2pdf().set(opt).from(el).save();
+  html2pdf().set(opt).from(wrap).save().then(() => {
+    document.body.removeChild(wrap);
+  }).catch(err => {
+    console.error('[Módulo2] Error generando PDF:', err);
+    document.body.removeChild(wrap);
+    showToast('No fue posible generar el PDF.', 'toast-err', 'ti-alert-circle');
+  });
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
