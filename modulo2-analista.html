@@ -1702,7 +1702,11 @@ function exportarPDF(id) {
   const hoy = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
 
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:absolute;left:0;top:-99999px;width:720px;background:#fff';
+  // html2canvas puede no renderizar contenido completamente fuera
+  // del viewport (algunos navegadores no lo pintan aunque esté en
+  // el DOM). Lo mantenemos DENTRO del área visible pero invisible
+  // al usuario: opacity 0 + z-index negativo + pointer-events none.
+  wrap.style.cssText = 'position:fixed;top:0;left:0;width:720px;background:#fff;opacity:0;z-index:-1;pointer-events:none';
   wrap.innerHTML = `
     <div style="font-family:'DM Sans',sans-serif;background:#fff;padding:1.5rem;color:#0B2545">
 
@@ -1759,18 +1763,24 @@ function exportarPDF(id) {
     margin:      10,
     filename:    filename,
     image:       { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
     jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak:   { mode: ['css', 'avoid-all'] }
   };
 
-  html2pdf().set(opt).from(wrap).save().then(() => {
-    document.body.removeChild(wrap);
-  }).catch(err => {
-    console.error('[Módulo2] Error generando PDF:', err);
-    document.body.removeChild(wrap);
-    showToast('No fue posible generar el PDF.', 'toast-err', 'ti-alert-circle');
-  });
+  // Pequeña espera antes de capturar: el contenido recién insertado
+  // (íconos de fuente web, layout) puede no estar listo en el mismo
+  // tick en que se agrega al DOM, y html2canvas puede capturar un
+  // lienzo vacío si se le pide de inmediato.
+  setTimeout(() => {
+    html2pdf().set(opt).from(wrap).save().then(() => {
+      document.body.removeChild(wrap);
+    }).catch(err => {
+      console.error('[Módulo2] Error generando PDF:', err);
+      document.body.removeChild(wrap);
+      showToast('No fue posible generar el PDF.', 'toast-err', 'ti-alert-circle');
+    });
+  }, 250);
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
