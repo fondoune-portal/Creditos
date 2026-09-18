@@ -1768,16 +1768,29 @@ function exportarPDF(id) {
     pagebreak:   { mode: ['css', 'avoid-all'] }
   };
 
-  // Pequeña espera antes de capturar: el contenido recién insertado
-  // (íconos de fuente web, layout) puede no estar listo en el mismo
-  // tick en que se agrega al DOM, y html2canvas puede capturar un
-  // lienzo vacío si se le pide de inmediato.
   setTimeout(() => {
-    html2pdf().set(opt).from(wrap).save().then(() => {
+    // Diagnóstico: medir el wrap real en el DOM antes de capturar.
+    // Si scrollHeight/scrollWidth salen en 0, el contenido está
+    // colapsado (bug de CSS/contenido) y html2canvas no tiene nada
+    // que fotografiar — sin importar cómo lo posicionemos.
+    const rect = wrap.getBoundingClientRect();
+    console.log('[Módulo2] PDF wrap dimensiones — offsetWidth:', wrap.offsetWidth, '· offsetHeight:', wrap.offsetHeight, '· scrollHeight:', wrap.scrollHeight, '· getBoundingClientRect:', rect, '· hijos:', wrap.children.length, '· innerHTML.length:', wrap.innerHTML.length);
+
+    html2pdf().set(opt).from(wrap).toContainer().then(() => {
+      console.log('[Módulo2] PDF — toContainer() completado, generando canvas...');
+    }).toCanvas().then((canvas) => {
+      console.log('[Módulo2] PDF — canvas generado. width:', canvas.width, '· height:', canvas.height);
+      if (canvas.width === 0 || canvas.height === 0) {
+        console.error('[Módulo2] PDF — el canvas salió con dimensiones 0. El contenido no se capturó.');
+      }
+    }).toPdf().get('pdf').then((pdf) => {
+      console.log('[Módulo2] PDF — número de páginas generadas:', pdf.internal.getNumberOfPages());
+      pdf.save(filename);
+    }).then(() => {
       document.body.removeChild(wrap);
     }).catch(err => {
       console.error('[Módulo2] Error generando PDF:', err);
-      document.body.removeChild(wrap);
+      if (wrap.parentNode) document.body.removeChild(wrap);
       showToast('No fue posible generar el PDF.', 'toast-err', 'ti-alert-circle');
     });
   }, 250);
