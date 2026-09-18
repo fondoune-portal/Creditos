@@ -1702,7 +1702,7 @@ function exportarPDF(id) {
   const hoy = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
 
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:720px';
+  wrap.style.cssText = 'position:absolute;left:0;top:-99999px;width:720px;background:#fff';
   wrap.innerHTML = `
     <div style="font-family:'DM Sans',sans-serif;background:#fff;padding:1.5rem;color:#0B2545">
 
