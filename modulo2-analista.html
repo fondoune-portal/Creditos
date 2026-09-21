@@ -1701,12 +1701,17 @@ function exportarPDF(id) {
 
   const hoy = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
 
+  // CAUSA DEL PDF EN BLANCO: html2pdf clona el nodo que recibe con
+  // todos sus estilos inline. Si el propio `wrap` tenía opacity:0
+  // (o position/left fuera de pantalla), el clon también salía
+  // invisible y html2canvas fotografiaba una página transparente.
+  // Solución: el `wrap` lleva SOLO estilos "limpios" (ancho + fondo)
+  // y la invisibilidad para el usuario se logra con un contenedor
+  // externo (`holder`), que html2pdf NO clona.
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;top:0;left:0;opacity:0;z-index:-1;pointer-events:none';
   const wrap = document.createElement('div');
-  // html2canvas puede no renderizar contenido completamente fuera
-  // del viewport (algunos navegadores no lo pintan aunque esté en
-  // el DOM). Lo mantenemos DENTRO del área visible pero invisible
-  // al usuario: opacity 0 + z-index negativo + pointer-events none.
-  wrap.style.cssText = 'position:fixed;top:0;left:0;width:720px;background:#fff;opacity:0;z-index:-1;pointer-events:none';
+  wrap.style.cssText = 'width:720px;background:#fff';
   wrap.innerHTML = `
     <div style="font-family:'DM Sans',sans-serif;background:#fff;padding:1.5rem;color:#0B2545">
 
@@ -1757,7 +1762,8 @@ function exportarPDF(id) {
       </div>
     </div>`;
 
-  document.body.appendChild(wrap);
+  holder.appendChild(wrap);
+  document.body.appendChild(holder);
 
   const opt = {
     margin:      10,
@@ -1778,7 +1784,7 @@ function exportarPDF(id) {
 
     html2pdf().set(opt).from(wrap).toContainer().then(() => {
       console.log('[Módulo2] PDF — toContainer() completado, generando canvas...');
-    }).toCanvas().then((canvas) => {
+    }).toCanvas().get('canvas').then((canvas) => {
       console.log('[Módulo2] PDF — canvas generado. width:', canvas.width, '· height:', canvas.height);
       if (canvas.width === 0 || canvas.height === 0) {
         console.error('[Módulo2] PDF — el canvas salió con dimensiones 0. El contenido no se capturó.');
@@ -1787,10 +1793,10 @@ function exportarPDF(id) {
       console.log('[Módulo2] PDF — número de páginas generadas:', pdf.internal.getNumberOfPages());
       pdf.save(filename);
     }).then(() => {
-      document.body.removeChild(wrap);
+      holder.remove();
     }).catch(err => {
       console.error('[Módulo2] Error generando PDF:', err);
-      if (wrap.parentNode) document.body.removeChild(wrap);
+      holder.remove();
       showToast('No fue posible generar el PDF.', 'toast-err', 'ti-alert-circle');
     });
   }, 250);
