@@ -1768,9 +1768,9 @@ function exportarPDF(id) {
   const opt = {
     margin:      10,
     filename:    filename,
-    image:       { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    image:       { type: 'png' },  // PNG: sin artefactos de compresión JPEG alrededor del texto
+    html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },  // scale 3 ≈ 288 dpi
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
     pagebreak:   { mode: ['css', 'avoid-all'] }
   };
 
