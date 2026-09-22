@@ -1655,9 +1655,6 @@ async function confirmDecision() {
   }
 }
 
-// ── EXPORTAR PDF ──────────────────────────────────────────────
-// ── EXPORTAR PDF ─────────────────────────────────────────────
-// Esta plantilla es EXCLUSIVA del PDF — no toca ni reutiliza el
 // ── EXPORTAR PDF (vectorial, jsPDF) ───────────────────────────
 // El PDF se arma directamente con jsPDF (texto y formas vectoriales),
 // no fotografiando el DOM. Resultado: texto nítido a cualquier zoom,
@@ -1790,6 +1787,54 @@ function construirPDFSolicitud(JsPDF, s, logo) {
       doc.line(M + CW * limit, y - 1, M + CW * limit, y + 3);
     }
     y += 6;
+  };
+
+  // Gauge de score CIFIN/DataCrédito: escala 300–900, igual a la que
+  // se ve en pantalla (número grande + barra con marcas 300/500/700/900).
+  const scoreGauge = (score, estadoTxt, estadoColor) => {
+    const h = 30;
+    ensure(h + 2);
+    txt(score > 0 ? String(score) : '—', M, y + 11, { size: 26, style: 'bold', color: C.gold });
+    txt('sobre 900 puntos', M, y + 15.5, { size: 7.5, color: C.muted });
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    const bw = doc.getTextWidth(estadoTxt) + 9;
+    fill(tint(estadoColor, 0.14)); doc.roundedRect(M + CW - bw, y + 1, bw, 6.5, 3.25, 3.25, 'F');
+    txt(estadoTxt, M + CW - bw / 2, y + 5.4, { size: 9, style: 'bold', color: estadoColor, align: 'center' });
+
+    const gy = y + 19;
+    fill(C.track); doc.roundedRect(M, gy, CW, 2.2, 1.1, 1.1, 'F');
+    if (score > 0) {
+      const ratio = Math.max(0, Math.min(1, (score - 300) / 600));
+      const segs = 60, gStart = rgb(C.green), gEnd = rgb(C.gold);
+      const fillW = ratio * CW;
+      for (let i = 0; i < segs; i++) {
+        const segX = i * CW / segs;
+        if (segX > fillW) break;
+        const t = i / (segs - 1);
+        const c = lerp(gStart, gEnd, t);
+        doc.setFillColor(Math.round(c[0]), Math.round(c[1]), Math.round(c[2]));
+        doc.rect(M + segX, gy, Math.min(CW / segs + 0.05, fillW - segX), 2.2, 'F');
+      }
+    }
+    [300, 500, 700, 900].forEach(v => {
+      const mx = M + ((v - 300) / 600) * CW;
+      const align = v === 300 ? 'left' : v === 900 ? 'right' : 'center';
+      txt(String(v), mx, gy + 6.5, { size: 7, color: C.muted, font: 'courier', align });
+    });
+    y = gy + 11;
+  };
+
+  // Marca de agua diagonal con el estado final de la solicitud —
+  // se dibuja al final, sobre todas las páginas, con opacidad baja
+  // para no interferir con la lectura del contenido.
+  const drawWatermark = (label, color) => {
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.07 }));
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(70);
+    ink(color);
+    doc.text(label, PW / 2, PH / 2, { align: 'center', angle: 35 });
+    doc.restoreGraphicsState();
   };
 
   // ── Datos derivados ─────────────────────────────────────────
@@ -1932,12 +1977,11 @@ function construirPDFSolicitud(JsPDF, s, logo) {
 
   // ── Score CIFIN / DataCrédito ───────────────────────────────
   section('Score CIFIN / DataCrédito');
+  scoreGauge(s.dc.score, plain(s.dc.estado), s.dc.score >= 700 ? C.green : s.dc.score >= 600 ? C.gold : C.red);
   cards([
-    { label: 'Estado de la consulta',  value: plain(s.dc.estado) },
-    { label: 'Score (sobre 900)',      value: s.dc.score > 0 ? String(s.dc.score) : 'Sin score' },
     { label: 'Obligaciones activas',   value: String(s.dc.obli) },
     { label: 'Endeudamiento actual',   value: fmtCOP(s.dc.endeuda) },
-  ]);
+  ], 2);
   if (s.dc.comp) {
     wrapT(plain(s.dc.comp), CW, 8.5).forEach(ln => { ensure(5); txt(ln, M, y + 2, { size: 8.5, color: C.muted }); y += 4; });
   }
@@ -2000,10 +2044,14 @@ function construirPDFSolicitud(JsPDF, s, logo) {
     });
   }
 
-  // ── Pie de página en todas las hojas ────────────────────────
+  // ── Pie de página y marca de agua en todas las hojas ────────
+  // Marca de agua solo para estados ya decididos (no para
+  // pendiente/revisión, donde aún no hay un resultado que sellar).
+  const watermarkLabel = { aprobado: 'APROBADO', rechazado: 'RECHAZADO', firmado: 'FIRMADO' }[s.estado];
   const total = doc.getNumberOfPages();
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
+    if (watermarkLabel) drawWatermark(watermarkLabel, estadoBadge.color);
     stroke(C.line); doc.setLineWidth(0.2); doc.line(M, PH - 14, M + CW, PH - 14);
     txt(`FondoUne · Documento generado el ${hoy} · Uso interno`, M, PH - 9.5, { size: 7.5, color: C.muted });
     txt(`Solicitud ${plain(s.fbId)} · Página ${p} de ${total}`, M + CW, PH - 9.5, { size: 7.5, color: C.muted, align: 'right' });
