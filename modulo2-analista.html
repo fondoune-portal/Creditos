@@ -1870,6 +1870,20 @@ function construirPDFSolicitud(JsPDF, s, logo) {
     doc.restoreGraphicsState();
   };
 
+  // Motivo de rechazo / información solicitada: viene embebido entre
+  // comillas en el último evento del log ("... · "texto""), el mismo
+  // patrón que ya usa el registro de auditoría en pantalla. Se busca
+  // desde el final porque puede no ser el último evento si luego hubo
+  // otra acción (ej. una nota interna posterior).
+  const extraerNotaDecision = log => {
+    if (!log || !log.length) return '';
+    for (let i = log.length - 1; i >= 0; i--) {
+      const m = (log[i].txt || '').match(/"([^"]+)"\s*$/);
+      if (m) return m[1];
+    }
+    return '';
+  };
+
   // ── Datos derivados ─────────────────────────────────────────
   const hoy = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const col = /^#[0-9a-f]{6}$/i.test(s.col || '') ? s.col : '#6B7280';
@@ -1985,6 +1999,26 @@ function construirPDFSolicitud(JsPDF, s, logo) {
     my += m.lines.length * 4 + 1.5;
   });
   y += boxH + 7;
+
+  // ── Motivo destacado (rechazo / información solicitada) ─────
+  // Se saca del log y se resalta aparte porque, enterrado entre los
+  // demás eventos de auditoría, es fácil pasarlo por alto — y es la
+  // parte que más le importa leer al asociado o a quien revise el caso.
+  const notaDecision = (s.estado === 'rechazado' || s.estado === 'revision')
+    ? extraerNotaDecision(s.log) : '';
+  if (notaDecision) {
+    const esRechazo = s.estado === 'rechazado';
+    const ttl = esRechazo ? 'Motivo del rechazo' : 'Información solicitada al asociado';
+    const nlines = wrapT(plain(notaDecision), CW - 10, 9);
+    const nh = 8 + nlines.length * 4.2 + 3;
+    ensure(nh + 4);
+    fill(tint(estadoBadge.color, 0.08));
+    stroke(estadoBadge.color); doc.setLineWidth(0.35);
+    doc.roundedRect(M, y, CW, nh, 2.5, 2.5, 'FD');
+    txt(ttl.toUpperCase(), M + 5, y + 6, { size: 7.5, style: 'bold', color: estadoBadge.color });
+    nlines.forEach((ln, i) => txt(ln, M + 5, y + 11.5 + i * 4.2, { size: 9 }));
+    y += nh + 7;
+  }
 
   // ── Verificación KYC ────────────────────────────────────────
   section('Verificación KYC');
