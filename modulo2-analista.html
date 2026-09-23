@@ -801,6 +801,7 @@ function adaptarDoc(doc) {
     nombre, empresa, ced,
     cargo:  s(doc.cargo || ''),
     email:  s(doc.email || ''),
+    telefono: s(doc.telefono || ''),
 
     // Tiempo
     tiempo, ts,
@@ -1916,7 +1917,7 @@ function construirPDFSolicitud(JsPDF, s, logo) {
 
   // ── Bloque del solicitante ──────────────────────────────────
   const nombre  = plain(s.nombre), empresa = plain(s.empresa), ced = plain(s.ced);
-  const cargo   = plain(s.cargo),  email   = plain(s.email);
+  const cargo   = plain(s.cargo),  email   = plain(s.email), telefono = plain(s.telefono);
   fill(tint(col, 0.15)); doc.circle(M + 7, y + 7, 7, 'F');
   txt(plain(s.ini), M + 7, y + 8.6, { size: 12, style: 'bold', color: col, align: 'center' });
 
@@ -1924,7 +1925,7 @@ function construirPDFSolicitud(JsPDF, s, logo) {
   txt(clip(nombre, CW - 18 - 34, 17, 'Syne'), nx, y + 5.5, { font: 'Syne', size: 15.5 });
   txt(clip(`C.C. ${ced}  ·  ${empresa}`, CW - 18, 8.5), nx, y + 11, { size: 8.5, color: C.muted });
   let cy = y + 11;
-  const sub = [cargo, email].filter(Boolean).join('  ·  ');
+  const sub = [cargo, email, telefono].filter(Boolean).join('  ·  ');
   if (sub) { cy += 4.5; txt(clip(sub, CW - 18, 8.5), nx, cy, { size: 8.5, color: C.muted }); }
 
   cy += 6;
