@@ -819,6 +819,14 @@ function adaptarDoc(doc) {
     // Estado
     estado:  estadoUI,
     estadoFB:doc.estado,
+    analista: s(doc.analistaNombre || ''),
+    fechaDecision: (() => {
+      if (!doc.fechaDecision) return '';
+      const f = doc.fechaDecision.toDate ? doc.fechaDecision.toDate() : new Date(doc.fechaDecision);
+      if (isNaN(f.getTime())) return '';
+      return f.toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'})
+        + ' ' + f.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+    })(),
 
     // KYC (resultado guardado del proceso KYC)
     kyc: {
@@ -1923,6 +1931,10 @@ function construirPDFSolicitud(JsPDF, s, logo) {
   const pw = doc.getTextWidth(estadoBadge.txt) + 9;
   fill(tint(estadoBadge.color, 0.14)); doc.roundedRect(M + CW - pw, y + 1, pw, 6.5, 3.25, 3.25, 'F');
   txt(estadoBadge.txt, M + CW - pw / 2, y + 5.4, { size: 9, style: 'bold', color: estadoBadge.color, align: 'center' });
+  if (s.analista && ['aprobado', 'rechazado', 'firmado'].includes(s.estado)) {
+    txt(`Decidido por ${plain(s.analista)}${s.fechaDecision ? ' · ' + plain(s.fechaDecision) : ''}`,
+        M + CW, y + 11, { size: 7, color: C.muted, align: 'right' });
+  }
 
   y = cy + 9;
 
