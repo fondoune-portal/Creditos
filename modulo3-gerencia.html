@@ -1016,6 +1016,26 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);di
 </div>
 
 <script>
+// Logo oficial precargado para los reportes en PDF (encabezadoPDF).
+// Se pide una sola vez al abrir la página, junto con lo demás — si
+// el fetch no ha terminado (o falla) cuando alguien exporta, el
+// encabezado cae de vuelta al texto "FondoUne" para no verse vacío.
+let LOGO_PDF_GER = null;
+(async function precargarLogoPDFGerencia() {
+  try {
+    const resp = await fetch('logo-fondoune.png');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const buf   = await resp.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const dv    = new DataView(buf);
+    const w = dv.getUint32(16), h = dv.getUint32(20);
+    if (!w || !h) throw new Error('PNG sin dimensiones');
+    LOGO_PDF_GER = { bytes, w, h };
+  } catch (e) {
+    console.warn('[Módulo Gerencia] No se pudo precargar logo-fondoune.png para los reportes:', e);
+  }
+})();
+
 // ── BAR CHART — Solicitudes diarias (real, calculado desde Firestore) ──
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 let barData = DIAS.slice(1).concat(DIAS[0]).map(d => ({d, apro:0, rech:0, pend:0}));
@@ -1467,8 +1487,15 @@ function encabezadoPDF(doc, meta) {
   doc.setFillColor(13, 21, 32);
   doc.rect(0, 0, doc.internal.pageSize.getWidth(), 26, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
-  doc.text('FondoUne', 14, 12);
+  if (LOGO_PDF_GER) {
+    const lh = 11, lw = lh * LOGO_PDF_GER.w / LOGO_PDF_GER.h;
+    doc.addImage(LOGO_PDF_GER.bytes, 'PNG', 14, 6, lw, lh);
+  } else {
+    // Respaldo si el logo aún no cargó o falló: texto en vez de
+    // dejar el encabezado vacío.
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text('FondoUne', 14, 12);
+  }
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
   doc.text('Unidos por nuestros sueños', 14, 18);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
