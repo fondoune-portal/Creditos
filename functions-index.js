@@ -186,3 +186,130 @@ exports.enviarEmail = onRequest(
     }
   }
 );
+// ─────────────────────────────────────────────────────────────
+// IMPORTACIÓN DE BASE SOCIAL Y CARTERA (OPA → Firestore)
+// Agregar este bloque a functions-index.js
+// ─────────────────────────────────────────────────────────────
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin'); // ya debe estar inicializado arriba en functions-index.js
+
+const BATCH_MAX = 450; // límite real de Firestore es 500 — dejamos margen
+
+// ── Helpers compartidos (los usan importarBaseSocial e importarCartera) ──
+
+// Por ahora se revisa el campo "rol" en usuarios/{uid}. Cuando se implemente
+// el sistema de custom claims de Firebase Auth, este helper es el único
+// lugar que habría que tocar.
+async function verificarRolCoordinador(auth) {
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión para importar datos.');
+  }
+  const snap = await admin.firestore().collection('usuarios').doc(auth.uid).get();
+  if (!snap.exists) {
+    throw new HttpsError('permission-denied', 'Usuario no encontrado en el sistema.');
+  }
+  const rol = snap.data().rol;
+  if (rol !== 'coordinador' && rol !== 'gerencia') {
+    throw new HttpsError('permission-denied', 'No tienes permiso para importar datos.');
+  }
+  return auth.uid;
+}
+
+// Excel exporta cédulas largas en notación científica (ej. "1.017125993e+09")
+// porque las interpreta como número. Esto la vuelve a texto plano, solo dígitos.
+function limpiarCedula(valor) {
+  if (valor === null || valor === undefined) return '';
+  let texto = String(valor).trim();
+  if (/e\+?\d+$/i.test(texto)) {
+    const n = Number(texto);
+    if (!Number.isNaN(n)) texto = Math.round(n).toString();
+  }
+  return texto.replace(/\D/g, '');
+}
+
+// Confirma valor "vacío" de forma consistente (null, undefined, cadena vacía o solo espacios)
+function esVacio(valor) {
+  return valor === null || valor === undefined || String(valor).trim() === '';
+}
+
+// ── Importar Base Social → colección "asociados/{cedula}" ──
+exports.importarBaseSocial = onCall({ timeoutSeconds: 300, memory: '512MiB' }, async (request) => {
+  const uid = await verificarRolCoordinador(request.auth);
+
+  const filas = request.data && request.data.filas;
+  if (!Array.isArray(filas) || filas.length === 0) {
+    throw new HttpsError('invalid-argument', 'No se recibieron filas para importar.');
+  }
+
+  const db = admin.firestore();
+  const errores = [];
+  let procesados = 0;
+  let batch = db.batch();
+  let opsEnBatch = 0;
+
+  for (let i = 0; i < filas.length; i++) {
+    const fila = filas[i] || {};
+    const cedula = limpiarCedula(fila.CEDULASOCI);
+
+    if (esVacio(cedula)) {
+      errores.push({ fila: i + 2, motivo: 'CEDULASOCI vacía o inválida' }); // +2: la fila 1 del Excel es el encabezado
+      continue;
+    }
+
+    const ref = db.collection('asociados').doc(cedula);
+    batch.set(ref, {
+      cedula,
+      codNit:           fila.CODNIT ?? null,
+      agencia:          fila.AGENCIA ?? null,
+      nombreAgencia:    fila.NOMBREAGEN ?? null,
+      nombre:           fila.NOMBRE ?? null,
+      estado:           fila.ESTADO ?? null,
+      direccion:        fila.DIRECCION ?? null,
+      telefono1:        fila.TELEFONO1 ?? null,
+      fechaNacimiento:  fila.FECHANACIM ?? null,
+      fechaNacimiento2: fila.FECHANACI2 ?? null,
+      salario:          fila.SALARIO ?? null,
+      codEmpresa:       fila.CODEMPRESA ?? null,
+      nombreEmpresa:    fila.NOMBREEMPR ?? null,
+      aportes:          fila.APORTES ?? null,
+      cuota:            fila.CUOTA ?? null,
+      codEmpresa2:      fila.CODEMPRES2 ?? null,
+      empresaTrabajo:   fila.EMPRESATRA ?? null,
+      nit:              fila.NIT ?? null,
+      primerApellido:   fila.PRIMERAPEL ?? null,
+      segundoApellido:  fila.SEGUNDOAPE ?? null,
+      nombres:          fila.NOMBRES ?? null,
+      segundoNombre:    fila.SEGUNDONOM ?? null,
+      ciudadEmpresa:    fila.CIUDADEMPR ?? null,
+      fechaIngreso:     fila.FECHAINGRE ?? null,
+      cedNumJc:         fila.CEDNUMJC ?? null,
+      actualizadoEn:    admin.firestore.FieldValue.serverTimestamp(),
+      actualizadoPor:   uid,
+    }, { merge: true });
+
+    opsEnBatch++;
+    procesados++;
+
+    if (opsEnBatch >= BATCH_MAX) {
+      await batch.commit();
+      batch = db.batch();
+      opsEnBatch = 0;
+    }
+  }
+  if (opsEnBatch > 0) await batch.commit();
+
+  const resumen = {
+    tipo: 'base_social',
+    uid,
+    fecha: admin.firestore.FieldValue.serverTimestamp(),
+    totalFilas: filas.length,
+    procesados,
+    errores: errores.length,
+    detalleErrores: errores.slice(0, 50), // limitar tamaño del documento de auditoría
+  };
+  await db.collection('importaciones_base_social').add(resumen);
+
+  return { ok: true, procesados, errores: errores.length, detalleErrores: errores.slice(0, 50) };
+});
+
+module.exports.__test__ = { verificarRolCoordinador, limpiarCedula, esVacio };
