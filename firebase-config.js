@@ -156,6 +156,11 @@
         periodicidad:         String(datosSolicitud.periodicidad || 'mensuales'),
         destinoCredito:       String(datosSolicitud.destino     || ''),
         lineaCreditoId:       String(datosSolicitud.lineaCreditoId || ''),
+        recaptchaToken:       String(datosSolicitud.recaptchaToken || ''),
+        // Historial del asociado con el fondo (créditos previos,
+        // comportamiento de pago). Hoy ningún módulo lo llena aún —
+        // el campo queda preparado para cuando exista esa fuente.
+        historial:            String(datosSolicitud.historial || ''),
 
         // ── Resultado del motor de análisis (Paso 3 del Módulo 1)
         scorePropio:          Number(datosSolicitud.scorePropio          || 0),
@@ -462,7 +467,7 @@
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['estado','tokenFirma','tokenUsado','numeroPagare',
                       'fechaDecision','analistaId','analistaNombre',
-                      'motivoRechazo','fechaFirmado']);
+                      'motivoRechazo','fechaFirmado','historial']);
       }
     }
   }
