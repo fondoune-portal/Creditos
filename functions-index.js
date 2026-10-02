@@ -313,3 +313,93 @@ exports.importarBaseSocial = onCall({ timeoutSeconds: 300, memory: '512MiB' }, a
 });
 
 module.exports.__test__ = { verificarRolCoordinador, limpiarCedula, esVacio };
+// ─────────────────────────────────────────────────────────────
+// Agregar este bloque también al final de functions-index.js,
+// junto al de importarBaseSocial (reutiliza sus mismos helpers:
+// verificarRolCoordinador, limpiarCedula, esVacio).
+// ─────────────────────────────────────────────────────────────
+
+// PAGARE es el id del documento dentro de la subcolección — no se le quitan
+// letras/guiones como a la cédula, solo se limpia espacio y caracteres que
+// Firestore no acepta en un id de documento.
+function limpiarPagare(valor) {
+  if (valor === null || valor === undefined) return '';
+  return String(valor).trim().replace(/[/]/g, '-');
+}
+
+exports.importarCartera = onCall({ timeoutSeconds: 300, memory: '512MiB' }, async (request) => {
+  const uid = await verificarRolCoordinador(request.auth);
+
+  const filas = request.data && request.data.filas;
+  if (!Array.isArray(filas) || filas.length === 0) {
+    throw new HttpsError('invalid-argument', 'No se recibieron filas para importar.');
+  }
+
+  const db = admin.firestore();
+  const errores = [];
+  let procesados = 0;
+  let batch = db.batch();
+  let opsEnBatch = 0;
+
+  for (let i = 0; i < filas.length; i++) {
+    const fila = filas[i] || {};
+    const cedula = limpiarCedula(fila.CEDULASOCI);
+    const pagare = limpiarPagare(fila.PAGARE);
+
+    if (esVacio(cedula) || esVacio(pagare)) {
+      errores.push({
+        fila: i + 2, // +2: la fila 1 del Excel es el encabezado
+        motivo: esVacio(cedula) && esVacio(pagare) ? 'CEDULASOCI y PAGARE vacíos'
+              : esVacio(cedula) ? 'CEDULASOCI vacía o inválida' : 'PAGARE vacío',
+      });
+      continue;
+    }
+
+    const ref = db.collection('asociados').doc(cedula).collection('creditos').doc(pagare);
+    batch.set(ref, {
+      pagare,
+      cedula,
+      codLinea:      fila.CODLINEA ?? null,
+      nombreLinea:   fila.NOMBRELINE ?? null,
+      fechaDesembolso: fila.FECHADESEM ?? null,
+      saldoCapital:  fila.SALDOCAPIT ?? null,
+      plazo:         fila.PLAZO ?? null,
+      tasaColocacion: fila.TASACOLOCA ?? null,
+      diasMora:      fila.DIASMORA ?? null,
+      cuotasMora:    fila.CUOTASMORA ?? null,
+      saldoPonerAlDia: fila.SALDOPONER ?? null,
+      formaPago:     fila.FORMAPAGO ?? null,
+      clasifica:     fila.CLASIFICA ?? null,
+      ultimoEstado:  fila.ULTIMOESTA ?? null,
+      tipoCartera:   fila.TIPOCARTER ?? null,
+      nombreTipo:    fila.NOMBRETIPO ?? null,
+      actualizadoEn:  admin.firestore.FieldValue.serverTimestamp(),
+      actualizadoPor: uid,
+    }, { merge: true });
+
+    opsEnBatch++;
+    procesados++;
+
+    if (opsEnBatch >= BATCH_MAX) {
+      await batch.commit();
+      batch = db.batch();
+      opsEnBatch = 0;
+    }
+  }
+  if (opsEnBatch > 0) await batch.commit();
+
+  const resumen = {
+    tipo: 'cartera',
+    uid,
+    fecha: admin.firestore.FieldValue.serverTimestamp(),
+    totalFilas: filas.length,
+    procesados,
+    errores: errores.length,
+    detalleErrores: errores.slice(0, 50),
+  };
+  await db.collection('importaciones_base_social').add(resumen);
+
+  return { ok: true, procesados, errores: errores.length, detalleErrores: errores.slice(0, 50) };
+});
+
+module.exports.__test_cartera__ = { limpiarPagare };
