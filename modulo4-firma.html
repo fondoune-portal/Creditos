@@ -162,14 +162,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <script>FondouneNav.init('firma');</script>
 
   <!-- Firebase — verificación real de sesión y rol (custom claims),
-       mismo patrón que modulo2-analista.html.
-       NOTA: esta página también necesitará, más adelante, un flujo
-       aparte para el link de firma que llega por correo (?token=...)
-       generado en modulo2-analista.html al aprobar una solicitud —
-       ese flujo todavía no está conectado aquí y probablemente no
-       deba exigir este mismo login de staff/asociado, sino validar
-       el token de la solicitud directamente. Lo dejamos anotado para
-       la fase de funcionalidad. -->
+       mismo patrón que modulo2-analista.html, PERO solo cuando la
+       página se abre SIN ?token= en la URL (uso directo del staff/
+       asociado ya logueado). Si llega ?token=..., es el link de firma
+       que se manda al aprobar una solicitud (modulo2-analista.html) —
+       en ese caso NO se exige este login: se valida el token de la
+       solicitud directamente contra Firestore (ver TOKEN_FIRMA /
+       inicializarPorToken() más abajo), como ya anotaba este mismo
+       comentario antes de conectarse. -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -178,6 +178,57 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   (function () {
     const PORTAL_KEY = 'firma';
 
+    // ID del documento de la solicitud cuando se llega por ?token=
+    // (flujo de firma por link). Si es null, la página está en modo
+    // staff/asociado logueado (flujo de sesión/demo de siempre).
+    window.TOKEN_FIRMA_SOLICITUD_ID = null;
+
+    function mostrarErrorToken(mensaje) {
+      const gate = document.getElementById('fu-auth-gate');
+      if (gate) { gate.classList.add('fu-gate-hide'); setTimeout(() => gate.remove(), 400); }
+      const main = document.getElementById('main-content');
+      if (main) main.style.display = 'none';
+      const err = document.getElementById('token-error-state');
+      if (err) {
+        const msg = document.getElementById('token-error-msg');
+        if (msg) msg.textContent = mensaje;
+        err.style.display = 'flex';
+      }
+    }
+
+    // Flujo con token: no requiere login de Firebase Auth. Se valida
+    // directamente contra Firestore con FondoUneFirebase.buscarPorToken().
+    async function inicializarPorToken(token) {
+      if (typeof FondoUneFirebase === 'undefined') {
+        console.error('[Módulo Firma] firebase-config.js no cargó. Verifica el <script src="firebase-config.js">.');
+        mostrarErrorToken('No se pudo cargar la página de firma. Intenta de nuevo más tarde.');
+        return;
+      }
+      try {
+        await FondoUneFirebase.inicializar();
+      } catch (err) {
+        console.error('[Módulo Firma] No se pudo inicializar Firebase:', err);
+        mostrarErrorToken('No se pudo cargar la página de firma. Intenta de nuevo más tarde.');
+        return;
+      }
+
+      const resultado = await FondoUneFirebase.buscarPorToken(token);
+      if (!resultado.ok) {
+        console.warn('[Módulo Firma] Token inválido:', resultado.error);
+        mostrarErrorToken(resultado.error || 'Este link de firma no es válido.');
+        return;
+      }
+
+      window.TOKEN_FIRMA_SOLICITUD_ID = resultado.solicitud.id;
+      if (typeof poblarPagareDesdeSolicitud === 'function') {
+        poblarPagareDesdeSolicitud(resultado.solicitud);
+      }
+
+      const gate = document.getElementById('fu-auth-gate');
+      if (gate) { gate.classList.add('fu-gate-hide'); setTimeout(() => gate.remove(), 400); }
+    }
+
+    // Flujo sin token: el login de staff/asociado de siempre.
     async function verificarAcceso() {
       if (typeof FondoUneFirebase === 'undefined') {
         console.error('[Módulo Firma] firebase-config.js no cargó. Verifica el <script src="firebase-config.js">.');
@@ -232,9 +283,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       });
     }
 
-    verificarAcceso();
+    const tokenURL = new URLSearchParams(window.location.search).get('token');
+    if (tokenURL) {
+      inicializarPorToken(tokenURL);
+    } else {
+      verificarAcceso();
+    }
   })();
   </script>
+
 </head>
 <body>
 <div id="fu-auth-gate" class="fu-gate">
@@ -243,6 +300,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="fu-gate-name">FondoUne</div>
     <div class="fu-gate-bar"><div class="fu-gate-bar-fill"></div></div>
     <div class="fu-gate-txt">Verificando sesión…</div>
+  </div>
+</div>
+<!-- Se muestra en vez del formulario cuando el link de firma (?token=)
+     no es válido, ya fue usado, o la solicitud no está aprobada. -->
+<div id="token-error-state" style="display:none;position:fixed;inset:0;background:#0B2545;z-index:99998;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;box-sizing:border-box;">
+  <div style="background:#fff;border-radius:16px;padding:36px 28px;max-width:420px;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:#FBEAEA;color:#8B1A1A;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;"><i class="ti ti-link-off"></i></div>
+    <div style="font-size:17px;font-weight:700;color:#0B2545;margin-bottom:8px;">Este link de firma no es válido</div>
+    <div id="token-error-msg" style="font-size:13.5px;color:#5A7099;line-height:1.5;">—</div>
   </div>
 </div>
 <style>
@@ -535,35 +601,13 @@ function generarHash() {
 }
 
 // ── POBLAR PAGARÉ DESDE SESIÓN ─────────────────────────
-function poblarPagare() {
-  if (typeof FondouneSession === 'undefined') return;
-  const user   = FondouneSession.getUser();
-  const credito = FondouneSession.getCreditApp();
-  const nomina  = FondouneSession.getNomina();
+// Pinta en el DOM un objeto `datos` con la forma que ya usaba
+// window._pagareData — lo llaman tanto poblarPagare() (sesión/demo)
+// como poblarPagareDesdeSolicitud() (link de firma con token real).
+function pintarPagare(datos) {
+  const { nombre, cedula, ciudad, monto, plazo, cuota, total, costo,
+    primCuota, txid, hash, tsNow, nroPagare } = datos;
 
-  // Datos del asociado
-  const nombre  = user.name  || 'Asociado FondoUne';
-  const cedula  = user.id    || '—';
-  const ciudad  = user.ciudad || nomina?.empresa?.includes('MEDELLIN') ? 'Medellín' : (user.ciudad || 'Medellín');
-
-  // Datos del crédito
-  const monto   = credito?.monto  || 8_000_000;
-  const plazo   = credito?.plazo  || 24;
-  const TASA    = 0.011;
-  const cuota   = credito?.cuota  || Math.round(monto * (TASA * Math.pow(1+TASA,plazo)) / (Math.pow(1+TASA,plazo)-1));
-  const total   = cuota * plazo;
-  const costo   = total - monto;
-
-  // Fechas
-  const hoy        = new Date();
-  const primCuota  = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
-  const txid       = generarTxID();
-  const hash       = generarHash();
-  const tsNow      = hoy.toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
-                     hoy.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) + ' UTC-5';
-  const nroPagare  = 'PAG-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000);
-
-  // Número de pagaré (header)
   const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
 
   set('pg-nro',          nroPagare.split('-').pop());
@@ -581,9 +625,9 @@ function poblarPagare() {
   set('pg-mes-cuota',    MESES[primCuota.getMonth()]);
   set('pg-ano-cuota',    primCuota.getFullYear());
   set('pg-ciudad-firma', ciudad);
-  set('pg-dia-firma',    hoy.getDate());
-  set('pg-mes-firma',    MESES[hoy.getMonth()]);
-  set('pg-ano-firma',    hoy.getFullYear());
+  set('pg-dia-firma',    (new Date()).getDate());
+  set('pg-mes-firma',    MESES[(new Date()).getMonth()]);
+  set('pg-ano-firma',    (new Date()).getFullYear());
   set('pg-firma-nombre', nombre);
   set('pg-firma-cedula', cedula.replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
   set('pg-txid',         txid);
@@ -594,7 +638,7 @@ function poblarPagare() {
   // Hero y credit grid
   set('hero-nombre', nombre.split(' ')[0]);
   const heroRef = document.getElementById('hero-ref');
-  if (heroRef) heroRef.textContent = 'Ref: ' + nroPagare + ' · Aprobado: ' + hoy.toLocaleDateString('es-CO') + ' · Analista: FondoUne';
+  if (heroRef) heroRef.textContent = 'Ref: ' + nroPagare + ' · Aprobado: ' + (new Date()).toLocaleDateString('es-CO') + ' · Analista: FondoUne';
   const heroSubEl = document.getElementById('hero-sub');
   if (heroSubEl) heroSubEl.textContent = 'Hola ' + nombre.split(' ')[0] + ', el analista del fondo revisó tu perfil crediticio y ha aprobado tu solicitud. Solo necesitas firmar el pagaré para recibir el desembolso.';
 
@@ -615,13 +659,72 @@ function poblarPagare() {
   if (cb2body) cb2body.textContent = 'Confirmo que la cuenta registrada en FondoUne es la correcta para recibir el desembolso de ' + fmtCOP(monto) + ' COP hoy.';
 
   // Guardar para el success state y el PDF
-  window._pagareData = { nombre, cedula, ciudad, monto, plazo, cuota, total, costo,
-    primCuota, txid, hash, tsNow, nroPagare };
+  window._pagareData = datos;
 
   // Poblar hero subtitle con nombre real
   const heroSub = document.querySelector('.hero-sub');
   if (heroSub) heroSub.textContent = 'Hola ' + nombre.split(' ')[0] + ', el analista del fondo revisó tu perfil crediticio y ha aprobado tu solicitud. Solo necesitas firmar el pagaré para recibir el desembolso.';
 }
+
+// Arma los `datos` del pagaré a partir de la sesión del navegador —
+// flujo de demo/uso directo del staff, sin ?token= en la URL.
+function poblarPagare() {
+  if (typeof FondouneSession === 'undefined') return;
+  const user    = FondouneSession.getUser();
+  const credito = FondouneSession.getCreditApp();
+
+  const nombre  = user.name  || 'Asociado FondoUne';
+  const cedula  = user.id    || '';
+  const ciudad  = user.ciudad || 'Medellín';
+
+  const monto   = credito?.monto  || 8_000_000;
+  const plazo   = credito?.plazo  || 24;
+  const TASA    = 0.011;
+  const cuota   = credito?.cuota  || Math.round(monto * (TASA * Math.pow(1+TASA,plazo)) / (Math.pow(1+TASA,plazo)-1));
+  const total   = cuota * plazo;
+  const costo   = total - monto;
+
+  const hoy        = new Date();
+  const primCuota  = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+  const txid       = generarTxID();
+  const hash       = generarHash();
+  const tsNow      = hoy.toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
+                     hoy.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) + ' UTC-5';
+  const nroPagare  = 'PAG-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000);
+
+  pintarPagare({ nombre, cedula, ciudad, monto, plazo, cuota, total, costo,
+    primCuota, txid, hash, tsNow, nroPagare });
+}
+
+// Arma los `datos` del pagaré a partir de la solicitud REAL de
+// Firestore — flujo del link de firma (?token=...), vía
+// FondoUneFirebase.buscarPorToken(). Todo lo que viene de `solicitud`
+// es dato real (monto, plazo, cuota, número de pagaré); solo el
+// hash/ID de transacción siguen siendo de demostración por ahora
+// (pendiente de la Fase A — SHA-256 real).
+function poblarPagareDesdeSolicitud(solicitud) {
+  const nombre  = solicitud.nombre || 'Asociado FondoUne';
+  const cedula  = solicitud.cedula || '';
+  const ciudad  = solicitud.ciudadDeudor || 'Medellín';
+
+  const monto   = Number(solicitud.monto) || 0;
+  const plazo   = Number(solicitud.plazo) || 0;
+  const cuota   = Number(solicitud.cuota) || 0;
+  const total   = cuota * plazo;
+  const costo   = total - monto;
+
+  const hoy        = new Date();
+  const primCuota  = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+  const txid       = generarTxID();
+  const hash       = generarHash();
+  const tsNow      = hoy.toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
+                     hoy.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) + ' UTC-5';
+  const nroPagare  = solicitud.numeroPagare || ('PAG-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000));
+
+  pintarPagare({ nombre, cedula, ciudad, monto, plazo, cuota, total, costo,
+    primCuota, txid, hash, tsNow, nroPagare });
+}
+
 
 // ── POBLAR SUCCESS STATE ───────────────────────────────
 function poblarSuccess() {
@@ -739,6 +842,10 @@ function descargarPagarePDF() {
 
 // ── AUTO-INICIALIZAR AL CARGAR ─────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Con ?token= en la URL, inicializarPorToken() (ver <head>) ya se
+  // encarga de todo con datos reales — no pisar eso con la sesión/demo.
+  if (new URLSearchParams(window.location.search).get('token')) return;
+
   if (typeof FondouneSession !== 'undefined' && !FondouneSession.isLoggedIn()) {
     FondouneSession.initUser({
       id: 'demo',
@@ -866,7 +973,7 @@ function toggleConsent(id,cbId){
 function allConsentsOk(){return consents.c1&&consents.c2&&consents.c3;}
 
 // ── FIRMAR ───────────────────────────────────────────
-function intentarFirmar(){
+async function intentarFirmar(){
   const warn=document.getElementById('nota-incompleta');
   if(!hasSig||!allConsentsOk()){
     warn.style.display='flex';
@@ -881,14 +988,49 @@ function intentarFirmar(){
   const style=document.createElement('style');
   style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
-  setTimeout(()=>{
+
+  const mostrarExito = () => {
     poblarSuccess();
     document.getElementById('main-content').style.display='none';
     document.getElementById('success-state').style.display='block';
     document.getElementById('success-state').scrollIntoView({behavior:'smooth'});
     launchConfetti();
-  },2000);
+  };
+
+  const solicitudId = window.TOKEN_FIRMA_SOLICITUD_ID;
+  if (!solicitudId) {
+    // Sin token real (demo/sesión) — mismo comportamiento simulado de siempre.
+    setTimeout(mostrarExito, 2000);
+    return;
+  }
+
+  // Con token real: registrar la firma de verdad en Firestore antes
+  // de mostrar éxito. El hash sigue siendo de demostración (Fase A
+  // pendiente), pero ya queda guardado y la solicitud queda marcada
+  // como firmada — no se puede volver a usar el mismo link.
+  try {
+    const hash = window._pagareData && window._pagareData.hash;
+    const resultado = await FondoUneFirebase.marcarFirmado(solicitudId, hash);
+    if (!resultado.ok) {
+      console.error('[Módulo Firma] marcarFirmado falló:', resultado.error);
+      btn.innerHTML='<i class="ti ti-pencil"></i> Firmar pagaré';
+      btn.disabled=false;
+      if (typeof showToast === 'function') {
+        showToast(resultado.error || 'No se pudo registrar la firma. Intenta de nuevo.', 'err');
+      }
+      return;
+    }
+    mostrarExito();
+  } catch (err) {
+    console.error('[Módulo Firma] Error inesperado al firmar:', err);
+    btn.innerHTML='<i class="ti ti-pencil"></i> Firmar pagaré';
+    btn.disabled=false;
+    if (typeof showToast === 'function') {
+      showToast('No se pudo registrar la firma. Intenta de nuevo.', 'err');
+    }
+  }
 }
+
 
 // ── CONFETTI ─────────────────────────────────────────
 function launchConfetti(){
