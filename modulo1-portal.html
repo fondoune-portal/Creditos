@@ -516,7 +516,9 @@
           }
           const ai = getAI(app, { backend: new AgentPlatformBackend() });
           return getGenerativeModel(ai, {
-            model: 'gemini-flash-latest',
+            // 'gemini-flash-latest' apuntaba a Gemini 2.0 Flash, dado de
+            // baja por Google el 1 de junio de 2026. Modelo vigente:
+            model: 'gemini-3.5-flash',
             generationConfig: { responseMimeType: 'application/json', responseSchema: nominaSchema },
           });
         })();
