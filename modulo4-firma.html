@@ -284,6 +284,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     const tokenURL = new URLSearchParams(window.location.search).get('token');
     if (tokenURL) {
+      // El link de firma es para un asociado externo (llega por correo,
+      // sin sesión de staff) — no debe ver el menú interno ni el badge
+      // de rol. Se oculta con CSS, que aplica aunque navigation.js
+      // inserte el nav después de este punto.
+      const estiloSinNav = document.createElement('style');
+      estiloSinNav.textContent = '#fu-navbar{display:none!important} body.fu-nav-active{padding-top:0!important}';
+      document.head.appendChild(estiloSinNav);
+
       inicializarPorToken(tokenURL);
     } else {
       verificarAcceso();
