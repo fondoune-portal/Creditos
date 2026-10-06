@@ -437,7 +437,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </div>
       <div class="pagare-footer">
         <i class="ti ti-shield-lock"></i>
-        <span>Cifrado AES-256 · SHA-256: <span style="font-family:'DM Mono',monospace;" id="pg-hash">—</span> · <span id="pg-timestamp">—</span></span>
+        <span>Hash SHA-256: <span style="font-family:'DM Mono',monospace;" id="pg-hash">—</span> · <span id="pg-timestamp">—</span></span>
       </div>
     </div>
 
@@ -595,10 +595,6 @@ function generarTxID() {
   return 'FU-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
 }
 
-function generarHash() {
-  return Math.random().toString(16).slice(2,10) + Math.random().toString(16).slice(2,10) + '…';
-}
-
 // ── POBLAR PAGARÉ DESDE SESIÓN ─────────────────────────
 // Pinta en el DOM un objeto `datos` con la forma que ya usaba
 // window._pagareData — lo llaman tanto poblarPagare() (sesión/demo)
@@ -686,7 +682,7 @@ function poblarPagare() {
   const hoy        = new Date();
   const primCuota  = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
   const txid       = generarTxID();
-  const hash       = generarHash();
+  const hash       = 'Se genera al firmar';  // real SHA-256, calculado en intentarFirmar()
   const tsNow      = hoy.toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
                      hoy.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) + ' UTC-5';
   const nroPagare  = 'PAG-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000);
@@ -715,7 +711,7 @@ function poblarPagareDesdeSolicitud(solicitud) {
   const hoy        = new Date();
   const primCuota  = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
   const txid       = generarTxID();
-  const hash       = generarHash();
+  const hash       = 'Se genera al firmar';  // real SHA-256, calculado en intentarFirmar()
   const tsNow      = hoy.toLocaleDateString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
                      hoy.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) + ' UTC-5';
   const nroPagare  = solicitud.numeroPagare || ('PAG-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000));
@@ -988,6 +984,26 @@ async function intentarFirmar(){
   style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
 
+  // Hash real (Fase A): SHA-256 sobre los datos del pagaré + la
+  // imagen de la firma dibujada + el momento exacto de la firma.
+  // Antes de esto, el hash se generaba con Math.random() al cargar
+  // la página, sin relación con la firma ni con el documento.
+  const d = window._pagareData || {};
+  const firmadoEn = new Date().toISOString();
+  const payload = JSON.stringify({
+    nroPagare: d.nroPagare, cedula: d.cedula, nombre: d.nombre,
+    monto: d.monto, plazo: d.plazo, cuota: d.cuota,
+    firmadoEn, firmaPng: canvas.toDataURL('image/png'),
+  });
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(payload));
+  const hashHex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  if (window._pagareData) window._pagareData.hash = hashHex;
+  const pgHashEl = document.getElementById('pg-hash');
+  if (pgHashEl) pgHashEl.textContent = hashHex.slice(0, 16) + '…';
+  const pgTsEl = document.getElementById('pg-timestamp');
+  if (pgTsEl) pgTsEl.textContent = new Date(firmadoEn).toLocaleString('es-CO');
+
   const mostrarExito = () => {
     poblarSuccess();
     document.getElementById('main-content').style.display='none';
@@ -1003,13 +1019,10 @@ async function intentarFirmar(){
     return;
   }
 
-  // Con token real: registrar la firma de verdad en Firestore antes
-  // de mostrar éxito. El hash sigue siendo de demostración (Fase A
-  // pendiente), pero ya queda guardado y la solicitud queda marcada
-  // como firmada — no se puede volver a usar el mismo link.
+  // Con token real: registrar la firma de verdad en Firestore,
+  // con el hash real recién calculado.
   try {
-    const hash = window._pagareData && window._pagareData.hash;
-    const resultado = await FondoUneFirebase.marcarFirmado(solicitudId, hash);
+    const resultado = await FondoUneFirebase.marcarFirmado(solicitudId, hashHex);
     if (!resultado.ok) {
       console.error('[Módulo Firma] marcarFirmado falló:', resultado.error);
       btn.innerHTML='<i class="ti ti-pencil"></i> Firmar pagaré';
@@ -1029,6 +1042,7 @@ async function intentarFirmar(){
     }
   }
 }
+
 
 
 // ── CONFETTI ─────────────────────────────────────────
