@@ -415,17 +415,24 @@
    * Invalida el token (no se puede firmar dos veces).
    *
    * @param {string} solicitudId
+   * @param {string} [hashFirma]  hash que se muestra en el pagaré —
+   *                 opcional, se guarda tal cual si se manda.
    * @returns {Promise<{ok: boolean, error?: string}>}
    */
-  async function marcarFirmado(solicitudId) {
+  async function marcarFirmado(solicitudId, hashFirma) {
     try {
       const db = await inicializar();
 
-      await db.collection(COL).doc(solicitudId).update({
+      const cambios = {
         estado:       ESTADOS.FIRMADO,
         tokenUsado:   true,
         fechaFirmado: _ahora(),
-      });
+      };
+      // hashFirma es opcional — si el caller no lo manda, el documento
+      // queda igual que antes (sin romper a quien ya usa esta función).
+      if (hashFirma) cambios.hashFirma = String(hashFirma);
+
+      await db.collection(COL).doc(solicitudId).update(cambios);
 
       console.log('[FondoUne] ✅ Solicitud marcada como firmada:', solicitudId);
       return { ok: true };
@@ -467,7 +474,7 @@
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['estado','tokenFirma','tokenUsado','numeroPagare',
                       'fechaDecision','analistaId','analistaNombre',
-                      'motivoRechazo','fechaFirmado','historial']);
+                      'motivoRechazo','fechaFirmado','historial','hashFirma']);
       }
     }
   }
