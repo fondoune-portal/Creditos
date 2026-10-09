@@ -403,3 +403,105 @@ exports.importarCartera = onCall({ timeoutSeconds: 300, memory: '512MiB' }, asyn
 });
 
 module.exports.__test_cartera__ = { limpiarPagare };
+// ─────────────────────────────────────────────────────────────
+// Agregar este bloque al final de functions-index.js, junto a
+// los de importarBaseSocial / importarCartera.
+//
+// ANTES DE DESPLEGAR — configura los 4 secretos desde tu terminal
+// (nunca se escriben en el código ni se comparten por chat):
+//
+//   firebase functions:secrets:set TWILIO_ACCOUNT_SID
+//   firebase functions:secrets:set TWILIO_AUTH_TOKEN
+//   firebase functions:secrets:set TWILIO_SMS_FROM
+//   firebase functions:secrets:set TWILIO_WHATSAPP_FROM
+//
+// Cada comando te va a pedir el valor por consola (no queda en el
+// código ni en el historial de git). TWILIO_SMS_FROM es tu número
+// de Twilio normal (ej. +15551234567). TWILIO_WHATSAPP_FROM es el
+// número habilitado para WhatsApp en Twilio (sin el prefijo
+// "whatsapp:", eso lo agrega el código solo).
+// ─────────────────────────────────────────────────────────────
+const { defineSecret } = require('firebase-functions/params');
+
+const TWILIO_SID     = defineSecret('TWILIO_ACCOUNT_SID');
+const TWILIO_TOKEN   = defineSecret('TWILIO_AUTH_TOKEN');
+const TWILIO_SMS_FROM = defineSecret('TWILIO_SMS_FROM');
+const TWILIO_WA_FROM  = defineSecret('TWILIO_WHATSAPP_FROM');
+
+// Un mensaje por tipo de evento — mismo texto para SMS y WhatsApp.
+const MENSAJES_NOTIFICACION = {
+  tomado:      (nombre, extra) => `Hola ${nombre}, tu solicitud de crédito FondoUne ya está siendo revisada por el analista ${extra || 'asignado'}.`,
+  aprobado:    (nombre) => `¡Buenas noticias, ${nombre}! Tu solicitud de crédito FondoUne fue APROBADA. Revisa tu correo para los siguientes pasos.`,
+  rechazado:   (nombre) => `Hola ${nombre}, tu solicitud de crédito FondoUne no fue aprobada en esta ocasión. Revisa tu correo para más detalles.`,
+  revision:    (nombre) => `Hola ${nombre}, tu solicitud de crédito FondoUne requiere información adicional. Revisa tu correo o ingresa al portal.`,
+  listo_firma: (nombre) => `Hola ${nombre}, tu crédito FondoUne ya está listo para firmar. Revisa tu correo para el link de firma del pagaré.`,
+};
+
+// Normaliza a formato E.164 (+57...) un teléfono colombiano guardado de
+// cualquier forma (con o sin indicativo, con espacios/guiones, etc.)
+function formatearTelefonoCO(telefono) {
+  const soloDigitos = String(telefono || '').replace(/\D/g, '');
+  if (!soloDigitos) return null;
+  if (soloDigitos.length === 10) return '+57' + soloDigitos;          // celular sin indicativo
+  if (soloDigitos.length === 12 && soloDigitos.startsWith('57')) return '+' + soloDigitos;
+  if (soloDigitos.length >= 10) return '+' + soloDigitos;             // ya trae algún indicativo
+  return null; // muy corto para ser un celular válido
+}
+
+async function enviarPorTwilio({ sid, token, from, to, mensaje }) {
+  const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+  const resp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ To: to, From: from, Body: mensaje }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.message || `Twilio respondió ${resp.status}`);
+  return data.sid;
+}
+
+exports.enviarNotificacion = onCall(
+  { secrets: [TWILIO_SID, TWILIO_TOKEN, TWILIO_SMS_FROM, TWILIO_WA_FROM], timeoutSeconds: 30 },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const { cedula, nombre, tipo, extra } = request.data || {};
+    if (!cedula || !tipo || !MENSAJES_NOTIFICACION[tipo]) {
+      throw new HttpsError('invalid-argument', 'Faltan datos o el tipo de notificación no es válido.');
+    }
+
+    const db = admin.firestore();
+    const asociadoSnap = await db.collection('asociados').doc(limpiarCedula(cedula)).get();
+    const telefonoCrudo = asociadoSnap.exists ? asociadoSnap.data().telefono1 : null;
+    const telefono = formatearTelefonoCO(telefonoCrudo);
+
+    if (!telefono) {
+      return { ok: false, error: 'El asociado ' + cedula + ' no tiene un teléfono válido en asociados/.telefono1 — no se envió nada.' };
+    }
+
+    const mensaje = MENSAJES_NOTIFICACION[tipo](nombre || 'asociado', extra);
+    const sid = TWILIO_SID.value(), token = TWILIO_TOKEN.value();
+    const resultados = {};
+
+    try {
+      resultados.sms = { ok: true, sid: await enviarPorTwilio({ sid, token, from: TWILIO_SMS_FROM.value(), to: telefono, mensaje }) };
+    } catch (err) {
+      resultados.sms = { ok: false, error: err.message };
+    }
+
+    try {
+      resultados.whatsapp = { ok: true, sid: await enviarPorTwilio({ sid, token, from: 'whatsapp:' + TWILIO_WA_FROM.value(), to: 'whatsapp:' + telefono, mensaje }) };
+    } catch (err) {
+      resultados.whatsapp = { ok: false, error: err.message };
+    }
+
+    return { ok: true, resultados };
+  }
+);
+
+module.exports.__test_notif__ = { formatearTelefonoCO, MENSAJES_NOTIFICACION };
